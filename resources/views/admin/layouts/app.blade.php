@@ -4,7 +4,8 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>Dashboard | Hando - Responsive Admin Dashboard Template</title>
+    <title>Dashboard</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A fully featured admin theme which can be used to build CRM, CMS, etc." />
     <meta name="author" content="Zoyothemes" />
@@ -146,18 +147,23 @@
 
                         <li class="menu-title">Menu</li>
 
-                        <li>
-                            <a href="{{ route('dashboard') }}">
+                        <li >
+                            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'tp-link active' : '' }}">
                                 <i data-feather="home"></i>
                                 <span> Dashboard </span>
-
                             </a>
                         </li>
 
                         <li>
-                            <a href="{{ route('users.index') }}">
+                            <a href="{{ route('users.index') }}"  class="{{ request()->routeIs('users.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="users"></i>
                                 <span> Users </span>
+                            </a>
+                        </li>
+                        <li >
+                            <a href="{{ route('customers.index') }}" class="{{ request()->routeIs('customers.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="user"></i>
+                                <span> Customers </span>
                             </a>
                         </li>
 
@@ -255,6 +261,9 @@
 
     <!-- App js-->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+
+    @yield('js')
+
 
 </body>
 

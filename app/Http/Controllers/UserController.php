@@ -97,6 +97,16 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // Soft delete the user (uses Eloquent's SoftDeletes trait)
+        $user = User::findOrFail($id);
+        $user->delete(); // This will perform a soft delete
+
+        // Set session flash message for display after page refresh
+        session()->flash('success', 'User deleted successfully.');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully.',
+        ]);
     }
 }

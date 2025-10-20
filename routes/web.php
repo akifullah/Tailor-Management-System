@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -25,4 +26,5 @@ Route::middleware(["auth"])->group(function () {
     })->name("dashboard");
 
     Route::resource('users', App\Http\Controllers\UserController::class);
+    Route::resource("customers", CustomerController::class);
 });
