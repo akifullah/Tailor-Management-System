@@ -35,6 +35,7 @@
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Phone</th>
+                                    <th>Address</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -50,6 +51,7 @@
                                         </td>
                                         <td>{{ $customer->email }}</td>
                                         <td>{{ $customer->phone }}</td>
+                                        <td>{{ $customer->address }}</td>
                                         <td>
                                             <button onclick="handleEdit({{ $customer }})"
                                                 class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"

@@ -167,7 +167,12 @@
                             </a>
                         </li>
 
-
+                        <li >
+                            <a href="{{ route('measurements.create') }}" class="{{ request()->routeIs('measurements.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="user"></i>
+                                <span> Measurements </span>
+                            </a>
+                        </li>
 
                     </ul>
 
