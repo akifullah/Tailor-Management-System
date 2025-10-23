@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Measurement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,7 +15,6 @@ class CustomerController extends Controller
     public function index()
     {
         $data["customers"] = Customer::get();
-
         return view("admin.customers.index", $data);
     }
 
@@ -97,5 +97,17 @@ class CustomerController extends Controller
             "success" => true,
             "message" => "Customer deleted."
         ]);
+    }
+
+
+
+    // Get Customers Measurements
+    public function getMeasurementsByUser($id)
+    {
+        if (!$id) abort(404);
+        $customer =  Customer::with("measurements")->where("id", $id)->first();
+        $data["customer"] = $customer;
+        // return $data;
+        return view("admin.customers.customer_measurement", $data);
     }
 }

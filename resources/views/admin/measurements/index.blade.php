@@ -7,11 +7,11 @@
 
         <div class="py-3 d-flex align-items-center justify-content-between">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Measurements</h4>
+                <h4 class="fs-18 fw-semibold m-0">Customers</h4>
             </div>
 
             <button data-bs-toggle="modal" data-bs-target='#userModal' class="btn btn-primary btn-sm"
-                onclick="handleCreateCustomer()">Add Measurements</button>
+                onclick="handleCreateCustomer()">Add Customer</button>
 
         </div>
 
@@ -27,12 +27,123 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+
                     <div class="card-body">
-                        
+                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Type</th>
+                                    <th>Notes</th>
+                                    <th>Created</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($measurements as $m)
+                                    <tr>
+                                        <td>{{ $m->id }}</td>
+                                        <td>{{ $m->customer->name ?? '—' }}</td>
+                                        <td>{{ ucfirst($m->type) }}</td>
+                                        <td>{{ Str::limit($m->notes, 40) }}</td>
+                                        <td>{{ $m->created_at->format('d M Y') }}</td>
+                                        <td class="text-end">
+
+                                            {{-- <button 
+                                                class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
+                                                data-bs-original-title="Edit">
+                                                <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                            </button>
+                                            <button 
+                                                class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                data-bs-original-title="Delete">
+                                            </button> --}}
+
+                                            <a href="{{ route('measurements.edit', $m) }}"
+                                                class="btn btn-sm bg-primary-subtle" data-bs-toggle="tooltip"
+                                                data-bs-original-title="Delete">
+                                                <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                            </a>
+                                            <form action="{{ route('measurements.destroy', $m) }}" method="POST"
+                                                class="d-inline">
+                                                @csrf @method('DELETE')
+                                                {{-- <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Delete this measurement?')">
+                                                    Delete
+                                                </button> --}}
+
+                                                <button onclick="return confirm('Delete this measurement?')"
+                                                    class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Delete">
+                                                    <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                                </button>
+
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">No measurements found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+
+                        </table>
                     </div>
+
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="userModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="userModalLabel">Add Customer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="userForm" autocomplete="off">
+                            <input type="hidden" name="id" id="id" autocomplete="off" value="">
+                            <div class="row g-3">
+                                <div class="col-xxl-6">
+                                    <div>
+                                        <label for="name" class="form-label">Name</label>
+                                        <input type="text" name="name" class="form-control" id="name"
+                                            placeholder="Enter Full Name">
+                                    </div>
+                                </div><!--end col-->
+                                <div class="col-xxl-6">
+                                    <div>
+                                        <label for="phone" class="form-label">Phone</label>
+                                        <input type="text" name="phone" class="form-control" id="phone"
+                                            placeholder="Enter phone">
+                                    </div>
+                                </div>
+                                <div class="col-xxl-12">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" name="email" class="form-control" id="email"
+                                        placeholder="Enter your email">
+                                </div><!--end col-->
+                                <div class="col-xxl-12">
+                                    <label for="address" class="form-label">Address</label>
+                                    <input type="address" class="form-control" id="address" name="address" value=""
+                                        placeholder="Enter Address" autocomplete="off">
+                                </div><!--end col-->
+                                <div class="col-lg-12">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary" id="submit_btn">Submit</button>
+                                    </div>
+                                </div><!-- end col -->
+                            </div><!-- end row -->
+                        </form> <!-- end form -->
+                    </div> <!-- end modal body -->
+                </div> <!-- end modal content -->
+            </div>
+        </div>
+
 
     </div> <!-- container-fluid -->
 @endsection
@@ -40,7 +151,7 @@
 
 
 @section('js')
-    {{-- <script>
+    <script>
         function setValById(id, val) {
             let $input = $(`#${id}`).val(val);
             console.log($input); // Log the DOM element instead of the jQuery wrapper
@@ -161,5 +272,5 @@
             });
 
         });
-    </script> --}}
+    </script>
 @endsection

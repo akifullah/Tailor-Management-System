@@ -53,6 +53,7 @@
                                         <td>{{ $customer->phone }}</td>
                                         <td>{{ $customer->address }}</td>
                                         <td>
+                                            <a href="{{ route("customers.measurements", ["id" => $customer->id]) }}">View</a>
                                             <button onclick="handleEdit({{ $customer }})"
                                                 class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
                                                 data-bs-original-title="Edit">
@@ -166,14 +167,14 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             location.reload();
                         } else {
                             alert(response.message || "Delete failed.");
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         alert("Error deleting user.");
                     }
                 });
@@ -195,8 +196,8 @@
 
         }
 
-        $(document).ready(function() {
-            $("#userForm").on('submit', function(e) {
+        $(document).ready(function () {
+            $("#userForm").on('submit', function (e) {
                 e.preventDefault();
                 let $form = $("#userForm");
                 // Serialize the form as an array and log it
@@ -213,7 +214,7 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             // Redirect to dashboard or wherever
                             location.reload();
@@ -222,7 +223,7 @@
                             const errors = response?.errors;
 
 
-                            Object.keys(errors).forEach(function(key) {
+                            Object.keys(errors).forEach(function (key) {
                                 var input = $form.find('[id="' + key + '"]');
                                 if (input.length) {
                                     input.after(

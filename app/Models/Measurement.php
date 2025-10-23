@@ -5,13 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Customer extends Model
+class Measurement extends Model
 {
     use SoftDeletes;
 
     protected $guarded = [];
 
-    public function measurements (){
-        return $this->hasMany(Measurement::class)->latest();
+    protected $casts = [
+        'data' => 'array',
+    ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
     }
 }

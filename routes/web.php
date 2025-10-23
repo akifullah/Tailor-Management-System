@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\MeasurementController;
 use App\Http\Controllers\MeasurementsController;
+use App\Http\Controllers\TypeController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -26,9 +30,24 @@ Route::middleware(["auth"])->group(function () {
         return view('admin.index');
     })->name("dashboard");
 
-    Route::resource('users', App\Http\Controllers\UserController::class);
-    Route::resource("customers", CustomerController::class);
+    // USERS
+    Route::resource('users', UserController::class);
 
-    Route::resource("measurements", MeasurementsController::class);
-    
+    // CUSTOMERS
+    Route::resource("customers", CustomerController::class);
+    Route::get('/customers/{id}/measurements', [CustomerController::class, 'getMeasurementsByUser'])->name('customers.measurements');
+
+    // MEASUREMENTS
+    Route::resource("naap", MeasurementsController::class);
+    Route::resource('measurements', MeasurementController::class);
+
+
+    // TYPE
+    Route::get("types/get", [TypeController::class, "getType"])->name('type.get');
+    Route::resource("types", TypeController::class);
 });
+// Route::get("/types/get/{name}", [TypeController::class, "getType"])->name('type.get');
+
+
+Route::get('/checkout', [CheckoutController::class, 'index']);
+Route::post('/create-payment-intent', [CheckoutController::class, 'createPaymentIntent']);
