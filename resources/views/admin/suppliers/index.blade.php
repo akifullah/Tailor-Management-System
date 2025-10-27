@@ -7,11 +7,11 @@
 
         <div class="py-3 d-flex align-items-center justify-content-between">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Customers</h4>
+                <h4 class="fs-18 fw-semibold m-0">Suppliers</h4>
             </div>
 
             <button data-bs-toggle="modal" data-bs-target='#userModal' class="btn btn-primary btn-sm"
-                onclick="handleCreateCustomer()">Add Customer</button>
+                onclick="handleCreateCustomer()">Add Supplier</button>
 
         </div>
 
@@ -24,7 +24,7 @@
             </div>
         @endif
 
-        
+
         <!-- Button Datatable -->
         <div class="row">
             <div class="col-12">
@@ -42,26 +42,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($customers as $customer)
+                                @foreach ($suppliers as $supplier)
                                     <tr>
                                         <td>
                                             <img src="assets/images/users/user.jpg" alt=""
                                                 class="thumb-md me-2 rounded-circle avatar-border">
                                             <p class="d-inline-block align-middle mb-0">
-                                                <span>{{ $customer->name }}</span>
+                                                <span>{{ $supplier->name }}</span>
                                             </p>
                                         </td>
-                                        <td>{{ $customer->email }}</td>
-                                        <td>{{ $customer->phone }}</td>
-                                        <td>{{ $customer->address }}</td>
+                                        <td>{{ $supplier->email }}</td>
+                                        <td>{{ $supplier->phone }}</td>
+                                        <td>{{ $supplier->address }}</td>
                                         <td>
-                                            <a href="{{ route("customers.measurements", ["id" => $customer->id]) }}">View</a>
-                                            <button onclick="handleEdit({{ $customer }})"
+                                            <button onclick="handleEdit({{ $supplier }})"
                                                 class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
                                                 data-bs-original-title="Edit">
                                                 <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
                                             </button>
-                                            <button onclick="handleDelete({{ $customer->id }})"
+                                            <button onclick="handleDelete({{ $supplier->id }})"
                                                 class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
                                                 data-bs-original-title="Delete">
                                                 <i class="mdi mdi-delete fs-14 text-danger"></i>
@@ -154,7 +153,7 @@
             setValById("phone", phone)
             setValById("address", address)
 
-            $("#userModalLabel").text("Edit Customer");
+            $("#userModalLabel").text("Edit Supplier");
             $("#submit_btn").text("Update");
 
 
@@ -164,7 +163,7 @@
         function handleDelete(id) {
             if (confirm("Are you sure! you want to delete?")) {
                 $.ajax({
-                    url: "{{ route('customers.destroy', ':id') }}".replace(':id', id),
+                    url: "{{ route('suppliers.destroy', ':id') }}".replace(':id', id),
                     type: 'DELETE',
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
@@ -210,7 +209,7 @@
                 $form.find('.text-danger').remove();
 
                 $.ajax({
-                    url: "{{ route('customers.store') }}",
+                    url: "{{ route('suppliers.store') }}",
                     type: "POST",
                     data: formArray,
                     headers: {

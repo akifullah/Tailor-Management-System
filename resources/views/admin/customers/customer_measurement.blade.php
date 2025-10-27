@@ -7,7 +7,6 @@
 
     <div class="py-3 d-flex align-items-center justify-content-between">
         <div class="flex-grow-1">
-            <h4 class="fs-18 fw-semibold m-0">Customers Measurements</h4>
         </div>
 
         {{-- <button data-bs-toggle="modal" data-bs-target='#userModal' class="btn btn-primary btn-sm"
@@ -47,30 +46,78 @@
 
 
                     <div class="mt-5">
-                        <h5>Measurements</h5>
+                        <h4 class="fs-18 fw-semibold m-0">Customers Measurements:</h4>
+                        <hr>
 
 
-                        <div class="row">
+
+                        <div class="row ps-2">
                             @forEach ($customer?->measurements as $measurement)
                             <div class="col-md-12">
-                                <h5 class="text-capitalize fw-bold">Type: {{str_replace('_', ' ', $measurement->type)}}
-                                </h5>
-                                <a href="{{ route('measurements.edit', $measurement->id) }}" class="btn btn-sm bg-primary-subtle"
-                                    data-bs-toggle="tooltip" data-bs-original-title="Delete">
-                                    <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
-                                </a>
+                                <div class="d-flex align-items-center justify-content-between my-2">
+                                    <h5 class="text-capitalize fw-bold">Type:
+                                        {{str_replace('_', ' ', $measurement->type)}}
+                                    </h5>
+                                    <div class="">
+
+                                        <a href="{{ route('measurements.edit', $measurement->id) }}"
+                                            class="btn btn-sm bg-primary-subtle" data-bs-toggle="tooltip"
+                                            data-bs-original-title="Edit">
+                                            <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                        </a>
+                                        <form action="{{ route('measurements.destroy', $measurement->id) }}"
+                                            method="POST" class="d-inline">
+                                            @csrf @method('DELETE')
+                                            {{-- <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Delete this measurement?')">
+                                                Delete
+                                            </button> --}}
+
+                                            <button onclick="return confirm('Delete this measurement?')"
+                                                class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                data-bs-original-title="Delete">
+                                                <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                            </button>
+
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
 
                             {{-- @php
                             $data = json_decode($measurement->data, true);
                             @endphp --}}
+                         
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Measurement</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($measurement?->data as $key => $item)
+                                        <tr>
+                                            <td class="text-capitaliz</td>e" style="width: 400px">
+                                                {{-- {{ str_replace('_', ' ', $key) }} --}}
+                                                {{ Str::title(trim(preg_replace('/^\w+\s*/', '', str_replace('_', ' ', $key)))) }}
+                                            </td>
+                                            <td>{{ $item }}</td>
+                                        </tr>
+                                    @endforeach
 
-                            @foreach ($measurement?->data as $key => $item)
-                                <div class="col-md-2">
+                                </tbody>
+                            </table>
+
+                            {{-- @foreach ($measurement?->data as $key => $item)
+                                <div class="col-sm-6 col-md-4 col-xl-3">
                                     <p class="text-capitalize"><strong>{{str_replace('_', ' ', $key)}}: </strong>
                                         {{ $item }}</p>
                                 </div>
-                            @endforeach
+                            @endforeach --}}
+                            <div class="col-12">
+                                <p class="text-capitalize"><strong>Notes: </strong>{{ $measurement?->notes }}</p>
+                            </div>
 
                             <hr />
                             @endforEach

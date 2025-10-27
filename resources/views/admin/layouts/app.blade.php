@@ -173,6 +173,24 @@
                                 <span> Measurements </span>
                             </a>
                         </li>
+                        <li >
+                            <a href="{{ route('brands.index') }}" class="{{ request()->routeIs('brands.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="package"></i>
+                                <span> Brands </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="grid"></i>
+                                <span> Categories </span>
+                            </a>
+                        </li>
+                        <li >
+                            <a href="{{ route('suppliers.index') }}" class="{{ request()->routeIs('suppliers.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="truck"></i>
+                                <span> Suppliers </span>
+                            </a>
+                        </li>
 
                     </ul>
 
@@ -227,7 +245,7 @@
     <script src="{{ asset('assets/libs/waypoints/lib/jquery.waypoints.min.js') }}"></script>
     <script src="{{ asset('assets/libs/jquery.counterup/jquery.counterup.min.js') }}"></script>
     <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
-
+{{-- 
     <!-- Datatables js -->
     <script src="assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
 
@@ -255,7 +273,7 @@
 
     <!-- dataTables.select -->
     <script src="assets/libs/datatables.net-select/js/dataTables.select.min.js"></script>
-    <script src="assets/libs/datatables.net-select-bs5/js/select.bootstrap5.min.js"></script>
+    <script src="assets/libs/datatables.net-select-bs5/js/select.bootstrap5.min.js"></script> --}}
 
 
     <!-- Vector map-->

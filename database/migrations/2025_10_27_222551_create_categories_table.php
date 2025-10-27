@@ -11,16 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('measurements', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->id();
-
-
-            $table->foreignId('customer_id')->constrained()->onDelete('restrict');
-            $table->string('type'); // pant, shirt, etc.
-            $table->json('data')->nullable(); // all measurement fields stored as JSON
-            $table->text('notes')->nullable();
+            $table->string("name")->unique();
             $table->softDeletes();
-
             $table->timestamps();
         });
     }
@@ -30,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('measurements');
+        Schema::dropIfExists('categories');
     }
 };

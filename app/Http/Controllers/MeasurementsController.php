@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Type;
 use Illuminate\Http\Request;
 
 class MeasurementsController extends Controller
@@ -19,7 +20,8 @@ class MeasurementsController extends Controller
      */
     public function create()
     {
-        return view("admin.measurements.create");
+       
+        return view("admin.measurements.create", $data);
     }
 
     /**

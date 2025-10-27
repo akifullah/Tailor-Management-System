@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\FieldController;
 use App\Http\Controllers\MeasurementController;
 use App\Http\Controllers\MeasurementsController;
 use App\Http\Controllers\TypeController;
@@ -45,6 +46,20 @@ Route::middleware(["auth"])->group(function () {
     // TYPE
     Route::get("types/get", [TypeController::class, "getType"])->name('type.get');
     Route::resource("types", TypeController::class);
+    
+    // field
+    Route::get("fields/{id}", [FieldController::class, "getFieldsByTypeId"])->name('field.byType');
+    Route::resource("fields", FieldController::class);
+
+
+    // Brand
+    Route::resource("brands", \App\Http\Controllers\BrandController::class);
+
+    // Supplier
+    Route::resource("suppliers", \App\Http\Controllers\SupplierController::class);
+
+    // category
+    Route::resource("categories", \App\Http\Controllers\CategoryController::class);
 });
 // Route::get("/types/get/{name}", [TypeController::class, "getType"])->name('type.get');
 

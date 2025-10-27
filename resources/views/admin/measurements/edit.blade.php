@@ -78,33 +78,33 @@
                 fields: [{
                     label: "Waist",
                     name: 'pant_Waist',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Seat / Hip",
                     name: 'pant_seat_hip',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Bottom",
                     name: 'pant_Bottom',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Length",
                     name: 'pant_Length',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Fit",
                     name: 'pant_Fit',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Slim', 'Regular', 'Loose']
                 },
                 {
                     label: "Pocket Style",
                     name: 'pant_pocket_style',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Cross', 'Straight']
                 }
                 ]
@@ -114,66 +114,66 @@
                 fields: [{
                     label: "Neck",
                     name: 'shirt_Neck',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Chest",
                     name: 'shirt_Chest',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Waist",
                     name: 'shirt_Waist',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Shoulder",
                     name: 'shirt_Shoulder',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Sleeve",
                     name: 'shirt_Sleeve',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Cuff",
                     name: 'shirt_Cuff',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Shirt Length",
                     name: 'shirt_length',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Fit",
                     name: 'shirt_Fit',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Slim', 'Regular']
                 },
                 {
                     label: "Collar",
                     name: 'shirt_collar',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Spread', 'Button-down', 'Mandarin']
                 },
                 {
                     label: "Cuffs",
                     name: 'shirt_Cuffs',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Single', 'Double']
                 },
                 {
                     label: "Pocket",
                     name: 'shirt_Pocket',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['0', '1', '2']
                 },
                 {
                     label: "Daman",
                     name: 'shirt_Daman',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Gool', 'Sada']
                 }
                 ]
@@ -183,28 +183,28 @@
                 fields: [{
                     label: "Length",
                     name: 'kameez_Length',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Sleeve",
                     name: 'kameez_Sleeve',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Sleeve",
                     name: 'kameez_Sleeve',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Collar",
                     name: 'kameez_Collar',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Collar', 'Short Collar', 'Nokdar Collar']
                 },
                 {
                     label: "Bann",
                     name: 'kameez_Bann',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Full Ban Cut', 'Full Ban Gool', 'Half Ban Cut', 'Half Ban Gool', 'Kabali Ban',
                         'Design Ban'
                     ]
@@ -212,7 +212,7 @@
                 {
                     label: "Cuff",
                     name: 'kameez_Cuff',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Sada', 'Gool', 'Sada Cut', 'Studd Kaag Gool', 'Studd Kaag Sada', 'Studd Double',
                         'Cuff 2 Kaag', 'Chk Patae Kaag', 'Bagair Chk Patae', 'Chk Patae 2 Kaag'
                     ]
@@ -220,13 +220,13 @@
                 {
                     label: "Stitching",
                     name: 'kameez_Stitching',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Simple', 'Chamak', 'Double Chamak', 'Double Simple', 'Conquer Stitch']
                 },
                 {
                     label: "Pocket",
                     name: 'kameez_Pocket',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Side 1 Pocket', 'Side 2 Pocket', 'Front 1 Pocket', 'Front 2 Pocket',
                         'Front 2 Pocket Tash'
                     ]
@@ -234,25 +234,25 @@
                 {
                     label: "Daman",
                     name: 'kameez_Daman',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Sada', 'Gool']
                 },
                 {
                     label: "Asteen",
                     name: 'kameez_Asteen',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['No Palet', 'One Palet', 'Two Palet']
                 },
                 {
                     label: "Buttons",
                     name: 'kameez_Buttons',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['1', '2', '3', '4', '5']
                 },
                 {
                     label: "Button Style",
                     name: 'kameez_Button_Style',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Simple', 'Design']
                 }
                 ]
@@ -262,34 +262,34 @@
                 fields: [{
                     label: "Length",
                     name: 'shalwar_Length',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Pancha",
                     name: 'shalwar_Pancha',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Shalwar Type",
                     name: 'shalwar_type',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Kundo Wala', 'Bagair Kundo Wala']
                 },
                 {
                     label: "Asin Width",
                     name: 'shalwar_Asin_Width',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Shalwar Pockets",
                     name: 'shalwar_Shalwar_Pockets',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['One', 'Two']
                 },
                 {
                     label: "Paint Pocket",
                     name: 'shalwar_Paint_Pocket',
-                    type: 'input'
+                    input_type: 'input'
                 }
                 ]
             },
@@ -298,49 +298,49 @@
                 fields: [{
                     label: "Chest",
                     name: 'coat_Chest',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Waist",
                     name: 'coat_Waist',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Hip",
                     name: 'coat_Hip',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Shoulder",
                     name: 'coat_Shoulder',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Sleeve",
                     name: 'coat_Sleeve',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Half Back",
                     name: 'coat_Half_Back',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Chok",
                     name: 'coat_Chok',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['None', 'Single', 'Double']
                 },
                 {
                     label: "Fit",
                     name: 'coat_Fit',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Slim', 'Regular']
                 },
                 {
                     label: "Buttons",
                     name: 'coat_Buttons',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['1', '2', '3']
                 }
                 ]
@@ -350,38 +350,38 @@
                 fields: [{
                     label: "Chest",
                     name: 'waistcoat_Chest',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Waist",
                     name: 'waistcoat_Waist',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Shoulder",
                     name: 'waistcoat_Shoulder',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Length",
                     name: 'waistcoat_Length',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Neck Depth",
                     name: 'waistcoat_Neck_Depth',
-                    type: 'input'
+                    input_type: 'input'
                 },
                 {
                     label: "Buttons",
                     name: 'waistcoat_Buttons',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['1', '2', '3', '4', '5']
                 },
                 {
                     label: "Style",
                     name: 'waistcoat_Style',
-                    type: 'select',
+                    input_type: 'select',
                     options: ['Simple', 'Design']
                 }
                 ]
@@ -394,14 +394,14 @@
 
             kameez_shalwar: {
                 combine: ["kameez", "shalwar"]
-            }
+            },
 
         };
-
+        console.log(options)
         const typeSelect = document.getElementById('type');
         const formContainer = document.getElementById('form-fields');
-        const oldValues = @json($measurement->data ?? []); // assume 'data' column stores JSON of field values
-        console.log(oldValues);
+        const oldValues = @json($measurement->data); // assume 'data' column stores JSON of field values
+        console.log("Old ",oldValues);
         function safeName(str) {
             return str.toString().trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
         }
@@ -416,9 +416,9 @@
                 if (!set) return;
 
                 const heading = `
-                    <div class="col-12 mt-3">
-                        <h5 class="fw-bold">${setName.charAt(0).toUpperCase() + setName.slice(1)} Measurements</h5>
-                    </div>`;
+                        <div class="col-12 mt-3">
+                            <h5 class="fw-bold">${setName.charAt(0).toUpperCase() + setName.slice(1)} Measurements</h5>
+                        </div>`;
                 formContainer.insertAdjacentHTML('beforeend', heading);
 
                 set.fields.forEach(field => {
@@ -426,7 +426,7 @@
                     const value = oldValues[key] || '';
                     let inputHTML = '';
 
-                    if (field.type === 'select') {
+                    if (field.input_type === 'select') {
                         const optionsHTML = field.options.map(opt =>
                             `<option value="${opt}" ${opt === value ? 'selected' : ''}>${opt}</option>`
                         ).join('');
@@ -436,10 +436,10 @@
                     }
 
                     const fieldHTML = `
-                        <div class="col-md-3 mb-2">
-                            <label class="form-label">${field.label}</label>
-                            ${inputHTML}
-                        </div>`;
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label">${field.label}</label>
+                                ${inputHTML}
+                            </div>`;
                     formContainer.insertAdjacentHTML('beforeend', fieldHTML);
                 });
             });

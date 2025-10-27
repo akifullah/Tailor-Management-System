@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Measurement;
+use App\Models\Type;
 use Illuminate\Http\Request;
 
 class MeasurementController extends Controller
@@ -22,8 +23,9 @@ class MeasurementController extends Controller
      */
     public function create()
     {
+        $types = Type::get();
         $customers = Customer::select('id', 'name')->get();
-        return view('admin.measurements.create', compact('customers'));
+        return view('admin.measurements.create', compact('customers', "types"));
     }
 
     /**
@@ -43,7 +45,7 @@ class MeasurementController extends Controller
         Measurement::create([
             'customer_id' => $request->customer_id,
             'type' => $request->type,
-            'data' => $data,
+            'data' => json_encode($data),
             'notes' => $request->notes,
         ]);
 
@@ -64,6 +66,10 @@ class MeasurementController extends Controller
     public function edit(Measurement $measurement)
     {
         $customers = Customer::select('id', 'name')->get();
+        if (is_string($measurement->data)) {
+            $measurement->data = json_decode($measurement->data, true);
+        }
+
         return view('admin.measurements.edit', compact('measurement', 'customers'));
     }
 
@@ -76,10 +82,8 @@ class MeasurementController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'type' => 'required|string',
         ]);
-        return $request->all();
 
-        $data = collect($request->except(['_token', '_method', 'customer_id', 'type', 'notes']))
-            ->filter(fn($v) => $v !== null && $v !== '');
+        $data = $request->except(['_token', '_method', 'customer_id', 'type', 'notes']);
         $measurement->update([
             'customer_id' => $request->customer_id,
             'type' => $request->type,

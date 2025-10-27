@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Field;
+use App\Models\Type;
 use Illuminate\Http\Request;
 
 class FieldController extends Controller
@@ -12,7 +13,8 @@ class FieldController extends Controller
      */
     public function index()
     {
-        //
+        $data["types"] = Type::get();
+        return view('admin.types.fields', $data);
     }
 
     /**
@@ -61,5 +63,15 @@ class FieldController extends Controller
     public function destroy(Field $field)
     {
         //
+    }
+
+
+    public function getFieldsByTypeId($id)
+    {
+        $fields = Field::where('type_id', $id)->get();
+        return response()->json([
+            'success' => true,
+            'data' => $fields
+        ]);
     }
 }

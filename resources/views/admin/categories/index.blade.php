@@ -7,11 +7,11 @@
 
         <div class="py-3 d-flex align-items-center justify-content-between">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Customers</h4>
+                <h4 class="fs-18 fw-semibold m-0">Categories</h4>
             </div>
 
-            <button data-bs-toggle="modal" data-bs-target='#userModal' class="btn btn-primary btn-sm"
-                onclick="handleCreateCustomer()">Add Customer</button>
+            <button data-bs-toggle="modal" data-bs-target='#createModal' class="btn btn-primary btn-sm"
+                onclick="handleCreate()">Add Category</button>
 
         </div>
 
@@ -23,8 +23,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
-
-        
         <!-- Button Datatable -->
         <div class="row">
             <div class="col-12">
@@ -35,35 +33,24 @@
                             <thead>
                                 <tr>
                                     <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Address</th>
-                                    <th>Action</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($customers as $customer)
+                                @foreach ($categories as $category)
                                     <tr>
                                         <td>
-                                            <img src="assets/images/users/user.jpg" alt=""
-                                                class="thumb-md me-2 rounded-circle avatar-border">
                                             <p class="d-inline-block align-middle mb-0">
-                                                <span>{{ $customer->name }}</span>
+                                                <span>{{ $category->name }}</span>
                                             </p>
                                         </td>
-                                        <td>{{ $customer->email }}</td>
-                                        <td>{{ $customer->phone }}</td>
-                                        <td>{{ $customer->address }}</td>
-                                        <td>
-                                            <a href="{{ route("customers.measurements", ["id" => $customer->id]) }}">View</a>
-                                            <button onclick="handleEdit({{ $customer }})"
-                                                class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Edit">
+                                        <td style="width: 150px">
+                                            <button onclick="handleEdit({{ $category }})" class="btn btn-sm bg-primary-subtle me-1"
+                                                data-bs-toggle="tooltip" data-bs-original-title="Edit">
                                                 <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
                                             </button>
-                                            <button onclick="handleDelete({{ $customer->id }})"
-                                                class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Delete">
+                                            <button onclick="handleDelete({{ $category->id }})" class="btn btn-sm bg-danger-subtle"
+                                                data-bs-toggle="tooltip" data-bs-original-title="Delete">
                                                 <i class="mdi mdi-delete fs-14 text-danger"></i>
                                             </button>
                                         </td>
@@ -77,45 +64,29 @@
             </div>
         </div>
 
-        <div class="modal fade" id="userModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal fade" id="createModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="userModalLabel">Add Customer</h5>
+                        <h5 class="modal-title" id="createModalLabel">Add Brand</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="userForm" autocomplete="off">
+                        <form id="createForm" autocomplete="off">
                             <input type="hidden" name="id" id="id" autocomplete="off" value="">
                             <div class="row g-3">
-                                <div class="col-xxl-6">
+                                <div class="col-xxl-12">
                                     <div>
-                                        <label for="name" class="form-label">Name</label>
+                                        <label for="name" class="form-label">Category Name</label>
                                         <input type="text" name="name" class="form-control" id="name"
-                                            placeholder="Enter Full Name">
+                                            placeholder="Enter Category Name">
                                     </div>
                                 </div><!--end col-->
-                                <div class="col-xxl-6">
-                                    <div>
-                                        <label for="phone" class="form-label">Phone</label>
-                                        <input type="text" name="phone" class="form-control" id="phone"
-                                            placeholder="Enter phone">
-                                    </div>
-                                </div>
-                                <div class="col-xxl-12">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control" id="email"
-                                        placeholder="Enter your email">
-                                </div><!--end col-->
-                                <div class="col-xxl-12">
-                                    <label for="address" class="form-label">Address</label>
-                                    <input type="address" class="form-control" id="address" name="address" value=""
-                                        placeholder="Enter Address" autocomplete="off">
-                                </div><!--end col-->
+
                                 <div class="col-lg-12">
                                     <div class="hstack gap-2 justify-content-end">
                                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                        <button type="submit" class="btn btn-primary" id="submit_btn">Submit</button>
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
                                     </div>
                                 </div><!-- end col -->
                             </div><!-- end row -->
@@ -138,33 +109,26 @@
             console.log($input); // Log the DOM element instead of the jQuery wrapper
         }
 
-        function handleEdit(user) {
-            $('#userModal').modal('show');
+        function handleEdit(data) {
+            $('#createModal').modal('show');
+
+            $("#createModalLabel").text("Edit Category");
+            $("#submitBtn").text("Update");
+
 
             const {
                 id,
                 name,
-                phone,
-                email,
-                address
-            } = user;
+            } = data;
             setValById("id", id)
             setValById("name", name)
-            setValById("email", email)
-            setValById("phone", phone)
-            setValById("address", address)
-
-            $("#userModalLabel").text("Edit Customer");
-            $("#submit_btn").text("Update");
-
-
         }
 
 
         function handleDelete(id) {
             if (confirm("Are you sure! you want to delete?")) {
                 $.ajax({
-                    url: "{{ route('customers.destroy', ':id') }}".replace(':id', id),
+                    url: "{{ route('categories.destroy', ':id') }}".replace(':id', id),
                     type: 'DELETE',
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
@@ -184,24 +148,20 @@
         }
     </script>
     <script>
-        function handleCreateCustomer() {
+        function handleCreate() {
             setValById("id", "")
             setValById("name", "")
-            setValById("email", "")
-            setValById("phone", "")
-            setValById("address", "")
-
-            $('#userModal').modal('show');
-            $("#userModalLabel").text("Add Customer");
-            $("#submit_btn").text("Submit");
-
-
+            $("#createModalLabel").text("Add Category");
+            $("#submitBtn").text("Submit");
         }
 
+
         $(document).ready(function () {
-            $("#userForm").on('submit', function (e) {
+            $("#createForm").on('submit', function (e) {
                 e.preventDefault();
-                let $form = $("#userForm");
+                let $form = $("#createForm");
+                var $btn = $form.find("button[type=submit]");
+                $btn.prop("disabled", true);
                 // Serialize the form as an array and log it
                 var formArray = $form.serializeArray();
                 console.log(formArray);
@@ -210,9 +170,9 @@
                 $form.find('.text-danger').remove();
 
                 $.ajax({
-                    url: "{{ route('customers.store') }}",
+                    url: "{{ route('categories.store') }}",
                     type: "POST",
-                    data: formArray,
+                    data: $form.serialize(),
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
@@ -233,6 +193,8 @@
                                         errors[key][0] + '</div>');
                                 }
                             });
+                            // showError(response.message || "Login failed.");
+                            $btn.prop("disabled", false);
                         }
                     },
 

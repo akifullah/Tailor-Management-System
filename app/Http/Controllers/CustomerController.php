@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Measurement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
@@ -14,7 +15,10 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $data["customers"] = Customer::get();
+        $data["customers"] = Cache::remember("customers", 60 * 1, function () {
+            return Customer::get();
+        });
+        // return $data;
         return view("admin.customers.index", $data);
     }
 
@@ -50,7 +54,7 @@ class CustomerController extends Controller
             ['id' => $request->id],
             $customerData
         );
-
+        Cache::forget("customers");
         session()->flash('success', $request->id ? 'Customer updated successfully.' : 'Customer created successfully.');
 
         return response()->json([
@@ -106,8 +110,14 @@ class CustomerController extends Controller
     {
         if (!$id) abort(404);
         $customer =  Customer::with("measurements")->where("id", $id)->first();
+        if ($customer && $customer->measurements) {
+            $customer->measurements->transform(function ($measurement) {
+                $measurement->data = json_decode($measurement->data, true);
+                return $measurement;
+            });
+        }
+
         $data["customer"] = $customer;
-        // return $data;
         return view("admin.customers.customer_measurement", $data);
     }
 }

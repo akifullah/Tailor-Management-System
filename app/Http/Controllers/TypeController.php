@@ -34,7 +34,8 @@ class TypeController extends Controller
         $validate = Validator::make(
             $request->all(),
             [
-                "name" => "required|unique:types,name",
+                "name" => "required|unique:types,name," . $request->id,
+                "name_prefix" => "required"
             ]
         );
 
@@ -46,7 +47,18 @@ class TypeController extends Controller
             ]);
         }
 
-        $type = Type::create($request->all());
+        if ($request->has('combine')) {
+            $request->merge([
+                'combine' => json_encode(explode(',', $request->combine))
+            ]);
+        }
+
+        $data = $request->except(['_token', 'id']);
+
+        $type = Type::updateOrCreate(
+            ['id' => $request->id],
+            $data
+        );
 
         return response()->json([
             "success" => true,
@@ -76,7 +88,41 @@ class TypeController extends Controller
      */
     public function update(Request $request, Type $type)
     {
-        //
+        return $request->all();
+        $validate = Validator::make(
+            $request->all(),
+            [
+                "name" => "required|unique:types,name," . $request->id,
+                "name_prefix" => "required"
+            ]
+        );
+
+        if ($validate->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Validation failed",
+                "errors" => $validate->errors(),
+            ]);
+        }
+
+        if ($request->has('combine')) {
+            $request->merge(['combine' => json_encode(explode(',', $request->combine))]);
+        }
+
+        $updated = $type->update($request->all());
+
+        if (! $updated) {
+            return response()->json([
+                "success" => false,
+                "message" => "Failed to update type",
+            ], 500);
+        }
+
+        return response()->json([
+            "success" => true,
+            "message" => "Type updated successfully",
+            "data" => $type->fresh()
+        ]);
     }
 
     /**
@@ -130,7 +176,7 @@ class TypeController extends Controller
             if ($type->is_combined && $type->combine) {
                 return [
                     $type->name => [
-                        'combine' => $type->combine
+                        'combine' => json_decode($type->combine)
                     ]
                 ];
             }

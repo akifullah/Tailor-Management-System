@@ -42,16 +42,22 @@
                                     <tr>
                                         <td>{{ $type->name }}</td>
                                         <td>{{ $type->is_combined == '1' ? 'Yes' : 'No' }}</td>
-                                        <td>{{ json_encode($type->combine) }}</td>
+                                        <td class="text-capitalize">
+                                            @php
+                                                $combineArr = json_decode($type->combine, true);
+                                                if (!is_array($combineArr)) {
+                                                    $combineArr = $type->combine ? array_map('trim', explode(',', $type->combine)) : [];
+                                                }
+                                            @endphp
+                                            {{ implode(', ', $combineArr) }}
+                                        </td>
                                         <td>
-                                            <button onclick="handleEdit({{ $type }})"
-                                                class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Edit">
+                                            <button onclick="handleEdit({{ $type }})" class="btn btn-sm bg-primary-subtle me-1"
+                                                data-bs-toggle="tooltip" data-bs-original-title="Edit">
                                                 <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
                                             </button>
-                                            <button onclick="handleDelete({{ $type->id }})"
-                                                class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Delete">
+                                            <button onclick="handleDelete({{ $type->id }})" class="btn btn-sm bg-danger-subtle"
+                                                data-bs-toggle="tooltip" data-bs-original-title="Delete">
                                                 <i class="mdi mdi-delete fs-14 text-danger"></i>
                                             </button>
                                         </td>
@@ -80,7 +86,13 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Name</label>
+                                <input type="text" name="id" id="id" class="form-control">
                                 <input type="text" name="name" id="name" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Name Prefix</label>
+                                <input type="text" name="name_prefix" id="name_prefix" class="form-control" required>
                             </div>
 
                             <div class="mb-3 form-check">
@@ -91,7 +103,8 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Combine (comma separated)</label>
-                                <input type="text" name="combine" id="combine" class="form-control" placeholder="e.g. shirt, pant">
+                                <input type="text" name="combine" id="combine" class="form-control"
+                                    placeholder="e.g. shirt, pant">
                             </div>
 
                             <div class="col-lg-12">
@@ -113,77 +126,77 @@
 
 
 @section('js')
-<script>
-    function handleCreateType() {
-        setValById("id", "")
-        setValById("name", "")
-        setValById("email", "")
-        setValById("phone", "")
-        setValById("address", "")
+    <script>
+        function handleCreateType() {
+            setValById("id", "")
+            setValById("name", "")
+            setValById("email", "")
+            setValById("phone", "")
+            setValById("address", "")
 
-        $('#typeModal').modal('show');
-        $("#modalTitle").text("Add Type");
-        $("#submit_btn").text("Submit");
+            $('#typeModal').modal('show');
+            $("#modalTitle").text("Add Type");
+            $("#submit_btn").text("Submit");
 
 
-    }
+        }
 
-    $(document).ready(function() {
-        $("#typeForm").on('submit', function(e) {
-            e.preventDefault();
-            let $form = $("#typeForm");
-            // Serialize the form as an array and log it
-            var formArray = $form.serializeArray();
-            console.log(formArray);
+        $(document).ready(function () {
+            $("#typeForm").on('submit', function (e) {
+                e.preventDefault();
+                let $form = $("#typeForm");
+                // Serialize the form as an array and log it
+                var formArray = $form.serializeArray();
+                console.log(formArray);
 
-            // Remove previous errors
-            $form.find('.text-danger').remove();
+                // Remove previous errors
+                $form.find('.text-danger').remove();
 
-            $.ajax({
-                url: "{{ route('types.store') }}",
-                type: "POST",
-                data: formArray,
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Redirect to dashboard or wherever
-                        location.reload();
+                $.ajax({
+                    url: "{{ route('types.store') }}",
+                    type: "POST",
+                    data: formArray,
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            // Redirect to dashboard or wherever
+                            location.reload();
+                        } else {
+                            console.log(response)
+                            const errors = response?.errors;
+
+
+                            Object.keys(errors).forEach(function (key) {
+                                var input = $form.find('[id="' + key + '"]');
+                                if (input.length) {
+                                    input.after(
+                                        '<div class="text-danger" style="font-size: 13px;">' +
+                                        errors[key][0] + '</div>');
+                                }
+                            });
+                        }
+                    },
+
+                    // showError(xhr.responseJSON && xhr.responseJSON.message ? xhr
+                    //     .responseJSON.message : "Login failed.");
+                });
+
+                function showError(msg) {
+                    // Show error somewhere at the top of the form
+                    if ($form.find('.form-error').length === 0) {
+                        $form.prepend('<div class="form-error text-danger mb-3" style="font-size: 14px;">' +
+                            msg + '</div>');
                     } else {
-                        console.log(response)
-                        const errors = response?.errors;
-
-
-                        Object.keys(errors).forEach(function(key) {
-                            var input = $form.find('[id="' + key + '"]');
-                            if (input.length) {
-                                input.after(
-                                    '<div class="text-danger" style="font-size: 13px;">' +
-                                    errors[key][0] + '</div>');
-                            }
-                        });
+                        $form.find('.form-error').html(msg);
                     }
-                },
+                }
 
-                // showError(xhr.responseJSON && xhr.responseJSON.message ? xhr
-                //     .responseJSON.message : "Login failed.");
             });
 
-            function showError(msg) {
-                // Show error somewhere at the top of the form
-                if ($form.find('.form-error').length === 0) {
-                    $form.prepend('<div class="form-error text-danger mb-3" style="font-size: 14px;">' +
-                        msg + '</div>');
-                } else {
-                    $form.find('.form-error').html(msg);
-                }
-            }
-
         });
-
-    });
-</script>
+    </script>
     <script>
         function setValById(id, val) {
             let $input = $(`#${id}`).val(val);
@@ -197,12 +210,17 @@
             const {
                 id,
                 name,
+                name_prefix,
                 is_combined,
                 combine,
             } = data;
+            const parsed = JSON.parse(combine);
+            const str = parsed.join(",");
+            console.log(str);
             setValById("id", id)
             setValById("name", name)
-            setValById("combine", combine)
+            setValById("name_prefix", name_prefix)
+            setValById("combine", str)
             // setValById("is_combined", name)
             // Properly check/uncheck and set the checkbox for is_combined
             if (is_combined == 1) {
@@ -226,19 +244,19 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             location.reload();
                         } else {
                             alert(response.message || "Delete failed.");
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         alert("Error deleting user.");
                     }
                 });
             }
         }
     </script>
- 
+
 @endsection
