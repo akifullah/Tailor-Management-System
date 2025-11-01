@@ -7,12 +7,10 @@
     <title>Dashboard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A fully featured admin theme which can be used to build CRM, CMS, etc." />
-    <meta name="author" content="Zoyothemes" />
+    <meta name="description" content="" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
 
     <!-- plugin css -->
     <link href="{{ asset('assets/libs/jsvectormap/css/jsvectormap.min.css') }}" rel="stylesheet" type="text/css" />
@@ -68,12 +66,12 @@
                     <ul class="list-unstyled topnav-menu mb-0 d-flex align-items-center">
 
                         <!-- Light/Dark Mode Button Themes -->
-                        <li class="d-none d-sm-flex">
+                        {{-- <li class="d-none d-sm-flex">
                             <button type="button" class="btn nav-link" id="light-dark-mode">
                                 <i data-feather="moon" class="align-middle dark-mode"></i>
                                 <i data-feather="sun" class="align-middle light-mode"></i>
                             </button>
-                        </li>
+                        </li> --}}
 
                         <!-- User Dropdown -->
                         <li class="dropdown notification-list topbar-dropdown">
@@ -125,7 +123,17 @@
                 <div id="sidebar-menu">
 
                     <div class="logo-box">
+                        
                         <a class='logo logo-light' href='index.html'>
+                            <h3 class="logo-text mt-3">TMS</h3>
+                            {{-- <span class="logo-sm">
+                                <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
+                            </span>
+                            <span class="logo-lg">
+                                <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="24">
+                            </span> --}}
+                        </a>
+                        {{-- <a class='logo logo-light' href='index.html'>
                             <span class="logo-sm">
                                 <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
                             </span>
@@ -140,7 +148,7 @@
                             <span class="logo-lg">
                                 <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" height="24">
                             </span>
-                        </a>
+                        </a> --}}
                     </div>
 
                     <ul id="side-menu">

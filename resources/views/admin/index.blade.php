@@ -3,7 +3,7 @@
 
 @section('content')
     <!-- Start Content-->
-    <div class="container-fluid">
+    {{-- <div class="container-fluid">
 
         <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
             <div class="flex-grow-1">
@@ -1064,7 +1064,7 @@
             <!-- End Recent Order -->
         </div>
 
-    </div> <!-- container-fluid -->
+    </div> <!-- container-fluid --> --}}
 @endsection
 
 
