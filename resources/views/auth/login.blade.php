@@ -37,7 +37,8 @@
                                 <div class="mb-0 border-0 p-md-4 p-lg-0 texc">
                                     <div class="mb-4 p-0  text-center">
                                         <div class="auth-brand">
-                                            <a class='logo logo-light' href='index.html'>
+                                            <h3 class="logo-text mt-3">TMS</h3>
+                                            {{-- <a class='logo logo-light' href='index.html'>
                                                 <span class="logo-lg">
                                                     <img src="{{ asset('assets/images/logo-light-3.png') }}"
                                                         alt="" height="24">
@@ -48,7 +49,7 @@
                                                     <img src="{{ asset('assets/images/logo-dark-3.png') }}"
                                                         alt="" height="24">
                                                 </span>
-                                            </a>
+                                            </a> --}}
                                         </div>
                                     </div>
 
