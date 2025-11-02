@@ -200,6 +200,60 @@
                             </a>
                         </li>
 
+                        <li class="menu-title mt-2">Inventory</li>
+
+                        <li >
+                            <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="box"></i>
+                                <span> Products </span>
+                            </a>
+                        </li>
+                        <li >
+                            <a href="{{ route('purchases.index') }}" class="{{ request()->routeIs('purchases.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="download"></i>
+                                <span> Purchases (Stock In) </span>
+                            </a>
+                        </li>
+                        <li >
+                            <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="shopping-cart"></i>
+                                <span> Orders </span>
+                            </a>
+                        </li>
+
+                        <li class="menu-title mt-2">Reports</li>
+
+                        <li >
+                            <a href="{{ route('reports.dashboard') }}" class="{{ request()->routeIs('reports.dashboard') ? 'tp-link active' : '' }}">
+                                <i data-feather="bar-chart-2"></i>
+                                <span> Dashboard </span>
+                            </a>
+                        </li>
+                        <li >
+                            <a href="{{ route('reports.sales') }}" class="{{ request()->routeIs('reports.sales') ? 'tp-link active' : '' }}">
+                                <i data-feather="trending-up"></i>
+                                <span> Sales Report </span>
+                            </a>
+                        </li>
+                        <li >
+                            <a href="{{ route('reports.customers') }}" class="{{ request()->routeIs('reports.customers') ? 'tp-link active' : '' }}">
+                                <i data-feather="users"></i>
+                                <span> Customer Ledger </span>
+                            </a>
+                        </li>
+                        <li >
+                            <a href="{{ route('reports.suppliers') }}" class="{{ request()->routeIs('reports.suppliers') ? 'tp-link active' : '' }}">
+                                <i data-feather="pie-chart"></i>
+                                <span> Supplier Ledger </span>
+                            </a>
+                        </li>
+                        <li >
+                            <a href="{{ route('reports.inventory-history') }}" class="{{ request()->routeIs('reports.inventory-history') ? 'tp-link active' : '' }}">
+                                <i data-feather="activity"></i>
+                                <span> Inventory History </span>
+                            </a>
+                        </li>
+
                     </ul>
 
                 </div>

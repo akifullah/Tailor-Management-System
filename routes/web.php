@@ -8,9 +8,12 @@ use App\Http\Controllers\MeasurementController;
 use App\Http\Controllers\MeasurementsController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\PurchaseController;
 
 
 Route::get("/", function () {
@@ -60,6 +63,26 @@ Route::middleware(["auth"])->group(function () {
 
     // category
     Route::resource("categories", \App\Http\Controllers\CategoryController::class);
+
+    // products
+    Route::resource('products', \App\Http\Controllers\ProductController::class);
+
+    // orders
+    Route::resource('orders', \App\Http\Controllers\OrderController::class);
+
+    // Reports
+    Route::prefix('reports')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\ReportController::class, 'dashboard'])->name('reports.dashboard');
+        Route::get('/sales', [\App\Http\Controllers\ReportController::class, 'salesReport'])->name('reports.sales');
+        Route::get('/customers', [\App\Http\Controllers\ReportController::class, 'customerReport'])->name('reports.customers');
+        Route::get('/suppliers', [\App\Http\Controllers\ReportController::class, 'supplierReport'])->name('reports.suppliers');
+        Route::get('/inventory-history', [\App\Http\Controllers\ReportController::class, 'inventoryHistory'])->name('reports.inventory-history');
+        Route::get('/customers/{customer}/ledger', [ReportController::class, 'customerLedgerDetail'])->name('reports.customers.ledger');
+        Route::get('/suppliers/{supplier}/ledger', [\App\Http\Controllers\ReportController::class, 'supplierLedgerDetail'])->name('reports.suppliers.ledger');
+    });
+
+    // Purchases
+    Route::resource('purchases', PurchaseController::class)->only(['index','create','store']);
 });
 // Route::get("/types/get/{name}", [TypeController::class, "getType"])->name('type.get');
 

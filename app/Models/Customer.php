@@ -14,4 +14,8 @@ class Customer extends Model
     public function measurements (){
         return $this->hasMany(Measurement::class)->latest();
     }
+
+    public function orders() {
+        return $this->hasMany(Order::class)->latest();
+    }
 }
