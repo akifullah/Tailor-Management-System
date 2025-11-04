@@ -123,7 +123,7 @@
                 <div id="sidebar-menu">
 
                     <div class="logo-box">
-                        
+
                         <a class='logo logo-light' href='index.html'>
                             <h3 class="logo-text mt-3">TMS</h3>
                             {{-- <span class="logo-sm">
@@ -155,46 +155,60 @@
 
                         <li class="menu-title">Menu</li>
 
-                        <li >
+                        {{-- <li >
                             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'tp-link active' : '' }}">
                                 <i data-feather="home"></i>
+                                <span> Dashboard </span>
+                            </a>
+                        </li> --}}
+
+                        <li>
+                            <a href="{{ route('reports.dashboard') }}"
+                                class="{{ request()->routeIs('reports.dashboard') ? 'tp-link active' : '' }}">
+                                <i data-feather="bar-chart-2"></i>
                                 <span> Dashboard </span>
                             </a>
                         </li>
 
                         <li>
-                            <a href="{{ route('users.index') }}"  class="{{ request()->routeIs('users.*') ? 'tp-link active' : '' }}">
+                            <a href="{{ route('users.index') }}"
+                                class="{{ request()->routeIs('users.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="users"></i>
                                 <span> Users </span>
                             </a>
                         </li>
-                        <li >
-                            <a href="{{ route('customers.index') }}" class="{{ request()->routeIs('customers.*') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('customers.index') }}"
+                                class="{{ request()->routeIs('customers.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="user"></i>
                                 <span> Customers </span>
                             </a>
                         </li>
 
-                        <li >
-                            <a href="{{ route('measurements.create') }}" class="{{ request()->routeIs('measurements.*') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('measurements.create') }}"
+                                class="{{ request()->routeIs('measurements.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="user"></i>
                                 <span> Measurements </span>
                             </a>
                         </li>
-                        <li >
-                            <a href="{{ route('brands.index') }}" class="{{ request()->routeIs('brands.*') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('brands.index') }}"
+                                class="{{ request()->routeIs('brands.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="package"></i>
                                 <span> Brands </span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'tp-link active' : '' }}">
+                            <a href="{{ route('categories.index') }}"
+                                class="{{ request()->routeIs('categories.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="grid"></i>
                                 <span> Categories </span>
                             </a>
                         </li>
-                        <li >
-                            <a href="{{ route('suppliers.index') }}" class="{{ request()->routeIs('suppliers.*') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('suppliers.index') }}"
+                                class="{{ request()->routeIs('suppliers.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="truck"></i>
                                 <span> Suppliers </span>
                             </a>
@@ -202,20 +216,23 @@
 
                         <li class="menu-title mt-2">Inventory</li>
 
-                        <li >
-                            <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('products.index') }}"
+                                class="{{ request()->routeIs('products.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="box"></i>
                                 <span> Products </span>
                             </a>
                         </li>
-                        <li >
-                            <a href="{{ route('purchases.index') }}" class="{{ request()->routeIs('purchases.*') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('purchases.index') }}"
+                                class="{{ request()->routeIs('purchases.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="download"></i>
                                 <span> Purchases (Stock In) </span>
                             </a>
                         </li>
-                        <li >
-                            <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('orders.index') }}"
+                                class="{{ request()->routeIs('orders.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="shopping-cart"></i>
                                 <span> Orders </span>
                             </a>
@@ -223,32 +240,31 @@
 
                         <li class="menu-title mt-2">Reports</li>
 
-                        <li >
-                            <a href="{{ route('reports.dashboard') }}" class="{{ request()->routeIs('reports.dashboard') ? 'tp-link active' : '' }}">
-                                <i data-feather="bar-chart-2"></i>
-                                <span> Dashboard </span>
-                            </a>
-                        </li>
-                        <li >
-                            <a href="{{ route('reports.sales') }}" class="{{ request()->routeIs('reports.sales') ? 'tp-link active' : '' }}">
+
+                        <li>
+                            <a href="{{ route('reports.sales') }}"
+                                class="{{ request()->routeIs('reports.sales') ? 'tp-link active' : '' }}">
                                 <i data-feather="trending-up"></i>
                                 <span> Sales Report </span>
                             </a>
                         </li>
-                        <li >
-                            <a href="{{ route('reports.customers') }}" class="{{ request()->routeIs('reports.customers') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('reports.customers') }}"
+                                class="{{ request()->routeIs('reports.customers') ? 'tp-link active' : '' }}">
                                 <i data-feather="users"></i>
                                 <span> Customer Ledger </span>
                             </a>
                         </li>
-                        <li >
-                            <a href="{{ route('reports.suppliers') }}" class="{{ request()->routeIs('reports.suppliers') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('reports.suppliers') }}"
+                                class="{{ request()->routeIs('reports.suppliers') ? 'tp-link active' : '' }}">
                                 <i data-feather="pie-chart"></i>
                                 <span> Supplier Ledger </span>
                             </a>
                         </li>
-                        <li >
-                            <a href="{{ route('reports.inventory-history') }}" class="{{ request()->routeIs('reports.inventory-history') ? 'tp-link active' : '' }}">
+                        <li>
+                            <a href="{{ route('reports.inventory-history') }}"
+                                class="{{ request()->routeIs('reports.inventory-history') ? 'tp-link active' : '' }}">
                                 <i data-feather="activity"></i>
                                 <span> Inventory History </span>
                             </a>
@@ -307,7 +323,7 @@
     <script src="{{ asset('assets/libs/waypoints/lib/jquery.waypoints.min.js') }}"></script>
     <script src="{{ asset('assets/libs/jquery.counterup/jquery.counterup.min.js') }}"></script>
     <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
-{{-- 
+    {{-- 
     <!-- Datatables js -->
     <script src="assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
 

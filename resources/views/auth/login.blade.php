@@ -156,7 +156,7 @@
                     success: function(response) {
                         if (response.success) {
                             // Redirect to dashboard or wherever
-                            window.location.href = "{{ route('dashboard') }}";
+                            window.location.href = "{{ route('reports.dashboard') }}";
                         } else {
                             showError(response.message || "Login failed.");
                             $btn.prop("disabled", false);
