@@ -27,7 +27,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required',
-            'brand_id' => 'required|exists:brands,id',
+            'brand_id' => 'nullable|exists:brands,id',
             'category_id' => 'required|exists:categories,id',
             'purchase_price' => 'required|numeric',
             'sell_price' => 'required|numeric',
@@ -50,7 +50,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required',
-            'brand_id' => 'required|exists:brands,id',
+            'brand_id' => 'nullable|exists:brands,id',
             'category_id' => 'required|exists:categories,id',
             'purchase_price' => 'required|numeric',
             'sell_price' => 'required|numeric',
