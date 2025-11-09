@@ -269,6 +269,48 @@
                                 <span> Inventory History </span>
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('reports.transactions') }}"
+                                class="{{ request()->routeIs('reports.transactions') ? 'tp-link active' : '' }}">
+                                <i data-feather="dollar-sign"></i>
+                                <span> All Transactions </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('reports.pending-transactions') }}"
+                                class="{{ request()->routeIs('reports.pending-transactions') ? 'tp-link active' : '' }}">
+                                <i data-feather="clock"></i>
+                                <span> Pending Transactions </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('reports.completed-transactions') }}"
+                                class="{{ request()->routeIs('reports.completed-transactions') ? 'tp-link active' : '' }}">
+                                <i data-feather="check-circle"></i>
+                                <span> Completed Transactions </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('reports.user-transactions') }}"
+                                class="{{ request()->routeIs('reports.user-transactions') ? 'tp-link active' : '' }}">
+                                <i data-feather="user-check"></i>
+                                <span> User Transactions </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('reports.customer-transactions') }}"
+                                class="{{ request()->routeIs('reports.customer-transactions') ? 'tp-link active' : '' }}">
+                                <i data-feather="users"></i>
+                                <span> Customer Transactions </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('reports.supplier-transactions') }}"
+                                class="{{ request()->routeIs('reports.supplier-transactions') ? 'tp-link active' : '' }}">
+                                <i data-feather="truck"></i>
+                                <span> Supplier Transactions </span>
+                            </a>
+                        </li>
 
                     </ul>
 

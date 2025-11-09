@@ -188,34 +188,8 @@ class TypeController extends Controller
                 ]
             ];
         });
-        return  $result;
         return response()->json([
             "options" => $result
         ]);
-
-        if (!$type) {
-            return response()->json(['error' => 'Type not found'], 404);
-        }
-
-        $combine = $type->combine; // ✅ already array
-        $combinedFields = [];
-
-        if (!empty($combine)) {
-            $combinedTypes = Type::with('fields')
-                ->whereIn('name', $combine)
-                ->get();
-
-            $key = implode('_', $combine); // e.g. "kameez_shalwar"
-            $combinedFields[$key] = [
-                'combine' => $combine,
-                'fields' => $combinedTypes->flatMap->fields->values(),
-            ];
-        } else {
-            $combinedFields[$type->name] = [
-                'fields' => $type->fields,
-            ];
-        }
-
-        return response()->json($combinedFields);
     }
 }

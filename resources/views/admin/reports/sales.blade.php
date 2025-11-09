@@ -38,25 +38,28 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
-                            <p><strong>Total Orders:</strong> {{ $summary['total_sales'] }}</p>
+                            <p><strong>Total Orders:</strong> {{ $summary['total_sales'] ?? 0 }}</p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>Total Revenue:</strong> {{ number_format($summary['total_revenue'], 2) }}</p>
+                            <p><strong>Total Revenue:</strong> Rs {{ number_format($summary['total_revenue'] ?? 0, 2) }}</p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>Cash Payments:</strong> {{ number_format($summary['cash_payments'], 2) }}</p>
+                            <p><strong>Cash Payments:</strong> Rs {{ number_format($summary['cash_payments'] ?? 0, 2) }}</p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>Online Payments:</strong> {{ number_format($summary['online_payments'], 2) }}</p>
+                            <p><strong>Online Payments:</strong> Rs {{ number_format($summary['online_payments'] ?? 0, 2) }}</p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>Full Payments:</strong> {{ number_format($summary['full_payments'], 2) }}</p>
+                            <p><strong>Full Payments:</strong> Rs {{ number_format($summary['full_payments'] ?? 0, 2) }}</p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>Partial Payments:</strong> {{ number_format($summary['partial_payments'], 2) }}</p>
+                            <p><strong>Partial Payments:</strong> Rs {{ number_format($summary['partial_payments'] ?? 0, 2) }}</p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>Pending Amount:</strong> {{ number_format($summary['pending_amount'], 2) }}</p>
+                            <p><strong>Pending Amount:</strong> Rs {{ number_format($summary['pending_amount'] ?? 0, 2) }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Total Paid:</strong> Rs {{ number_format($summary['total_paid'] ?? 0, 2) }}</p>
                         </div>
                     </div>
                 </div>
@@ -88,7 +91,7 @@
                                 <tr>
                                     <td>{{ $order->order_number }}</td>
                                     <td>{{ $order->order_date }}</td>
-                                    <td>{{ $order->customer->name }}</td>
+                                    <td>{{ $order->customer->name ?? 'N/A' }}</td>
                                     <td>{{ number_format($order->total_amount, 2) }}</td>
                                     <td><span class="badge bg-{{ $order->payment_method == 'online' ? 'info' : 'success' }}">{{ ucfirst($order->payment_method) }}</span></td>
                                     <td><span class="badge bg-{{ $order->payment_status == 'full' ? 'success' : 'warning' }}">{{ ucfirst($order->payment_status) }}</span></td>

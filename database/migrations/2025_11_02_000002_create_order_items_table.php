@@ -12,10 +12,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->nullable()->constrained()->onDelete('restrict');
+            $table->text('product_name')->nullable();
+            $table->json('measurement')->nullable();
             $table->boolean('is_from_inventory')->default(true);
             $table->decimal('sell_price', 10, 2);
             $table->decimal('quantity_meters', 10, 2);
             $table->decimal('total_price', 10, 2);
+            $table->json("measurement")->nullable();
             $table->timestamps();
         });
     }
@@ -25,4 +28,3 @@ return new class extends Migration
         Schema::dropIfExists('order_items');
     }
 };
-

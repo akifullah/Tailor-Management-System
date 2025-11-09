@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Measurement;
 use App\Models\Type;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class MeasurementController extends Controller
@@ -21,11 +22,13 @@ class MeasurementController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($customer = null)
     {
+
+        $selectedCustomer = $customer ? Customer::find($customer) : null;
         $types = Type::get();
         $customers = Customer::select('id', 'name')->get();
-        return view('admin.measurements.create', compact('customers', "types"));
+        return view('admin.measurements.create', compact('customers', "types", "selectedCustomer"));
     }
 
     /**

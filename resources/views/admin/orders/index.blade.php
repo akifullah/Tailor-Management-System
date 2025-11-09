@@ -34,35 +34,69 @@
                                 <th>Date</th>
                                 <th>Customer</th>
                                 <th>Total Amount</th>
-                                <th>Payment Method</th>
                                 <th>Payment Status</th>
+                                <th>Delivery Status</th>
+                                <th>Items Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($orders as $order)
+                                @php
+                                    $totalPaid = $order->payments->sum('amount');
+                                    $remaining = $order->total_amount - $totalPaid;
+                                    $itemsPending = $order->items->where('status', 'pending')->count();
+                                    $itemsProgress = $order->items->where('status', 'progress')->count();
+                                    $itemsCompleted = $order->items->where('status', 'completed')->count();
+                                    $totalItems = $order->items->count();
+                                @endphp
                                 <tr>
                                     <td>{{ $order->order_number }}</td>
                                     <td>{{ $order->order_date }}</td>
-                                    <td>{{ $order->customer->name }}</td>
+                                    <td>{{ $order->customer->name ?? 'N/A' }}</td>
                                     <td>{{ number_format($order->total_amount, 2) }}</td>
                                     <td>
-                                        <span class="badge bg-{{ $order->payment_method == 'online' ? 'info' : 'success' }}">
-                                            {{ ucfirst($order->payment_method) }}
+                                        <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
+                                            {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
                                         </span>
+                                        @if($remaining > 0)
+                                            <br><small class="text-muted">Remaining: Rs {{ number_format($remaining, 2) }}</small>
+                                        @endif
                                     </td>
                                     <td>
-                                        <span class="badge bg-{{ $order->payment_status == 'full' ? 'success' : 'warning' }}">
-                                            {{ ucfirst($order->payment_status) }}
+                                        <span class="badge bg-{{ $order->delivery_status == 'delivered' ? 'success' : 'secondary' }}">
+                                            {{ ucfirst($order->delivery_status ?? 'pending') }}
                                         </span>
+                                        @if($order->delivery_date)
+                                            <br><small class="text-muted">{{ $order->delivery_date->format('Y-m-d') }}</small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($totalItems > 0)
+                                            @if($itemsCompleted == $totalItems)
+                                                <span class="badge bg-success">All Completed</span>
+                                            @elseif($itemsProgress > 0 || $itemsPending > 0)
+                                                <span class="badge bg-info">
+                                                    {{ $itemsCompleted }}/{{ $totalItems }} Done
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">
+                                                    @if($itemsProgress > 0)
+                                                        <span class="badge bg-warning">{{ $itemsProgress }} In Progress</span>
+                                                    @endif
+                                                    @if($itemsPending > 0)
+                                                        <span class="badge bg-secondary">{{ $itemsPending }} Pending</span>
+                                                    @endif
+                                                </small>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">No items</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <a href="{{ route('orders.show', $order) }}" class="btn btn-sm bg-info-subtle">
                                             <i class="mdi mdi-eye fs-14 text-info"></i>
                                         </a>
-                                        @if($order->payment_status == 'partial')
-                                        <span class="text-muted small d-block">Remaining: {{ number_format($order->remaining_amount, 2) }}</span>
-                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

@@ -13,6 +13,8 @@ class Order extends Model
         'order_number',
         'customer_id',
         'order_date',
+        'delivery_date',
+        'delivery_status',
         'total_amount',
         'payment_method',
         'payment_status',
@@ -23,12 +25,22 @@ class Order extends Model
 
     protected $casts = [
         'order_date' => 'date',
+        'delivery_date' => 'date',
         'total_amount' => 'decimal:2',
         'partial_amount' => 'decimal:2',
         'remaining_amount' => 'decimal:2',
     ];
+    
+    protected $appends = ['total_paid'];
 
     public function customer() { return $this->belongsTo(Customer::class); }
     public function items() { return $this->hasMany(OrderItem::class); }
+    public function payments() { return $this->morphMany(Payment::class, 'payable'); }
+    
+    // Calculate total paid amount from payments
+    public function getTotalPaidAttribute()
+    {
+        return $this->payments()->sum('amount');
+    }
 }
 

@@ -24,7 +24,7 @@
             </div>
         @endif
 
-        
+
         <!-- Button Datatable -->
         <div class="row">
             <div class="col-12">
@@ -54,18 +54,50 @@
                                         <td>{{ $customer->email }}</td>
                                         <td>{{ $customer->phone }}</td>
                                         <td>{{ $customer->address }}</td>
-                                        <td>
-                                            <a href="{{ route("customers.measurements", ["id" => $customer->id]) }}">View</a>
-                                            <button onclick="handleEdit({{ $customer }})"
-                                                class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Edit">
-                                                <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
-                                            </button>
-                                            <button onclick="handleDelete({{ $customer->id }})"
-                                                class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Delete">
-                                                <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                            </button>
+                                        <td class="d-flex gap-2 ">
+
+                                            <div class="dropdown ">
+
+                                                <button
+                                                    class="btn btn-sm btn-outline-dark border-0 p-0 px-1 dropdown-toggle me-0"
+                                                    style="font-size: 22px" data-bs-toggle="dropdown" href="#"
+                                                    role="button" aria-haspopup="false" aria-expanded="false">
+                                                    <span class="mdi mdi-dots-vertical"></span>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end profile-dropdown">
+
+                                                    <a class="dropdown-item "
+                                                        href="{{ route('customers.measurements', ['id' => $customer->id]) }}">
+                                                        <span>View Detail</span>
+                                                    </a>
+
+                                                    <a class="dropdown-item "
+                                                        href="{{ route('measurements.create.withCustomer', ['customer' => $customer->id]) }}">Create
+                                                        Measurements</a>
+
+                                                    <a class="dropdown-item "
+                                                        href="{{ route('orders.create.withCustomer', ['customer' => $customer->id]) }}">Create
+                                                        Order</a>
+
+                                                </div>
+                                            </div>
+                                            <div class="">
+
+
+                                                <button onclick="handleEdit({{ $customer }})"
+                                                    class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Edit">
+                                                    <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                                </button>
+                                                <button onclick="handleDelete({{ $customer->id }})"
+                                                    class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Delete">
+                                                    <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                                </button>
+                                            </div>
+
+
+
                                         </td>
                                     </tr>
                                 @endforeach
@@ -109,12 +141,13 @@
                                 </div><!--end col-->
                                 <div class="col-xxl-12">
                                     <label for="address" class="form-label">Address</label>
-                                    <input type="address" class="form-control" id="address" name="address" value=""
-                                        placeholder="Enter Address" autocomplete="off">
+                                    <input type="address" class="form-control" id="address" name="address"
+                                        value="" placeholder="Enter Address" autocomplete="off">
                                 </div><!--end col-->
                                 <div class="col-lg-12">
                                     <div class="hstack gap-2 justify-content-end">
-                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-light"
+                                            data-bs-dismiss="modal">Close</button>
                                         <button type="submit" class="btn btn-primary" id="submit_btn">Submit</button>
                                     </div>
                                 </div><!-- end col -->
@@ -169,14 +202,14 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             location.reload();
                         } else {
                             alert(response.message || "Delete failed.");
                         }
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         alert("Error deleting user.");
                     }
                 });
@@ -198,8 +231,8 @@
 
         }
 
-        $(document).ready(function () {
-            $("#userForm").on('submit', function (e) {
+        $(document).ready(function() {
+            $("#userForm").on('submit', function(e) {
                 e.preventDefault();
                 let $form = $("#userForm");
                 // Serialize the form as an array and log it
@@ -216,16 +249,22 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             // Redirect to dashboard or wherever
-                            location.reload();
+                            let customer_id = response.user.id;
+                            if (response?.isCreated) {
+                                window.location.href =
+                                    "{{ url('measurements/create') }}/" + customer_id;
+                            } else {
+                                location.reload();
+                            }
                         } else {
                             console.log(response)
                             const errors = response?.errors;
 
 
-                            Object.keys(errors).forEach(function (key) {
+                            Object.keys(errors).forEach(function(key) {
                                 var input = $form.find('[id="' + key + '"]');
                                 if (input.length) {
                                     input.after(

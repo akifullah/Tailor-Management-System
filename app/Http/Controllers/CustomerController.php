@@ -61,6 +61,7 @@ class CustomerController extends Controller
             'success' => true,
             'message' => $request->id ? 'Customer updated successfully.' : 'Customer created successfully.',
             'user' => $customer,
+            "isCreated" => $request->id ? false : true,
         ]);
     }
 

@@ -1,24 +1,18 @@
 @extends('admin.layouts.app')
 
 @section('content')
-<div class="container">
-    <h2>Add Product</h2>
-    <form action="{{ route('products.store') }}" method="POST">
-        @csrf
-        <div class="mb-3">
-            <label>Title</label>
-            <input type="text" name="title" class="form-control" value="{{ old('title') }}" required>
+<div class="container-fluid">
+    <div class="py-3 d-flex align-items-center justify-content-between">
+        <div class="flex-grow-1">
+            <h4 class="fs-18 fw-semibold mb-0">Add Product</h4>
         </div>
-        <div class="mb-3">
-            <label>Brand</label>
-            <select name="brand_id" class="form-control" required>
-                <option value="">Select Brand</option>
-                @foreach($brands as $brand)
-                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="mb-3">
+        <a href="{{ route('products.index') }}" class="btn btn-secondary btn-sm">Back to Products</a>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ route('products.store') }}" method="POST">
+                @csrf
+                <div class="mb-3">
             <label>Category</label>
             <select name="category_id" class="form-control" required>
                 <option value="">Select Category</option>
