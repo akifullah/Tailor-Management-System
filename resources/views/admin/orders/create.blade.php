@@ -14,22 +14,13 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('orders.store') }}" method="POST" id="orderForm">
+                        <form action="{{ route('orders.store') }}" method="POST" id="orderForm" autocomplete="off">
                             @csrf
 
                             <div class="row mb-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Customer *</label>
-                                    {{-- <select id="customer_id" name="customer_id" class="form-control" required>
-                                        <option value="">Select Customer</option>
-                                        @foreach ($customers as $customer)
-                                            <option value="{{ $customer->id }}"
-                                                data-measurement='@json($customer->measurements)'>{{ $customer->name }}
-                                            </option>
-                                        @endforeach
-                                    </select> --}}
                                     @if ($selectedCustomer)
-                                        <!-- Disabled select for display -->
                                         <select id="customer_id" class="form-select" disabled>
                                             @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}"
@@ -39,10 +30,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <!-- Hidden input to submit value -->
                                         <input type="hidden" name="customer_id" value="{{ $selectedCustomer->id }}">
                                     @else
-                                        <!-- Normal select for user to choose -->
                                         <select id="customer_id" name="customer_id" class="form-select" required>
                                             <option value="">Select Customer</option>
                                             @foreach ($customers as $customer)
@@ -53,7 +42,6 @@
                                             @endforeach
                                         </select>
                                     @endif
-
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Order Date *</label>
@@ -74,60 +62,10 @@
                                     </select>
                                 </div>
                             </div>
-
-
-
                             <hr>
-
                             <h5>Order Items</h5>
-                            <div id="orderItems">
-                                {{-- <div class="row mb-2 item-row">
-                                    <div class="col-md-3">
-                                        <label class="form-label product-label">Product <span
-                                                class="product-required">*</span></label>
-                                        <select name="items[0][product_id]" class="form-control product-select" required
-                                            onchange="loadProductPrice(this)">
-                                            <option value="">Select Product (Optional if customer brings fabric)
-                                            </option>
-                                            @foreach ($products as $product)
-                                                <option value="{{ $product->id }}" data-price="{{ $product->sell_price }}"
-                                                    data-stock="{{ $product->available_meters }}">
-                                                    {{ $product->title }} ({{ $product->available_meters }}m)
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <div class="form-check mt-2">
-                                            <input class="form-check-input customer-fabric-check" type="checkbox"
-                                                name="items[0][is_from_inventory]" value="1" id="is_from_inventory_0"
-                                                checked onchange="handleCustomerFabric(this)">
-                                            <label class="form-check-label" for="is_from_inventory_0">
-                                                Use Inventory Stock
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Sell Price *</label>
-                                        <input type="number" step="0.01" name="items[0][sell_price]"
-                                            class="form-control sell-price" required onchange="calculateTotal(this)">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Quantity (Meters) *</label>
-                                        <input type="number" step="0.01" name="items[0][quantity_meters]"
-                                            class="form-control quantity" required onchange="calculateTotal(this)">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Total</label>
-                                        <input type="text" class="form-control item-total" readonly>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">&nbsp;</label><br>
-                                        <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
-                                    </div>
-                                </div> --}}
-                            </div>
-
+                            <div id="orderItems"></div>
                             <button type="button" class="btn btn-info" onclick="addItemRow()">Add Item</button>
-
 
                             <hr>
                             <h5 class="mb-3">Payment Information</h5>
@@ -214,48 +152,7 @@
 
 @section('js')
     <script>
-        // let custumerMeasurements = null
-
-        // function getCustomerMeasurement() {
-        //     const option = $(this).find(":selected");
-        //     const measurementData = option.attr("data-measurement");
-
-        //     let measurements;
-        //     try {
-        //         measurements = JSON.parse(measurementData);
-        //     } catch (err) {
-        //         measurements = measurementData;
-        //     }
-
-        //     let ms = document.createElement("select");
-        //     ms.className = "form-select";
-        //     ms.required = true;
-
-        //     let options = `<option value="" >Select a Measurement</option>`;
-
-        //     measurements?.forEach((m) => {
-        //         options += `<option value="${JSON.stringify(m)}">${String(m?.type ?? '')}</option>`;
-        //     });
-
-        //     // Add all options at once
-        //     ms.innerHTML = options;
-
-        //     $("#orderItems").html("")
-
-        //     // Debug log
-        //     console.log(ms);
-        //     custumerMeasurements = ms;
-        //     console.log(custumerMeasurements)
-
-        // }
-        // $("#customer_id").on("change", getCustomerMeasurement);
-
-        // getCustomerMeasurement();
-
         let itemCount = 1;
-
-
-
         let custumerMeasurements = null;
 
         function getCustomerMeasurement(selectElement) {
@@ -273,7 +170,6 @@
             ms.className = "form-select";
             ms.required = true;
 
-
             let options = `<option value="">Select a Measurement</option>`;
 
             measurements?.forEach((m) => {
@@ -290,38 +186,57 @@
             console.log(custumerMeasurements);
         }
 
-        // On change
         $("#customer_id").on("change", function() {
             getCustomerMeasurement(this);
         });
 
-        // On page load / initial run
         $(document).ready(function() {
             const select = $("#customer_id")[0];
-            if (select?.value) { // Only if a customer is selected
+            if (select?.value) {
                 getCustomerMeasurement(select);
             }
-        });
 
+            // -- PATCH START: Payment section UX for required/focus/error on partial_amount --
 
-        $('#payment_status').on('change', function() {
-            if ($(this).val() === 'partial') {
-                $('#partial_amount_div').show();
-                $('#partial_amount').attr('required', 'required');
+            // Initially hide and remove required from partial amount
+            $('#partial_amount_div').hide();
+            $('#partial_amount').prop('required', false);
+
+            $('#payment_status').on('change', function () {
+                if ($(this).val() === 'partial') {
+                    $('#partial_amount_div').show();
+
+                    // Remove required by default, only add required on focus
+                    $('#partial_amount').prop('required', false);
+
+                    // Attach focus event (only once)
+                    $('#partial_amount').off('focus.addreq').on('focus.addreq', function () {
+                        if ($('#payment_status').val() === 'partial') {
+                            $(this).prop('required', true);
+                        }
+                    });
+
+                    // Remove invalid flag on focus (if user was blocked because "is not focusable")
+                    $('#partial_amount').on('focus', function () {
+                        this.setCustomValidity('');
+                    });
+
+                } else {
+                    $('#partial_amount_div').hide();
+                    $('#partial_amount').prop('required', false).val('');
+                    $('#remaining_amount_display').text('0.00');
+                }
+            });
+
+            // If switching to partial from full, reset value, validity, required, focus behavior
+            $('#payment_status').trigger('change');
+
+            // Update remaining amount when partial amount changes
+            $('#partial_amount').on('input', function() {
                 updateRemainingAmount();
-            } else {
-                $('#partial_amount_div').hide();
-                $('#partial_amount').removeAttr('required');
-                $('#remaining_amount_display').text('0.00');
-            }
+            });
         });
 
-        // Update remaining amount when partial amount changes
-        $('#partial_amount').on('input', function() {
-            updateRemainingAmount();
-        });
-
-        // Update remaining amount when grand total changes
         function updateRemainingAmount() {
             const grandTotal = parseFloat($('#grandTotal').text()) || 0;
             const paidAmount = parseFloat($('#partial_amount').val()) || 0;
@@ -329,13 +244,15 @@
             $('#remaining_amount_display').text(remaining.toFixed(2));
             $('#payment_total_display').text(grandTotal.toFixed(2));
 
-            // Set max attribute on partial amount input
             $('#partial_amount').attr('max', grandTotal.toFixed(2));
 
-            // Validate paid amount doesn't exceed total
             const partialAmountInput = $('#partial_amount');
-            if (paidAmount > grandTotal) {
-                partialAmountInput[0].setCustomValidity('Paid amount cannot exceed total amount');
+            if ($('#payment_status').val() === 'partial') {
+                if (paidAmount > grandTotal) {
+                    partialAmountInput[0].setCustomValidity('Paid amount cannot exceed total amount');
+                } else {
+                    partialAmountInput[0].setCustomValidity('');
+                }
             } else {
                 partialAmountInput[0].setCustomValidity('');
             }
@@ -348,32 +265,28 @@
             const row = $(select).closest('.item-row');
             const isFromInventory = row.find('.customer-fabric-check').is(':checked');
 
-            // Only auto-fill price if using inventory stock
             if (isFromInventory) {
                 row.find('.sell-price').val(price || '');
                 if (stock && stock <= 0) {
                     alert('Product is out of stock!');
                 }
             } else {
-                // Customer brings own fabric - price should be custom (leave empty or let user enter)
                 row.find('.sell-price').val('').attr('placeholder', 'Enter custom price');
             }
             calculateTotal(select);
             checkAllQuantities();
         }
 
-        // New: Check all quantities grouped by product and show inline error if any exceed stock (only for items from inventory)
         function checkAllQuantities() {
             let productTotals = {};
             let productStocks = {};
             let productRows = {};
-            // Gather totals (only for items where "Use Inventory Stock" is checked)
             $('.item-row').each(function(i) {
                 const select = $(this).find('.product-select');
                 const pid = select.val();
                 if (!pid) return;
                 const isFromInventory = $(this).find('.customer-fabric-check').is(':checked');
-                if (!isFromInventory) return; // Skip items where customer brings own fabric
+                if (!isFromInventory) return;
                 const stock = parseFloat(select.find('option:selected').data('stock')) || 0;
                 const qtyInput = $(this).find('.quantity');
                 const qty = parseFloat(qtyInput.val() || 0);
@@ -385,10 +298,8 @@
                     qtyInput: qtyInput
                 });
             });
-            // Clear previous warning
             $('.item-row .qty-error').remove();
             $('.item-row .quantity').removeClass('is-invalid');
-            // For every product, show warning on all rows if total exceeds stock
             $.each(productTotals, function(pid, total) {
                 if (total > productStocks[pid]) {
                     productRows[pid].forEach(function(obj) {
@@ -419,7 +330,6 @@
             });
             $('#grandTotal').text(grandTotal.toFixed(2));
             $('#payment_total_display').text(grandTotal.toFixed(2));
-            // Update remaining amount if partial payment is selected
             if ($('#payment_status').val() === 'partial') {
                 updateRemainingAmount();
             }
@@ -443,7 +353,6 @@
                 if (productLabel.length) {
                     productLabel.html('Product <span class="product-required">*</span>');
                 }
-                // If product is selected, auto-fill price from inventory
                 if (select.val()) {
                     const price = select.find('option:selected').data('price');
                     priceInput.val(price || '').removeAttr('placeholder');
@@ -456,9 +365,8 @@
                 if (productLabel.length) {
                     productLabel.html('Product (Optional)');
                 }
-                // Clear auto-filled price, allow custom price entry
                 priceInput.val('').attr('placeholder', 'Enter custom price');
-                select.val(''); // Clear product selection
+                select.val('');
             }
             calculateTotal(checkbox);
             checkAllQuantities();
@@ -511,11 +419,8 @@
                 <div class="col-md-2">
                     <label class="form-label">Select Measurement</label>
                     ${(function() {
-                        // Clone the custumerMeasurements element to avoid mutating the original reference
                         if (!custumerMeasurements) return '';
-                        // Create a clone
                         const ms = custumerMeasurements.cloneNode(true);
-                        // Add the name attribute with the correct itemCount
                         ms.name = `items[${itemCount}][measurement]`;
                         return ms.outerHTML;
                     })()}
@@ -530,9 +435,8 @@
             itemCount++;
         }
 
-        // Event: Also watch for input on every .quantity field for instant validation
         $(document).on('input change', '.item-row .quantity, .item-row .product-select', function() {
-            calculateTotal(this); // Will also call checkAllQuantities as part of calculateTotal
+            calculateTotal(this);
         });
 
         $(document).on('click', '.remove-item', function() {
@@ -543,7 +447,6 @@
 
         // Block form submit if any total qty for any product > stock (only for items from inventory)
         $('#orderForm').on('submit', function(e) {
-            // Remove required attribute from product selects where customer brings fabric
             $('.item-row').each(function() {
                 const isFromInventory = $(this).find('.customer-fabric-check').is(':checked');
                 const select = $(this).find('.product-select');
@@ -555,7 +458,6 @@
             });
 
             checkAllQuantities();
-            // Also check totals for items from inventory
             let productTotals = {};
             let productStocks = {};
             $('.item-row').each(function() {
@@ -581,6 +483,14 @@
                 );
                 e.preventDefault();
                 return false;
+            }
+
+            // Extra: Focus partial amount if it's partial and missing, to avoid "not focusable" browser error
+            if ($('#payment_status').val() === 'partial' && ($('#partial_amount_div').is(':hidden') || !$('#partial_amount')[0].checkValidity())) {
+                $('#partial_amount_div').show();
+                setTimeout(function() {
+                    $('#partial_amount').focus();
+                }, 50);
             }
         });
     </script>
