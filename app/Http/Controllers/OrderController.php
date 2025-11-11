@@ -25,6 +25,7 @@ class OrderController extends Controller
 
         $customers = Customer::with("measurements")->get();
         $products = Product::all();
+
         return view('admin.orders.create', compact('customers', 'products', "selectedCustomer"));
     }
 
@@ -195,7 +196,22 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order->load(['customer', 'items.product', 'payments']);
-        
+        // Convert the measurement field in each item to parsed JSON
+        $orderArray = $order->toArray();
+        if (!empty($orderArray['items'])) {
+            foreach ($orderArray['items'] as &$item) {
+                if (isset($item['measurement']) && is_string($item['measurement'])) {
+                    $decodedMeasurement = json_decode($item['measurement'], true);
+                    // if the measurement itself has a JSON "data" field, also parse it
+                    if (is_array($decodedMeasurement) && isset($decodedMeasurement['data']) && is_string($decodedMeasurement['data'])) {
+                        $dataDecoded = json_decode($decodedMeasurement['data'], true);
+                        $decodedMeasurement['data'] = $dataDecoded ?: $decodedMeasurement['data'];
+                    }
+                    $item['measurement'] = $decodedMeasurement ?: $item['measurement'];
+                }
+            }
+        }
+        $orderArray['items'] = $orderArray['items'] ?? [];
         return view('admin.orders.show', compact('order'));
     }
 

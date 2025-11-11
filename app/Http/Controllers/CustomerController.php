@@ -117,7 +117,7 @@ class CustomerController extends Controller
                 return $measurement;
             });
         }
-
+        // return $customer;
         $data["customer"] = $customer;
         return view("admin.customers.customer_measurement", $data);
     }

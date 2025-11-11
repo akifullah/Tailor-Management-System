@@ -180,7 +180,6 @@
                 url: "{{ route('field.byType', ':id') }}".replace(':id', typeId),
                 type: 'GET',
                 success: function (response) {
-                    console.log(response)
                     let fieldContainer = $("#field-container");
                     fieldContainer.empty();
 

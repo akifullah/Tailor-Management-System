@@ -183,7 +183,6 @@
 
             // Save reference for later
             custumerMeasurements = ms;
-            console.log(custumerMeasurements);
         }
 
         $("#customer_id").on("change", function() {
@@ -373,7 +372,6 @@
         }
 
         function addItemRow() {
-            console.log(custumerMeasurements)
             const html = `
             <div class="row align-items-end mb-2 item-row border-bottom pb-2">
                 <div class="col-md-2">

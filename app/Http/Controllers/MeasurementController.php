@@ -15,7 +15,16 @@ class MeasurementController extends Controller
      */
     public function index()
     {
-        $measurements = Measurement::with('customer')->latest()->paginate(20);
+        $measurements = Measurement::with('customer')->get();
+
+        // Convert the JSON 'data' column to an object, and eager customer is fine (already done)
+        $measurements->transform(function ($measurement) {
+            if (is_string($measurement->data)) {
+                $measurement->data = json_decode($measurement->data);
+            }
+            return $measurement;
+        });
+
         return view('admin.measurements.index', compact('measurements'));
     }
 
@@ -36,19 +45,48 @@ class MeasurementController extends Controller
      */
     public function store(Request $request)
     {
+        // $request->validate([
+        //     'customer_id' => 'required|exists:customers,id',
+        //     'type' => 'required|string',
+        // ]);
+
+        // // Get all form fields except _token
+        // $data = collect($request->except(['_token', 'customer_id', 'type', 'notes']))
+        //     ->filter(fn($v) => $v !== null && $v !== '');
+
+        // Measurement::create([
+        //     'customer_id' => $request->customer_id,
+        //     'type' => $request->type,
+        //     'data' => json_encode($data),
+        //     'notes' => $request->notes,
+        // ]);
+
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'type' => 'required|string',
         ]);
 
-        // Get all form fields except _token
+        // Get all fields except the system ones
         $data = collect($request->except(['_token', 'customer_id', 'type', 'notes']))
             ->filter(fn($v) => $v !== null && $v !== '');
+
+        // Group by prefix before underscore (e.g. "kameez_length" → "kameez" → ["length" => "1200"])
+        $grouped = [];
+
+        foreach ($data as $key => $value) {
+            if (strpos($key, '_') !== false) {
+                [$prefix, $field] = explode('_', $key, 2);
+                $grouped[$prefix][$field] = $value;
+            } else {
+                // fallback for keys without underscore
+                $grouped[$key] = $value;
+            }
+        }
 
         Measurement::create([
             'customer_id' => $request->customer_id,
             'type' => $request->type,
-            'data' => json_encode($data),
+            'data' => json_encode($grouped, JSON_PRETTY_PRINT),
             'notes' => $request->notes,
         ]);
 
@@ -79,6 +117,8 @@ class MeasurementController extends Controller
     /**
      * Update the specified resource in storage.
      */
+
+
     public function update(Request $request, Measurement $measurement)
     {
         $request->validate([
@@ -86,16 +126,48 @@ class MeasurementController extends Controller
             'type' => 'required|string',
         ]);
 
-        $data = $request->except(['_token', '_method', 'customer_id', 'type', 'notes']);
+        // Get all fields except the system ones
+        $data = collect($request->except(['_token', '_method', 'customer_id', 'type', 'notes']))
+            ->filter(fn($v) => $v !== null && $v !== '');
+
+        // Group by prefix before underscore (e.g. "kameez_length" → "kameez" → ["length" => "1200"])
+        $grouped = [];
+        foreach ($data as $key => $value) {
+            if (strpos($key, '_') !== false) {
+                [$prefix, $field] = explode('_', $key, 2);
+                $grouped[$prefix][$field] = $value;
+            } else {
+                $grouped[$key] = $value;
+            }
+        }
+
         $measurement->update([
             'customer_id' => $request->customer_id,
             'type' => $request->type,
-            'data' => json_encode($data),
+            'data' => json_encode($grouped, JSON_PRETTY_PRINT),
             'notes' => $request->notes,
         ]);
 
         return redirect()->route('measurements.index')->with('success', 'Measurement updated successfully!');
     }
+
+    // public function update(Request $request, Measurement $measurement)
+    // {
+    //     $request->validate([
+    //         'customer_id' => 'required|exists:customers,id',
+    //         'type' => 'required|string',
+    //     ]);
+
+    //     $data = $request->except(['_token', '_method', 'customer_id', 'type', 'notes']);
+    //     $measurement->update([
+    //         'customer_id' => $request->customer_id,
+    //         'type' => $request->type,
+    //         'data' => json_encode($data),
+    //         'notes' => $request->notes,
+    //     ]);
+
+    //     return redirect()->route('measurements.index')->with('success', 'Measurement updated successfully!');
+    // }
 
     /**
      * Remove the specified resource from storage.

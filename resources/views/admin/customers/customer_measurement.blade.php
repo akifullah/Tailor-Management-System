@@ -52,75 +52,83 @@
 
 
                         <div class="row ps-2">
-                            @forEach ($customer?->measurements as $measurement)
-                            <div class="col-md-12">
-                                <div class="d-flex align-items-center justify-content-between my-2">
-                                    <h5 class="text-capitalize fw-bold">Type:
-                                        {{str_replace('_', ' ', $measurement->type)}}
-                                    </h5>
-                                    <div class="">
-
-                                        <a href="{{ route('measurements.edit', $measurement->id) }}"
-                                            class="btn btn-sm bg-primary-subtle" data-bs-toggle="tooltip"
-                                            data-bs-original-title="Edit">
-                                            <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
-                                        </a>
-                                        <form action="{{ route('measurements.destroy', $measurement->id) }}"
-                                            method="POST" class="d-inline">
-                                            @csrf @method('DELETE')
-                                            {{-- <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Delete this measurement?')">
-                                                Delete
-                                            </button> --}}
-
-                                            <button onclick="return confirm('Delete this measurement?')"
-                                                class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Delete">
-                                                <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                            </button>
-
-                                        </form>
+                            @foreach ($customer?->measurements as $measurement)
+                                <div class="col-md-12">
+                                    <div class="d-flex align-items-center justify-content-between my-2">
+                                        <h5 class="text-capitalize fw-bold">Type:
+                                            {{ str_replace('_', ' ', $measurement->type) }}
+                                        </h5>
+                                        <div>
+                                            <a href="{{ route('measurements.edit', $measurement->id) }}"
+                                                class="btn btn-sm bg-primary-subtle" data-bs-toggle="tooltip"
+                                                data-bs-original-title="Edit">
+                                                <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                            </a>
+                                            <form action="{{ route('measurements.destroy', $measurement->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf @method('DELETE')
+                                                <button onclick="return confirm('Delete this measurement?')"
+                                                    class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Delete">
+                                                    <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            {{-- @php
-                            $data = json_decode($measurement->data, true);
-                            @endphp --}}
-                         
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Measurement</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($measurement?->data as $key => $item)
-                                        <tr>
-                                            <td class="text-capitaliz</td>e" style="width: 400px">
-                                                {{-- {{ str_replace('_', ' ', $key) }} --}}
-                                                {{ Str::title(trim(preg_replace('/^\w+\s*/', '', str_replace('_', ' ', $key)))) }}
-                                            </td>
-                                            <td>{{ $item }}</td>
-                                        </tr>
+                                
+                                {{-- Nested measurement data display --}}
+                                @if(is_array($measurement->data) || is_object($measurement->data))
+                                    @foreach ($measurement->data as $groupKey => $fields)
+                                        <h6 class="mt-3 mb-1 text-primary text-capitalize" style="font-weight: 700;">
+                                            {{ str_replace('_', ' ', $groupKey) }}
+                                        </h6>
+                                        <table class="table table-bordered table-striped mb-2">
+                                            <thead>
+                                                <tr>
+                                                    <th>Measurement</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            @if(is_array($fields) || is_object($fields))
+                                                @foreach ($fields as $key => $item)
+                                                    <tr>
+                                                        <td class="text-capitalize" style="width: 400px">
+                                                            {{ Str::title(str_replace('_', ' ', $key)) }}
+                                                        </td>
+                                                        <td>{{ $item }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td colspan="2">{{ $fields }}</td>
+                                                </tr>
+                                            @endif
+                                            </tbody>
+                                        </table>
                                     @endforeach
+                                @else
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Measurement</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="2">{{ $measurement->data }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                @endif
 
-                                </tbody>
-                            </table>
-
-                            {{-- @foreach ($measurement?->data as $key => $item)
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    <p class="text-capitalize"><strong>{{str_replace('_', ' ', $key)}}: </strong>
-                                        {{ $item }}</p>
+                                <div class="col-12">
+                                    <p class="text-capitalize"><strong>Notes: </strong>{{ $measurement?->notes }}</p>
                                 </div>
-                            @endforeach --}}
-                            <div class="col-12">
-                                <p class="text-capitalize"><strong>Notes: </strong>{{ $measurement?->notes }}</p>
-                            </div>
-
-                            <hr />
-                            @endforEach
+                                <hr />
+                            @endforeach
                         </div>
 
                         {{-- {{ dd($customer?->measurements) }} --}}
@@ -197,7 +205,6 @@
     <script>
         function setValById(id, val) {
             let $input = $(`#${id}`).val(val);
-            console.log($input); // Log the DOM element instead of the jQuery wrapper
         }
 
         function handleEdit(user) {
@@ -266,7 +273,6 @@
                 let $form = $("#userForm");
                 // Serialize the form as an array and log it
                 var formArray = $form.serializeArray();
-                console.log(formArray);
 
                 // Remove previous errors
                 $form.find('.text-danger').remove();
@@ -283,7 +289,6 @@
                             // Redirect to dashboard or wherever
                             location.reload();
                         } else {
-                            console.log(response)
                             const errors = response?.errors;
 
 

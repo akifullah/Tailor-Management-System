@@ -106,7 +106,6 @@
     <script>
         function setValById(id, val) {
             let $input = $(`#${id}`).val(val);
-            console.log($input); // Log the DOM element instead of the jQuery wrapper
         }
 
         function handleEdit(data) {
@@ -164,7 +163,6 @@
                 $btn.prop("disabled", true);
                 // Serialize the form as an array and log it
                 var formArray = $form.serializeArray();
-                console.log(formArray);
 
                 // Remove previous errors
                 $form.find('.text-danger').remove();
@@ -181,7 +179,6 @@
                             // Redirect to dashboard or wherever
                             location.reload();
                         } else {
-                            console.log(response)
                             const errors = response?.errors;
 
 

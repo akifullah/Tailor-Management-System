@@ -300,39 +300,54 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="measurementModalLabel{{ $itemIndex }}">
-                                Measurement Details - {{ ucfirst($measurement['type'] ?? 'N/A') }}
+                                Measurement Details: {{ ucfirst(str_replace('_', ' ', $measurement['type'] ?? 'N/A')) }}
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <strong>Type:</strong> {{ ucfirst($measurement['type'] ?? 'N/A') }}
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Measurement ID:</strong> {{ $measurement['id'] ?? 'N/A' }}
-                                </div>
-                            </div>
-                            
-                            @if (!empty($readableData))
-                                <h6 class="mt-3 mb-2">Measurement Data</h6>
+                            @php
+                                // $measurement['data'] is now a nested keyed array like ['kameez' => [...], 'shalwar' => [...]]
+                                $dataGroups = [];
+                                // $measurement['data'] is an object of objects: ['kameez' => [...], 'shalwar' => [...]]
+                                // If it's a JSON string, decode it. If already array/object, use directly.
+                                if (isset($measurement['data'])) {
+                                    // Handle if $measurement['data'] is still JSON string (sometimes double-encoded)
+                                    if (is_string($measurement['data'])) {
+                                        $decoded = json_decode($measurement['data'], true);
+                                        if (is_array($decoded)) {
+                                            $dataGroups = $decoded;
+                                        }
+                                    } elseif (is_array($measurement['data'])) {
+                                        $dataGroups = $measurement['data'];
+                                    } elseif (is_object($measurement['data'])) {
+                                        $dataGroups = (array) $measurement['data'];
+                                    }
+                                }
+                            @endphp
+
+                            @if (!empty($dataGroups))
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Field</th>
-                                                <th>Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($readableData as $key => $value)
+                                    @foreach ($dataGroups as $groupLabel => $groupFields)
+                                        <h4 class="mt-3 text-center" style="font-weight: 700;">
+                                            {{ ucfirst($groupLabel) }}
+                                        </h4>
+                                        <table class="table table-bordered table-striped mb-2">
+                                            <thead>
                                                 <tr>
-                                                    <td><strong>{{ $key }}</strong></td>
-                                                    <td>{{ $value ?? 'N/A' }}</td>
+                                                    <th style="width: 50%">Field</th>
+                                                    <th style="width: 50%">Value</th>
                                                 </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($groupFields as $fieldKey => $fieldValue)
+                                                    <tr>
+                                                        <td class="text-capitalize"><strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong></td>
+                                                        <td>{{ $fieldValue ?? 'N/A' }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    @endforeach
                                 </div>
                             @else
                                 <div class="alert alert-info">
@@ -347,16 +362,16 @@
                                 </div>
                             @endif
 
-                            <div class="row mt-3">
+                            {{-- <div class="row mt-3">
                                 <div class="col-md-6">
-                                    <strong>Created At:</strong> 
+                                    <strong>Created At:</strong>
                                     {{ isset($measurement['created_at']) ? \Carbon\Carbon::parse($measurement['created_at'])->format('Y-m-d H:i:s') : 'N/A' }}
                                 </div>
                                 <div class="col-md-6">
-                                    <strong>Updated At:</strong> 
+                                    <strong>Updated At:</strong>
                                     {{ isset($measurement['updated_at']) ? \Carbon\Carbon::parse($measurement['updated_at'])->format('Y-m-d H:i:s') : 'N/A' }}
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
