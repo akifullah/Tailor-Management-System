@@ -11,9 +11,26 @@ class SupplierController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data["suppliers"] = Supplier::latest()->get();
+        // Handle searching based on type/value from the request
+        $query = Supplier::query();
+
+        $type = $request->input('type');
+        $value = $request->input('value');
+
+        if ($type && $value !== null && $value !== '') {
+            // Only apply if both type and value are given
+            if (in_array($type, ['name', 'id', 'phone', 'email'])) {
+                if ($type === 'id') {
+                    $query->where($type, $value);
+                } else {
+                    $query->where($type, 'like', '%' . $value . '%');
+                }
+            }
+        }
+
+        $data['suppliers'] = $query->get();
         return view("admin.suppliers.index", $data);
     }
 

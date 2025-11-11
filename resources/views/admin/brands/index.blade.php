@@ -29,35 +29,75 @@
                 <div class="card">
 
                     <div class="card-body">
+
+                        <div class="mb-3">
+                            <form id="brandSearchForm" method="GET" action="">
+                                <div class="row g-2 justify-content-end align-items-end">
+                                    <div class="col-md-2">
+                                        <label for="search_type" class="form-label">Search By</label>
+                                        <select name="type" id="search_type" class="form-select" required>
+                                            <option value="">-- Select Type --</option>
+                                            <option value="name" {{ request('type') == 'name' ? 'selected' : '' }}>Name
+                                            </option>
+                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>ID
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="search_value" class="form-label">Input Value</label>
+                                        <input type="text" required name="value" id="search_value" class="form-control"
+                                            value="{{ request('value') }}" placeholder="Enter value">
+                                    </div>
+                                    <div class="col-md-1 align-self-end">
+                                        <div class="d-flex gap-1">
+                                            <button type="submit" class="btn px-2 btn-primary">Search</button>
+                                            <a href="{{ route(Route::currentRouteName()) }}"
+                                                class="btn px-2 btn-secondary">Reset</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
                         <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
+                                    <th>#ID</th>
                                     <th>Name</th>
                                     <th>Description</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($brands as $brand)
+                                @if ($brands->isNotEmpty())
+                                    @foreach ($brands as $brand)
+                                        <tr>
+                                            <td style="width: 80px">{{ $brand->id }}</td>
+                                            <td>
+                                                <p class="d-inline-block align-middle mb-0">
+                                                    <span>{{ $brand->name }}</span>
+                                                </p>
+                                            </td>
+                                            <td>{{ $brand->description }}</td>
+                                            <td style="width: 120px">
+                                                <button onclick="handleEdit({{ $brand }})"
+                                                    class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Edit">
+                                                    <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                                </button>
+                                                <button onclick="handleDelete({{ $brand->id }})"
+                                                    class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Delete">
+                                                    <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
-                                        <td>
-                                            <p class="d-inline-block align-middle mb-0">
-                                                <span>{{ $brand->name }}</span>
-                                            </p>
-                                        </td>
-                                        <td>{{ $brand->description }}</td>
-                                        <td>
-                                            <button onclick="handleEdit({{ $brand }})" class="btn btn-sm bg-primary-subtle me-1"
-                                                data-bs-toggle="tooltip" data-bs-original-title="Edit">
-                                                <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
-                                            </button>
-                                            <button onclick="handleDelete({{ $brand->id }})" class="btn btn-sm bg-danger-subtle"
-                                                data-bs-toggle="tooltip" data-bs-original-title="Delete">
-                                                <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                            </button>
-                                        </td>
+                                        <td colspan="4" class="text-center text-muted">No brands found.</td>
                                     </tr>
-                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -95,7 +135,8 @@
 
                                 <div class="col-lg-12">
                                     <div class="hstack gap-2 justify-content-end">
-                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-light"
+                                            data-bs-dismiss="modal">Close</button>
                                         <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
                                     </div>
                                 </div><!-- end col -->
@@ -145,14 +186,14 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             location.reload();
                         } else {
                             alert(response.message || "Delete failed.");
                         }
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         alert("Error deleting user.");
                     }
                 });
@@ -169,8 +210,8 @@
         }
 
 
-        $(document).ready(function () {
-            $("#createForm").on('submit', function (e) {
+        $(document).ready(function() {
+            $("#createForm").on('submit', function(e) {
                 e.preventDefault();
                 let $form = $("#createForm");
                 var $btn = $form.find("button[type=submit]");
@@ -189,7 +230,7 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             // Redirect to dashboard or wherever
                             location.reload();
@@ -198,7 +239,7 @@
                             const errors = response?.errors;
 
 
-                            Object.keys(errors).forEach(function (key) {
+                            Object.keys(errors).forEach(function(key) {
                                 var input = $form.find('[id="' + key + '"]');
                                 if (input.length) {
                                     input.after(

@@ -31,9 +31,47 @@
                 <div class="card">
 
                     <div class="card-body">
+
+                        <div class="mb-3">
+                            <form id="searchForm" method="GET" action="">
+                                <div class="row g-2 justify-content-end align-items-end">
+                                    <div class="col-md-2">
+                                        <label for="search_type" class="form-label">Search By</label>
+                                        <select name="type" id="search_type" class="form-select" required>
+                                            <option value="">-- Select Type --</option>
+                                            <option value="name" {{ request('type') == 'name' ? 'selected' : '' }}> Name
+                                            </option>
+                                            {{-- <option value="id"
+                                                {{ request('type') == 'id' ? 'selected' : '' }}>User Old ID
+                                            </option> --}}
+                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>
+                                                ID</option>
+                                            <option value="phone" {{ request('type') == 'phone' ? 'selected' : '' }}>
+                                                Phone</option>
+                                            <option value="email" {{ request('type') == 'email' ? 'selected' : '' }}>
+                                                Email</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="search_value" class="form-label">Input Value</label>
+                                        <input type="text" required name="value" id="search_value" class="form-control"
+                                            value="{{ request('value') }}" placeholder="Enter value">
+                                    </div>
+                                    <div class="col-md-1 align-self-end">
+                                        <div class="d-flex gap-1">
+                                            <button type="submit" class="btn px-2 btn-primary">Search</button>
+                                            <a href="{{ route(Route::currentRouteName()) }}"
+                                                class="btn px-2 btn-secondary">Reset</a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
                         <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
+                                    <th>#ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Phone</th>
@@ -42,32 +80,37 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($suppliers as $supplier)
-                                    <tr>
-                                        <td>
-                                            <img src="assets/images/users/user.jpg" alt=""
-                                                class="thumb-md me-2 rounded-circle avatar-border">
-                                            <p class="d-inline-block align-middle mb-0">
-                                                <span>{{ $supplier->name }}</span>
-                                            </p>
-                                        </td>
-                                        <td>{{ $supplier->email }}</td>
-                                        <td>{{ $supplier->phone }}</td>
-                                        <td>{{ $supplier->address }}</td>
-                                        <td>
-                                            <button onclick="handleEdit({{ $supplier }})"
-                                                class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Edit">
-                                                <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
-                                            </button>
-                                            <button onclick="handleDelete({{ $supplier->id }})"
-                                                class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Delete">
-                                                <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                @if ($suppliers->isNotEmpty())
+                                    @foreach ($suppliers as $supplier)
+                                        <tr>
+                                            <td>{{ $supplier->id }}</td>
+                                            <td>
+                                                <p class="d-inline-block align-middle mb-0">
+                                                    <span>{{ $supplier->name }}</span>
+                                                </p>
+                                            </td>
+                                            <td>{{ $supplier->email }}</td>
+                                            <td>{{ $supplier->phone }}</td>
+                                            <td>{{ $supplier->address }}</td>
+                                            <td>
+                                                <button onclick="handleEdit({{ $supplier }})"
+                                                    class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Edit">
+                                                    <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                                </button>
+                                                <button onclick="handleDelete({{ $supplier->id }})"
+                                                    class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Delete">
+                                                    <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                <tr>
+                                    <td colspan="6" class="text-center">No suppliers found.</td>
+                                </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -108,12 +151,13 @@
                                 </div><!--end col-->
                                 <div class="col-xxl-12">
                                     <label for="address" class="form-label">Address</label>
-                                    <input type="address" class="form-control" id="address" name="address" value=""
-                                        placeholder="Enter Address" autocomplete="off">
+                                    <input type="address" class="form-control" id="address" name="address"
+                                        value="" placeholder="Enter Address" autocomplete="off">
                                 </div><!--end col-->
                                 <div class="col-lg-12">
                                     <div class="hstack gap-2 justify-content-end">
-                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-light"
+                                            data-bs-dismiss="modal">Close</button>
                                         <button type="submit" class="btn btn-primary" id="submit_btn">Submit</button>
                                     </div>
                                 </div><!-- end col -->
@@ -167,14 +211,14 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             location.reload();
                         } else {
                             alert(response.message || "Delete failed.");
                         }
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         alert("Error deleting user.");
                     }
                 });
@@ -196,8 +240,8 @@
 
         }
 
-        $(document).ready(function () {
-            $("#userForm").on('submit', function (e) {
+        $(document).ready(function() {
+            $("#userForm").on('submit', function(e) {
                 e.preventDefault();
                 let $form = $("#userForm");
                 // Serialize the form as an array and log it
@@ -213,7 +257,7 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             // Redirect to dashboard or wherever
                             location.reload();
@@ -221,7 +265,7 @@
                             const errors = response?.errors;
 
 
-                            Object.keys(errors).forEach(function (key) {
+                            Object.keys(errors).forEach(function(key) {
                                 var input = $form.find('[id="' + key + '"]');
                                 if (input.length) {
                                     input.after(

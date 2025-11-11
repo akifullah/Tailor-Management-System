@@ -10,9 +10,36 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['brand', 'category', 'supplier'])->get();
+        // Handle searching based on type/value from the request
+        $query = Product::with(['brand', 'category', 'supplier']);
+
+        $type = $request->input('type');
+        $value = $request->input('value');
+        
+        if ($type && $value !== null && $value !== '') {
+            // Allow searching by title, id, brand, and supplier
+            if (in_array($type, ['title', 'id', 'brand', 'supplier'])) {
+                if ($type === 'id') {
+                    $query->where('id', $value);
+                } elseif ($type === 'brand') {
+                    // Search by brand name (joined)
+                    $query->whereHas('brand', function($q) use ($value) {
+                        $q->where('name', 'like', '%' . $value . '%');
+                    });
+                } elseif ($type === 'supplier') {
+                    // Search by supplier name (joined)
+                    $query->whereHas('supplier', function($q) use ($value) {
+                        $q->where('name', 'like', '%' . $value . '%');
+                    });
+                } else {
+                    $query->where($type, 'like', '%' . $value . '%');
+                }
+            }
+        }
+
+        $products = $query->get();
         return view('admin.products.index', compact('products'));
     }
 

@@ -31,6 +31,10 @@
                     <h5>Customer Informations</h5>
                     <div class="row mt-3">
                         <div class="col-md-3">
+                            <p><strong>Old Id: </strong>#{{ $customer->customer_id }}</p>
+                            <p><strong>Id: </strong> #{{ $customer->id }}</p>
+                        </div>
+                        <div class="col-md-3">
                             <p><strong>Name: </strong> {{ $customer->name }}</p>
                         </div>
                         <div class="col-md-3">
@@ -80,9 +84,9 @@
                                 {{-- Nested measurement data display --}}
                                 @if(is_array($measurement->data) || is_object($measurement->data))
                                     @foreach ($measurement->data as $groupKey => $fields)
-                                        <h6 class="mt-3 mb-1 text-primary text-capitalize" style="font-weight: 700;">
+                                        <h4 class="mt-3 mb-1  text-capitalize" style="font-weight: 700;">
                                             {{ str_replace('_', ' ', $groupKey) }}
-                                        </h6>
+                                        </h4>
                                         <table class="table table-bordered table-striped mb-2">
                                             <thead>
                                                 <tr>

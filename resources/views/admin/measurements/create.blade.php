@@ -2,46 +2,6 @@
 
 
 @section('content')
-    {{-- <style>
-        .select2-container--default .select2-selection--single {
-            background-color: #2b2b2b;
-            border: 1px solid #444;
-            color: #fff;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #fff;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__arrow b {
-            border-color: #fff transparent transparent transparent;
-        }
-
-        .select2-dropdown {
-            background-color: #2b2b2b;
-            border-color: #444;
-            color: #fff;
-        }
-
-        .select2-results__option--highlighted {
-            background-color: #555 !important;
-            color: #fff !important;
-        }
-
-        body.dark .select2-container--default .select2-selection--single {
-            background-color: #1e1e1e;
-            border-color: #333;
-            color: #f1f1f1;
-        }
-
-        body.dark .select2-dropdown {
-            background-color: #1e1e1e;
-            color: #f1f1f1;
-        }
-    </style> --}}
-
-    <!-- Start Content-->
-
     <div class="container-fluid">
 
         <div class="py-3 d-flex align-items-center justify-content-between">
@@ -50,7 +10,7 @@
             </div>
 
             {{-- <button data-bs-toggle="modal" data-bs-target='#userModal' class="btn btn-primary btn-sm"
-                onclick="handleCreateCustomer()">Add Measurements</button> --}}
+            onclick="handleCreateCustomer()">Add Measurements</button> --}}
 
         </div>
 
@@ -105,11 +65,11 @@
                                 <div class="col-md-3">
                                     <label>Type</label>
                                     {{-- <select id="type" name="type" class="form-select text-capitalize">
-                                        <option value="">Select Type</option>
-                                        @foreach ($types as $type)
-                                            <option value="{{ $type->name }}">{{ str_replace('_', ' ', $type->name) }}</option>
-                                        @endforeach
-                                    </select> --}}
+                                    <option value="">Select Type</option>
+                                    @foreach ($types as $type)
+                                        <option value="{{ $type->name }}">{{ str_replace('_', ' ', $type->name) }}</option>
+                                    @endforeach
+                                </select> --}}
                                     <select id="type" name="type" class="form-select">
                                         <option value="">Select Type</option>
                                         <option value="pant">Pant</option>
@@ -138,158 +98,158 @@
 
                         </div>
                         {{-- <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <label>Customer</label>
-                                    <select name="customer_id" class="form-select" required>
-                                        <!-- populate from customers -->
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>Type</label>
-                                    <select name="type" class="form-select" required>
-                                        <option value="pant">Pant</option>
-                                        <option value="shirt">Shirt</option>
-                                        <option value="kameez">Kameez</option>
-                                        <option value="shalwar">Shalwar</option>
-                                        <option value="coat">Coat</option>
-                                        <option value="waistcoat">Waistcoat</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>Fit</label>
-                                    <select name="fit" class="form-select">
-                                        <option value="">-- Select --</option>
-                                        <option value="Slim">Slim</option>
-                                        <option value="Regular">Regular</option>
-                                        <option value="Loose">Loose</option>
-                                    </select>
-                                </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>Customer</label>
+                                <select name="customer_id" class="form-select" required>
+                                    <!-- populate from customers -->
+                                </select>
                             </div>
-
-
-                            <div class="row mt-3">
-                                @foreach (['length', 'chest', 'waist', 'hip', 'shoulder', 'sleeve', 'cuff', 'bottom'] as $field)
-                                <div class="col-md-3 mb-3">
-                                    <label>{{ ucfirst($field) }}</label>
-                                    <input type="number" step="0.01" name="{{ $field }}" class="form-control"
-                                        placeholder="in inches">
-                                </div>
-                                @endforeach
+                            <div class="col-md-3">
+                                <label>Type</label>
+                                <select name="type" class="form-select" required>
+                                    <option value="pant">Pant</option>
+                                    <option value="shirt">Shirt</option>
+                                    <option value="kameez">Kameez</option>
+                                    <option value="shalwar">Shalwar</option>
+                                    <option value="coat">Coat</option>
+                                    <option value="waistcoat">Waistcoat</option>
+                                </select>
                             </div>
-
-                            <div class="row mt-3">
-                                @foreach (['daman', 'patae', 'ban', 'stitching', 'asteen', 'btn_style', 'chok', 'style'] as $field)
-                                <div class="col-md-3 mb-3">
-                                    <label>{{ ucfirst($field) }}</label>
-                                    <input type="text" name="{{ $field }}" class="form-control">
-                                </div>
-                                @endforeach
+                            <div class="col-md-3">
+                                <label>Fit</label>
+                                <select name="fit" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option value="Slim">Slim</option>
+                                    <option value="Regular">Regular</option>
+                                    <option value="Loose">Loose</option>
+                                </select>
                             </div>
+                        </div>
 
-                            <div class="row mt-3">
-                                <div class="col-md-3">
-                                    <label>Seat</label>
-                                    <input type="number" step="0.01" name="seat" class="form-control">
-                                </div>
-                                <div class="col-md-3">
-                                    <label>Pocket Type</label>
-                                    <select name="pocket_type" class="form-select">
-                                        <option value="">-- Select --</option>
-                                        <option value="Cross">Cross</option>
-                                        <option value="Straight">Straight</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>Shalwar Type</label>
-                                    <select name="shalwar_type" class="form-select">
-                                        <option value="">-- Select --</option>
-                                        <option value="Kundo wala">Kundo wala</option>
-                                        <option value="Bagair kundo wala">Bagair kundo wala</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>Shalwar Asin</label>
-                                    <input type="number" step="0.01" name="shalwar_asin" class="form-control">
-                                </div>
-                                <div class="col-md-3 mt-3">
-                                    <label>Shalwar Width</label>
-                                    <input type="number" step="0.01" name="shalwar_width" class="form-control">
-                                </div>
+
+                        <div class="row mt-3">
+                            @foreach (['length', 'chest', 'waist', 'hip', 'shoulder', 'sleeve', 'cuff', 'bottom'] as $field)
+                            <div class="col-md-3 mb-3">
+                                <label>{{ ucfirst($field) }}</label>
+                                <input type="number" step="0.01" name="{{ $field }}" class="form-control"
+                                    placeholder="in inches">
                             </div>
+                            @endforeach
+                        </div>
 
-
-
-
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <label>Collar</label>
-                                    <select name="collar" class="form-select">
-                                        <option value="">-- Select --</option>
-                                        <option value="Spread">Spread</option>
-                                        <option value="Button-down">Button-down</option>
-                                        <option value="Mandarin">Mandarin</option>
-                                        <option value="Kabali">Kabali</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label>Neck Depth</label>
-                                    <input type="number" step="0.01" name="neck_depth" class="form-control">
-                                </div>
+                        <div class="row mt-3">
+                            @foreach (['daman', 'patae', 'ban', 'stitching', 'asteen', 'btn_style', 'chok', 'style'] as $field)
+                            <div class="col-md-3 mb-3">
+                                <label>{{ ucfirst($field) }}</label>
+                                <input type="text" name="{{ $field }}" class="form-control">
                             </div>
-                            <div class="row mt-3">
-                                <div class="col-md-4">
-                                    <label>Half Back</label>
-                                    <input type="number" step="0.01" name="half_back" class="form-control">
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Fit Type</label>
-                                    <input type="text" name="fit_type" class="form-control" placeholder="e.g. coat fit">
-                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <label>Seat</label>
+                                <input type="number" step="0.01" name="seat" class="form-control">
                             </div>
-
-
-                            <div class="row mt-3">
-                                <div class="col-md-4">
-                                    <label>Buttons</label>
-                                    <input type="number" name="buttons" class="form-control">
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Pocket Style</label>
-                                    <select name="pocket_style" class="form-select">
-                                        <option value="">-- Select --</option>
-                                        <option value="Cross">Cross</option>
-                                        <option value="Straight">Straight</option>
-                                        <option value="Side">Side</option>
-                                        <option value="Front">Front</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Pocket Count</label>
-                                    <select name="pocket_count" class="form-select">
-                                        <option value="">-- Select --</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                    </select>
-                                </div>
+                            <div class="col-md-3">
+                                <label>Pocket Type</label>
+                                <select name="pocket_type" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option value="Cross">Cross</option>
+                                    <option value="Straight">Straight</option>
+                                </select>
                             </div>
-
-
-
-                            <div class="mt-4 text-end">
-                                <button type="submit" class="btn btn-primary">Save</button>
+                            <div class="col-md-3">
+                                <label>Shalwar Type</label>
+                                <select name="shalwar_type" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option value="Kundo wala">Kundo wala</option>
+                                    <option value="Bagair kundo wala">Bagair kundo wala</option>
+                                </select>
                             </div>
+                            <div class="col-md-3">
+                                <label>Shalwar Asin</label>
+                                <input type="number" step="0.01" name="shalwar_asin" class="form-control">
+                            </div>
+                            <div class="col-md-3 mt-3">
+                                <label>Shalwar Width</label>
+                                <input type="number" step="0.01" name="shalwar_width" class="form-control">
+                            </div>
+                        </div>
 
 
-                        </div> --}}
+
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Collar</label>
+                                <select name="collar" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option value="Spread">Spread</option>
+                                    <option value="Button-down">Button-down</option>
+                                    <option value="Mandarin">Mandarin</option>
+                                    <option value="Kabali">Kabali</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Neck Depth</label>
+                                <input type="number" step="0.01" name="neck_depth" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <label>Half Back</label>
+                                <input type="number" step="0.01" name="half_back" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Fit Type</label>
+                                <input type="text" name="fit_type" class="form-control" placeholder="e.g. coat fit">
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <label>Buttons</label>
+                                <input type="number" name="buttons" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Pocket Style</label>
+                                <select name="pocket_style" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option value="Cross">Cross</option>
+                                    <option value="Straight">Straight</option>
+                                    <option value="Side">Side</option>
+                                    <option value="Front">Front</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Pocket Count</label>
+                                <select name="pocket_count" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+
+                        <div class="mt-4 text-end">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+
+
+                    </div> --}}
                     </div>
                 </form>
             </div>
         </div>
 
-    </div> <!-- container-fluid -->
-@endsection
+    </div>
+@endsection()
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
@@ -955,8 +915,12 @@
         };
 
         options["kameez_shalwar"] = {
-            kameez: {...options?.kameez?.kameez},
-            shalwar: {...options?.shalwar?.shalwar},
+            kameez: {
+                ...options?.kameez?.kameez
+            },
+            shalwar: {
+                ...options?.shalwar?.shalwar
+            },
         }
 
 

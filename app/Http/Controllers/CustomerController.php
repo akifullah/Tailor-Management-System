@@ -13,11 +13,26 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data["customers"] = Cache::remember("customers", 60 * 1, function () {
-            return Customer::get();
-        });
+        // Handle searching based on type/value from the request
+        $query = Customer::query();
+
+        $type = $request->input('type');
+        $value = $request->input('value');
+
+        if ($type && $value !== null && $value !== '') {
+            // Only apply if both type and value are given
+            if (in_array($type, ['name', 'customer_id', 'id', 'phone', 'email'])) {
+                if ($type === 'id' || $type === 'customer_id') {
+                    $query->where($type, $value);
+                } else {
+                    $query->where($type, 'like', '%' . $value . '%');
+                }
+            }
+        }
+
+        $data['customers'] = $query->get();
         // return $data;
         return view("admin.customers.index", $data);
     }
@@ -35,12 +50,14 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+
         $validate = Validator::make($request->all(), [
             "name" => "required",
             "email" => "nullable|email",
-            "phone" => "required"
+            "phone" => "required",
+            "customer_id"=> "nullable"
         ]);
-
+        
         if ($validate->fails()) {
             return response()->json([
                 "success" => false,
@@ -48,7 +65,7 @@ class CustomerController extends Controller
                 "errors" => $validate->errors()
             ]);
         }
-        $customerData = $request->only(['name', 'email', 'address', 'phone']);
+        $customerData = $request->only(['name', 'email', 'address', 'phone', "customer_id"]);
 
         $customer = Customer::updateOrCreate(
             ['id' => $request->id],

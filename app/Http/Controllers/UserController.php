@@ -11,12 +11,29 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data["users"] = User::get();
-        // return $data;
+        // Handle searching based on type/value from the request
+        $query = User::query();
+
+        $type = $request->input('type');
+        $value = $request->input('value');
+
+        if ($type && $value !== null && $value !== '') {
+            // Only apply if both type and value are given
+            if (in_array($type, ['name', 'id', 'phone', 'email'])) {
+                if ($type === 'id') {
+                    $query->where($type, $value);
+                } else {
+                    $query->where($type, 'like', '%' . $value . '%');
+                }
+            }
+        }
+
+        $data['users'] = $query->get();
         return view("admin.users.index", $data);
     }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -31,6 +48,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             "name" => "required",
             "email" => "required|email|unique:users,email" . ($request->id ? ',' . $request->id : ''),
@@ -46,7 +64,7 @@ class UserController extends Controller
         }
 
         // Only take valid fields
-        $userData = $request->only(['name', 'email']);
+        $userData = $request->only(['name', 'email', "phone", "address"]);
 
         // Handle password
         if ($request->filled('password')) {

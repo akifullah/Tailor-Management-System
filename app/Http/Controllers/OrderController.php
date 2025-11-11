@@ -13,9 +13,27 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['customer', 'items.product', 'items', 'payments'])->latest()->get();
+        $query = Order::with(['customer', 'items.product', 'items', 'payments']);
+
+        $type = $request->input('type');
+        $value = $request->input('value');
+
+        // Search by order_number or customer (name or id)
+        if ($type && $value !== null && $value !== '') {
+            if ($type === 'order_number') {
+                $query->where('order_number', 'like', '%' . $value . '%');
+            } elseif ($type === 'customer') {
+                $query->whereHas('customer', function ($q) use ($value) {
+                    $q->where('name', 'like', '%' . $value . '%')
+                      ->orWhere('id', $value);
+                });
+            }
+        }
+
+        $orders = $query->latest()->get();
+
         return view('admin.orders.index', compact('orders'));
     }
 

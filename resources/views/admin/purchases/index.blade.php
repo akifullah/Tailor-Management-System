@@ -17,6 +17,33 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
+                    <div class="mb-3">
+                        <form id="purchaseSearchForm" method="GET" action="">
+                            <div class="row g-2 justify-content-end align-items-end">
+                                <div class="col-md-2">
+                                    <label for="search_type" class="form-label">Search By</label>
+                                    <select name="type" id="search_type" class="form-select" required>
+                                        <option value="">-- Select Type --</option>
+                                        <option value="product" {{ request('type') == 'product' ? 'selected' : '' }}>Product</option>
+                                        <option value="supplier" {{ request('type') == 'supplier' ? 'selected' : '' }}>Supplier</option>
+                                        <option value="reference_number" {{ request('type') == 'reference_number' ? 'selected' : '' }}>Reference #</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="search_value" class="form-label">Input Value</label>
+                                    <input type="text" required name="value" id="search_value" class="form-control"
+                                        value="{{ request('value') }}" placeholder="Enter value">
+                                </div>
+                                <div class="col-md-1 align-self-end">
+                                    <div class="d-flex gap-1">
+                                        <button type="submit" class="btn px-2 btn-primary">Search</button>
+                                        <a href="{{ route(Route::currentRouteName()) }}"
+                                            class="btn px-2 btn-secondary">Reset</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                     <table class="table table-striped">
                         <thead>
                         <tr>

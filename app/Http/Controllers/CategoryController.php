@@ -13,9 +13,21 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::all();
+        $query = Category::query();
+        $type = $request->input('type');
+        $value = $request->input('value');
+
+        if ($type && $value !== null && $value !== '') {
+            if ($type === 'name') {
+                $query->where('name', 'like', '%' . $value . '%');
+            } elseif ($type === 'id') {
+                $query->where('id', $value);
+            }
+        }
+
+        $categories = $query->get();
         return view('admin.categories.index', compact('categories'));
     }
 

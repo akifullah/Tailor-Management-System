@@ -29,33 +29,74 @@
                 <div class="card">
 
                     <div class="card-body">
+
+                        <div class="mb-3">
+                            <form id="categorySearchForm" method="GET" action="">
+                                <div class="row g-2 justify-content-end align-items-end">
+                                    <div class="col-md-2">
+                                        <label for="search_type" class="form-label">Search By</label>
+                                        <select name="type" id="search_type" class="form-select" required>
+                                            <option value="">-- Select Type --</option>
+                                            <option value="name" {{ request('type') == 'name' ? 'selected' : '' }}>Name
+                                            </option>
+                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>ID
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="search_value" class="form-label">Input Value</label>
+                                        <input type="text" required name="value" id="search_value" class="form-control"
+                                            value="{{ request('value') }}" placeholder="Enter value">
+                                    </div>
+                                    <div class="col-md-1 align-self-end">
+                                        <div class="d-flex gap-1">
+                                            <button type="submit" class="btn px-2 btn-primary">Search</button>
+                                            <a href="{{ route(Route::currentRouteName()) }}"
+                                                class="btn px-2 btn-secondary">Reset</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+
                         <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
+                                    <th>#ID</th>
                                     <th>Name</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($categories as $category)
+                                @if ($categories->isNotEmpty())
+                                    @foreach ($categories as $category)
+                                        <tr>
+                                            <td style="width: 80px">{{ $category->id }}</td>
+                                            <td>
+                                                <p class="d-inline-block align-middle mb-0">
+                                                    <span>{{ $category->name }}</span>
+                                                </p>
+                                            </td>
+                                            <td style="width: 150px">
+                                                <button onclick="handleEdit({{ $category }})"
+                                                    class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Edit">
+                                                    <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                                </button>
+                                                <button onclick="handleDelete({{ $category->id }})"
+                                                    class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Delete">
+                                                    <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
-                                        <td>
-                                            <p class="d-inline-block align-middle mb-0">
-                                                <span>{{ $category->name }}</span>
-                                            </p>
-                                        </td>
-                                        <td style="width: 150px">
-                                            <button onclick="handleEdit({{ $category }})" class="btn btn-sm bg-primary-subtle me-1"
-                                                data-bs-toggle="tooltip" data-bs-original-title="Edit">
-                                                <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
-                                            </button>
-                                            <button onclick="handleDelete({{ $category->id }})" class="btn btn-sm bg-danger-subtle"
-                                                data-bs-toggle="tooltip" data-bs-original-title="Delete">
-                                                <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                            </button>
-                                        </td>
+                                        <td colspan="2" class="text-center">No categories found.</td>
                                     </tr>
-                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -132,14 +173,14 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             location.reload();
                         } else {
                             alert(response.message || "Delete failed.");
                         }
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         alert("Error deleting user.");
                     }
                 });
@@ -155,8 +196,8 @@
         }
 
 
-        $(document).ready(function () {
-            $("#createForm").on('submit', function (e) {
+        $(document).ready(function() {
+            $("#createForm").on('submit', function(e) {
                 e.preventDefault();
                 let $form = $("#createForm");
                 var $btn = $form.find("button[type=submit]");
@@ -174,7 +215,7 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             // Redirect to dashboard or wherever
                             location.reload();
@@ -182,7 +223,7 @@
                             const errors = response?.errors;
 
 
-                            Object.keys(errors).forEach(function (key) {
+                            Object.keys(errors).forEach(function(key) {
                                 var input = $form.find('[id="' + key + '"]');
                                 if (input.length) {
                                     input.after(

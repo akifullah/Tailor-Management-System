@@ -19,12 +19,25 @@ class BrandController extends Controller
     }
 
 
-    public function index()
+    public function index(Request $request)
     {
-        $brands = $this->brandService->getAll();
+        $query = Brand::query();
+        $type = $request->input('type');
+        $value = $request->input('value');
+
+        if ($type && $value !== null && $value !== '') {
+            if ($type === 'name') {
+                $query->where('name', 'like', '%' . $value . '%');
+            } elseif ($type === 'id') {
+                $query->where('id', $value);
+            }
+        }
+
+        $brands = $query->get();
 
         return view('admin.brands.index', compact('brands'));
     }
+
 
     public function store(Request $request)
     {

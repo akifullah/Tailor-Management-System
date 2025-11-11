@@ -11,12 +11,37 @@ use Illuminate\Support\Facades\DB;
 
 class PurchaseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // List of all purchases (inventory tracking of type 'purchase')
-        $purchases = InventoryTracking::with(['product', 'product.supplier', 'supplier', 'payments'])
-            ->where('type', 'purchase')->latest()->get();
-            // return $purchases;
+        $query = InventoryTracking::with(['product', 'product.supplier', 'supplier', 'payments'])
+            ->where('type', 'purchase');
+
+        // Filter by search type and value (product, supplier, reference_number)
+        $type = $request->input('type');
+        $value = $request->input('value');
+
+        if ($type && $value !== null && $value !== '') {
+            if ($type === 'product') {
+                // Allow searching by product title or ID
+                $query->whereHas('product', function($q) use ($value) {
+                    $q->where('title', 'like', "%{$value}%")
+                      ->orWhere('id', $value);
+                });
+            } elseif ($type === 'supplier') {
+                // By supplier name or ID
+                $query->whereHas('supplier', function($q) use ($value) {
+                    $q->where('name', 'like', "%{$value}%")
+                      ->orWhere('id', $value);
+                });
+            } elseif ($type === 'reference_number') {
+                // By reference number
+                $query->where('reference_number', 'like', "%{$value}%");
+            }
+            // Add more search types if needed
+        }
+
+        $purchases = $query->latest()->get();
+
         return view('admin.purchases.index', compact('purchases'));
     }
 

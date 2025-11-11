@@ -201,7 +201,7 @@
             $('#partial_amount_div').hide();
             $('#partial_amount').prop('required', false);
 
-            $('#payment_status').on('change', function () {
+            $('#payment_status').on('change', function() {
                 if ($(this).val() === 'partial') {
                     $('#partial_amount_div').show();
 
@@ -209,14 +209,14 @@
                     $('#partial_amount').prop('required', false);
 
                     // Attach focus event (only once)
-                    $('#partial_amount').off('focus.addreq').on('focus.addreq', function () {
+                    $('#partial_amount').off('focus.addreq').on('focus.addreq', function() {
                         if ($('#payment_status').val() === 'partial') {
                             $(this).prop('required', true);
                         }
                     });
 
                     // Remove invalid flag on focus (if user was blocked because "is not focusable")
-                    $('#partial_amount').on('focus', function () {
+                    $('#partial_amount').on('focus', function() {
                         this.setCustomValidity('');
                     });
 
@@ -484,7 +484,8 @@
             }
 
             // Extra: Focus partial amount if it's partial and missing, to avoid "not focusable" browser error
-            if ($('#payment_status').val() === 'partial' && ($('#partial_amount_div').is(':hidden') || !$('#partial_amount')[0].checkValidity())) {
+            if ($('#payment_status').val() === 'partial' && ($('#partial_amount_div').is(':hidden') || !$(
+                    '#partial_amount')[0].checkValidity())) {
                 $('#partial_amount_div').show();
                 setTimeout(function() {
                     $('#partial_amount').focus();
