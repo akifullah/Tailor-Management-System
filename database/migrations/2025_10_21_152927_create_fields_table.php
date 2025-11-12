@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('type_id')->constrained('types')->onDelete('restrict');
             $table->string('label');
-            $table->string('name')->unique();
+            $table->string('name');
             $table->string('input_type')->default('input');
             $table->json('options')->nullable();
-
+            $table->softDeletes();
             $table->timestamps();
         });
     }

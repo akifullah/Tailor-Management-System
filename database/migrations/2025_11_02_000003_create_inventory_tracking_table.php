@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('balance_meters', 10, 2); // balance after this transaction
             $table->text('notes')->nullable();
             $table->string('reference_number')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

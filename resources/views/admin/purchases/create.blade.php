@@ -72,7 +72,7 @@
             <h5 class="mb-3">Payment Information</h5>
 
             <div class="row mb-3">
-                <div class="col-md-3">
+                {{-- <div class="col-md-3">
                     <label class="form-label">Payment Method *</label>
                     <select name="payment_method" id="payment_method" class="form-control" required>
                         <option value="cash">Cash</option>
@@ -80,7 +80,7 @@
                         <option value="bank_transfer">Bank Transfer</option>
                         <option value="cheque">Cheque</option>
                     </select>
-                </div>
+                </div> --}}
 
                 <div class="col-md-3">
                     <label class="form-label">Payment Status</label>
@@ -98,7 +98,7 @@
                 </div>
                 <div class="col-md-3" id="payment_method_div" style="display: none;">
                     <label>Payment Method <span class="text-danger">*</span></label>
-                    <select name="payment_method" id="payment_method" class="form-select">
+                    <select name="payment_method" id="payment_method_duplicate" class="form-select">
                         <option value="">Select Method</option>
                         <option value="cash">Cash</option>
                         <option value="online">Online</option>
@@ -138,12 +138,19 @@
 
 @section('js')
     <script>
+        // Explanation:
+        // The infinite recursion/stack overflow occurred because calculateTotal calls updatePaymentFields, 
+        // and updatePaymentFields also calls calculateTotal. 
+        // This mutual recursion never terminates.
+        // 
+        // The fix: calculateTotal should ONLY do calculation & DOM update, not call updatePaymentFields.
+        // ONLY input listeners and updatePaymentFields should call calculateTotal (never vice-versa).
+
         function calculateTotal() {
             const quantity = parseFloat(document.getElementById('quantity_meters').value) || 0;
             const price = parseFloat(document.getElementById('price_per_meter').value) || 0;
             const total = quantity * price;
             document.getElementById('totalAmount').textContent = 'Rs ' + total.toFixed(2);
-            updatePaymentFields();
             return total;
         }
 
@@ -153,43 +160,49 @@
             const paidAmountDiv = document.getElementById('paid_amount_div');
             const paymentMethodDiv = document.getElementById('payment_method_div');
             const paymentDateDiv = document.getElementById('payment_date_div');
-            const personReferenceDiv = document.getElementById('person_reference_div');
-            const paymentNotesDiv = document.getElementById('payment_notes_div');
+            // These are commented out in the UI but left for future use 
+            // const personReferenceDiv = document.getElementById('person_reference_div');
+            // const paymentNotesDiv = document.getElementById('payment_notes_div');
             const paidAmountInput = document.getElementById('paid_amount');
-            const paymentMethodInput = document.getElementById('payment_method');
+            // For the duplicate payment_method select (when payment info shown):
+            const paymentMethodInput = document.getElementById('payment_method_duplicate');
 
             if (paymentStatus === 'full') {
-                paidAmountDiv.style.display = 'none';
+                paidAmountDiv.style.display = 'block';
                 paidAmountInput.value = total.toFixed(2);
                 paidAmountInput.removeAttribute('required');
+                paidAmountInput.readOnly = true;
                 paidAmountInput.removeAttribute('max');
                 paymentMethodDiv.style.display = 'block';
                 paymentMethodInput.setAttribute('required', 'required');
                 paymentDateDiv.style.display = 'block';
                 document.getElementById('payment_date').setAttribute('required', 'required');
-                personReferenceDiv.style.display = 'block';
-                paymentNotesDiv.style.display = 'block';
+                // document.getElementById('person_reference_div').style.display = 'block';
+                // document.getElementById('payment_notes_div').style.display = 'block';
                 document.getElementById('remaining_amount_display').textContent = '0.00';
             } else if (paymentStatus === 'partial') {
+                paidAmountInput.value = ""
+                paidAmountInput.readOnly = false;
                 paidAmountDiv.style.display = 'block';
                 paidAmountInput.setAttribute('required', 'required');
                 paidAmountInput.setAttribute('max', total.toFixed(2));
                 if (!paidAmountInput.value || parseFloat(paidAmountInput.value) > total) {
-                    paidAmountInput.value = total > 0 ? total.toFixed(2) : '0.00';
+                    paidAmountInput.value = '';
                 }
                 paymentMethodDiv.style.display = 'block';
                 paymentMethodInput.setAttribute('required', 'required');
                 paymentDateDiv.style.display = 'block';
                 document.getElementById('payment_date').setAttribute('required', 'required');
-                personReferenceDiv.style.display = 'block';
-                paymentNotesDiv.style.display = 'block';
+                // document.getElementById('person_reference_div').style.display = 'block';
+                // document.getElementById('payment_notes_div').style.display = 'block';
                 updateRemainingAmount();
             } else {
+                paidAmountInput.readOnly = false;
                 paidAmountDiv.style.display = 'none';
                 paymentMethodDiv.style.display = 'none';
                 paymentDateDiv.style.display = 'none';
-                personReferenceDiv.style.display = 'none';
-                paymentNotesDiv.style.display = 'none';
+                // document.getElementById('person_reference_div').style.display = 'none';
+                // document.getElementById('payment_notes_div').style.display = 'none';
                 paidAmountInput.value = '';
                 paidAmountInput.removeAttribute('required');
                 paymentMethodInput.removeAttribute('required');
@@ -207,6 +220,7 @@
             // Validate paid amount doesn't exceed total
             const paidAmountInput = document.getElementById('paid_amount');
             if (paid > total) {
+                paidAmountInput.value = total;
                 paidAmountInput.setCustomValidity('Paid amount cannot exceed total amount');
             } else {
                 paidAmountInput.setCustomValidity('');
@@ -214,12 +228,19 @@
         }
 
         // Event listeners
-        document.getElementById('quantity_meters').addEventListener('input', calculateTotal);
-        document.getElementById('price_per_meter').addEventListener('input', calculateTotal);
+        document.getElementById('quantity_meters').addEventListener('input', function() {
+            calculateTotal();
+            updatePaymentFields();
+        });
+        document.getElementById('price_per_meter').addEventListener('input', function() {
+            calculateTotal();
+            updatePaymentFields();
+        });
         document.getElementById('payment_status').addEventListener('change', updatePaymentFields);
         document.getElementById('paid_amount').addEventListener('input', updateRemainingAmount);
 
-        // Calculate total on page load
+        // Calculate total and set payment fields on page load
         calculateTotal();
+        updatePaymentFields();
     </script>
 @endsection

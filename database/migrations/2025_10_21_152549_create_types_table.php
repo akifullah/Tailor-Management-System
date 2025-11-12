@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name_prefix'); // e.g. shirt_
             $table->boolean('is_combined')->default(false);
             $table->json('combine')->nullable(); // store ["shirt","pant"]
+            $table->softDeletes();
             $table->timestamps();
         });
     }

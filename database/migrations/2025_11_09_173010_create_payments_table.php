@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('person_reference')->nullable(); // e.g., "John Doe - INV-123"
             $table->dateTime('payment_date');
             $table->text('notes')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

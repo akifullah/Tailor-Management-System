@@ -18,7 +18,8 @@ return new class extends Migration
             $table->decimal('sell_price', 10, 2);
             $table->decimal('quantity_meters', 10, 2);
             $table->decimal('total_price', 10, 2);
-            $table->json("measurement")->nullable();
+            $table->enum('status', ['pending', 'progress', 'completed'])->default('pending');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
