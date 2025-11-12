@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->nullable()->constrained()->onDelete('restrict');
+            $table->foreignId('assign_to')->nullable()->constrained('users')->onDelete('restrict');
+            $table->foreignId('assign_notes')->nullable();
             $table->text('product_name')->nullable();
             $table->json('measurement')->nullable();
             $table->boolean('is_from_inventory')->default(true);

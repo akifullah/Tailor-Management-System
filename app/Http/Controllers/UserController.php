@@ -51,6 +51,7 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             "name" => "required",
+            "worker_type" => "required",
             "email" => "required|email|unique:users,email" . ($request->id ? ',' . $request->id : ''),
             "password" => ($request->id ? "nullable" : "required") . "|min:5"
         ]);
@@ -64,7 +65,7 @@ class UserController extends Controller
         }
 
         // Only take valid fields
-        $userData = $request->only(['name', 'email', "phone", "address"]);
+        $userData = $request->only(['name', 'email', "phone", "address", "worker_type"]);
 
         // Handle password
         if ($request->filled('password')) {

@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Customer;
 use App\Models\InventoryTracking;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +28,7 @@ class OrderController extends Controller
             } elseif ($type === 'customer') {
                 $query->whereHas('customer', function ($q) use ($value) {
                     $q->where('name', 'like', '%' . $value . '%')
-                      ->orWhere('id', $value);
+                        ->orWhere('id', $value);
                 });
             }
         }
@@ -44,7 +45,9 @@ class OrderController extends Controller
         $customers = Customer::with("measurements")->get();
         $products = Product::all();
 
-        return view('admin.orders.create', compact('customers', 'products', "selectedCustomer"));
+        $workers = User::get();
+
+        return view('admin.orders.create', compact('customers', 'products', "selectedCustomer", "workers"));
     }
 
     public function store(Request $request)
@@ -67,9 +70,9 @@ class OrderController extends Controller
             'items.*.quantity_meters' => 'required|numeric',
             'items.*.measurement' => 'required',
             'items.*.product_name' => 'nullable',
-            'items.*.status' => 'nullable|in:pending,progress,completed',
+            // 'items.*.status' => 'nullable|in:pending,progress,completed',
+            'items.*.assign_to' => 'nullable',
         ]);
-
         // Validate: product_id is required only if is_from_inventory is true
         foreach ($validated['items'] as $idx => $item) {
             $isFromInventory = isset($item['is_from_inventory']) && ($item['is_from_inventory'] == '1' || $item['is_from_inventory'] === true || $item['is_from_inventory'] === 1 || $item['is_from_inventory'] == 'on');
@@ -139,7 +142,7 @@ class OrderController extends Controller
             if ($paymentAmount > 0) {
                 // Format payment_date properly - handle datetime-local format (YYYY-MM-DDTHH:mm)
                 $paymentDate = $validated['payment_date'] ?? $validated['order_date'];
-                
+
                 // Convert datetime-local format (2025-11-09T19:42) to proper datetime format
                 if (is_string($paymentDate) && str_contains($paymentDate, 'T')) {
                     // Replace T with space and ensure seconds are included
@@ -166,14 +169,14 @@ class OrderController extends Controller
                 // Update order payment status based on payments (this ensures consistency)
                 $this->updateOrderPaymentStatus($order);
             }
-
             foreach ($validated['items'] as $itemData) {
                 $isFromInventory = isset($itemData['is_from_inventory']) && ($itemData['is_from_inventory'] == '1' || $itemData['is_from_inventory'] === true || $itemData['is_from_inventory'] === 1 || $itemData['is_from_inventory'] == 'on');
-
+                $assignTo = isset($itemData['assign_to']) && $itemData['assign_to'] !== '' ? $itemData['assign_to'] : null;
                 $orderItem = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $itemData['product_id'] ?? null, // Can be null if customer brings own fabric
-                    'product_name' => $itemData['product_name'] ?? null, // Can be null if customer brings own fabric
+                    'assign_to' =>   $assignTo,
+                    'product_name' => $itemData['product_name'] ?? "lkdsajflkdsj", // Can be null if customer brings own fabric
                     'measurement' => $itemData['measurement'] ?? null, // Can be null if customer brings own fabric
                     'is_from_inventory' => $isFromInventory,
                     'sell_price' => $itemData['sell_price'],
@@ -203,6 +206,7 @@ class OrderController extends Controller
             }
 
             DB::commit();
+
             session()->flash('success', 'Order created successfully.');
             return redirect()->route('orders.index');
         } catch (\Exception $e) {

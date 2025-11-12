@@ -165,7 +165,6 @@
             } catch (err) {
                 measurements = measurementData;
             }
-
             let ms = document.createElement("select");
             ms.className = "form-select";
             ms.required = true;
@@ -212,6 +211,8 @@
                     $('#partial_amount').off('focus.addreq').on('focus.addreq', function() {
                         if ($('#payment_status').val() === 'partial') {
                             $(this).prop('required', true);
+                            const grandTotal = parseFloat($('#grandTotal').text()) || 0;
+                            $('#remaining_amount_display').text(grandTotal);
                         }
                     });
 
@@ -372,8 +373,12 @@
         }
 
         function addItemRow() {
+            // if(!$("#customer_id").val()) {
+            //     alert("Please select a customer");
+            //     return;
+            // }
             const html = `
-            <div class="row align-items-end mb-2 item-row border-bottom pb-2">
+            <div class="row align-items-end mb-2 item-row border-bottom pb-2 position-relative">
                 <div class="col-md-2">
                      <div class="form-check mb-2">
                         <input class="form-check-input customer-fabric-check" type="checkbox" name="items[${itemCount}][is_from_inventory]" value="1" id="is_from_inventory_${itemCount}" checked onchange="handleCustomerFabric(this)">
@@ -406,14 +411,7 @@
                     <label class="form-label">Total</label>
                     <input type="text" class="form-control item-total" readonly>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">Status</label>
-                    <select name="items[${itemCount}][status]" class="form-control">
-                        <option value="pending" selected>Pending</option>
-                        <option value="progress">Progress</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                </div>
+                
                 <div class="col-md-2">
                     <label class="form-label">Select Measurement</label>
                     ${(function() {
@@ -423,10 +421,18 @@
                         return ms.outerHTML;
                     })()}
                 </div>
-                <div class="col-md-1">
-                    <label class="form-label">&nbsp;</label><br>
-                    <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+
+                <div class="col-md-2">
+                    <label class="form-label">Assign to worker</label>
+                    <select required name="items[${itemCount}][assign_to]" class="form-select">
+                        <option value="" disabled selected >Assign to worker</option>
+                        @foreach ($workers as $worker)
+                            <option class="text-capitalize" value="{{ $worker->id }}">{{ $worker->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
+                
+                    <button type="button" class="btn btn-danger btn-sm remove-item position-absolute w-auto  top-0 end-0">Remove</button>
             </div>
         `;
             $('#orderItems').append(html);

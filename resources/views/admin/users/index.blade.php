@@ -73,6 +73,7 @@
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Phone</th>
+                                    <th>Worker Type</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -82,12 +83,13 @@
                                 <tr>
                                         <td>{{ $user->id }}</td>
                                         <td>
-                                            <p class="d-inline-block align-middle mb-0">
+                                            <p class="d-inline-block align-middle mb-0 text-capitalize">
                                                 <span>{{ $user->name }}</span>
                                             </p>
                                         </td>
-                                        <td>{{ $user->email }}</td>
-                                        <td>{{ $user->phone }}</td>
+                                        <td >{{ $user->email }}</td>
+                                        <td class="text-capitalize">{{ $user->phone }}</td>
+                                        <td class="text-capitalize">{{ $user->worker_type }}</td>
                                         <td>
                                             <button onclick="handleEdit({{ $user }})"
                                                 class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
@@ -147,6 +149,18 @@
                                         placeholder="Enter your email">
                                 </div><!--end col-->
                                 <div class="col-xxl-6">
+                                    <label for="worker_type" class="form-label">Worker Type</label>
+                                    <select class="form-select" id="worker_type" name="worker_type" required>
+                                        <option disabled selected>Select Worker Type</option>
+                                        <option value="cutter">Cutter</option>
+                                        <option value="wiscot maker">Wiscot Maker</option>
+                                        <option value="suit maker">Suit Maker</option>
+                                        <option value="coat maker">Coat Maker</option>
+                                    </select>
+                                </div>
+                                
+                                
+                                <div class="col-xxl-6">
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" class="form-control" id="password" name="password"
                                         value="" placeholder="Enter password" autocomplete="off">
@@ -184,12 +198,14 @@
                 id,
                 name,
                 phone,
-                email
+                email,
+                worker_type
             } = user;
             setValById("id", id)
             setValById("name", name)
             setValById("email", email)
             setValById("phone", phone)
+            setValById("worker_type", worker_type)
 
             $("#password").removeAttr("required");
         }
@@ -220,9 +236,10 @@
     <script>
         function handleCreateUser() {
             setValById("id", "")
-            setValById("name", "name")
-            setValById("email", "email")
-            setValById("phone", "phone")
+            setValById("name", "")
+            setValById("email", "")
+            setValById("phone", "")
+            setValById("worker_type", "")
             setValById("password", "")
         }
 
