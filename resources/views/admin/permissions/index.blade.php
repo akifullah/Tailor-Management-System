@@ -1,0 +1,242 @@
+@extends('admin.layouts.app')
+
+@section('content')
+    <!-- Start Content-->
+    <div class="container-fluid">
+
+        <div class="py-3 d-flex align-items-center justify-content-between">
+            <div class="flex-grow-1">
+                <h4 class="fs-18 fw-semibold m-0">Permissions</h4>
+            </div>
+
+            <button data-bs-toggle="modal" data-bs-target='#permissionModal' class="btn btn-primary btn-sm"
+                onclick="handleCreatePermission()">Add Permission</button>
+        </div>
+
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        <!-- Button Datatable -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <form id="searchForm" method="GET" action="">
+                                <div class="row g-2 justify-content-end align-items-end">
+                                    <div class="col-md-2">
+                                        <label for="search_type" class="form-label">Search By</label>
+                                        <select name="type" id="search_type" class="form-select" required>
+                                            <option value="">-- Select Type --</option>
+                                            <option value="name" {{ request('type') == 'name' ? 'selected' : '' }}>Name</option>
+                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>ID</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="search_value" class="form-label">Input Value</label>
+                                        <input type="text" required name="value" id="search_value" class="form-control"
+                                            value="{{ request('value') }}" placeholder="Enter value">
+                                    </div>
+                                    <div class="col-md-1 align-self-end">
+                                        <div class="d-flex gap-1">
+                                            <button type="submit" class="btn px-2 btn-primary">Search</button>
+                                            <a href="{{ route(Route::currentRouteName()) }}"
+                                                class="btn px-2 btn-secondary">Reset</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap">
+                            <thead>
+                                <tr>
+                                    <th>#ID</th>
+                                    <th>Name</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if($permissions->isNotEmpty())
+                                @foreach ($permissions as $permission)
+                                <tr>
+                                    <td>{{ $permission->id }}</td>
+                                    <td>
+                                        <p class="d-inline-block align-middle mb-0">
+                                            <span>{{ $permission->name }}</span>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <button onclick="handleEdit({{ $permission->id }})"
+                                            class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
+                                            data-bs-original-title="Edit">
+                                            <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                        </button>
+                                        <button onclick="handleDelete({{ $permission->id }})"
+                                            class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                            data-bs-original-title="Delete">
+                                            <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @else
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">No permissions found.</td>
+                                </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permission Modal -->
+        <div class="modal fade" id="permissionModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="permissionModalLabel">Add Permission</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="permissionForm" autocomplete="off">
+                            <input type="hidden" name="id" id="id" autocomplete="off" value="">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div>
+                                        <label for="name" class="form-label">Permission Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="name" class="form-control" id="name"
+                                            placeholder="Enter Permission Name (e.g., create-users, edit-products)" required>
+                                        <small class="text-muted">Use lowercase with hyphens (e.g., create-users, edit-products)</small>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-light"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- container-fluid -->
+@endsection
+
+@section('js')
+    <script>
+        function setValById(id, val) {
+            $(`#${id}`).val(val);
+        }
+
+        function handleEdit(permissionId) {
+            $.ajax({
+                url: "{{ route('permissions.show', ':id') }}".replace(':id', permissionId),
+                type: 'GET',
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                },
+                success: function(response) {
+                    $('#permissionModal').modal('show');
+                    setValById("id", response.id);
+                    setValById("name", response.name);
+                },
+                error: function(xhr) {
+                    alert("Error loading permission data.");
+                }
+            });
+        }
+
+        function handleDelete(id) {
+            if (confirm("Are you sure! you want to delete this permission?")) {
+                $.ajax({
+                    url: "{{ route('permissions.destroy', ':id') }}".replace(':id', id),
+                    type: 'DELETE',
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert(response.message || "Delete failed.");
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        alert(response?.message || "Error deleting permission.");
+                    }
+                });
+            }
+        }
+
+        function handleCreatePermission() {
+            setValById("id", "");
+            setValById("name", "");
+        }
+
+        $(document).ready(function() {
+            $("#permissionForm").on('submit', function(e) {
+                e.preventDefault();
+                let $form = $("#permissionForm");
+                var $btn = $form.find("button[type=submit]");
+                $btn.prop("disabled", true);
+
+                // Remove previous errors
+                $form.find('.text-danger').remove();
+
+                $.ajax({
+                    url: "{{ route('permissions.store') }}",
+                    type: "POST",
+                    data: $form.serialize(),
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            const errors = response?.errors;
+                            if (errors) {
+                                Object.keys(errors).forEach(function(key) {
+                                    var input = $form.find('[name="' + key + '"]');
+                                    if (input.length) {
+                                        input.after(
+                                            '<div class="text-danger" style="font-size: 13px;">' +
+                                            errors[key][0] + '</div>');
+                                    }
+                                });
+                            }
+                            $btn.prop("disabled", false);
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        if (response && response.errors) {
+                            Object.keys(response.errors).forEach(function(key) {
+                                var input = $form.find('[name="' + key + '"]');
+                                if (input.length) {
+                                    input.after(
+                                        '<div class="text-danger" style="font-size: 13px;">' +
+                                        response.errors[key][0] + '</div>');
+                                }
+                            });
+                        }
+                        $btn.prop("disabled", false);
+                    }
+                });
+            });
+        });
+    </script>
+@endsection
+

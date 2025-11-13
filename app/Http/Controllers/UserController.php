@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
 {
@@ -13,6 +15,11 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        // Check permission
+        if (!auth()->user()->can('manage-users')) {
+            abort(403, 'Unauthorized action.');
+        }
+
         // Handle searching based on type/value from the request
         $query = User::query();
 
@@ -30,7 +37,9 @@ class UserController extends Controller
             }
         }
 
-        $data['users'] = $query->get();
+        $data['users'] = $query->with(['roles', 'permissions'])->get();
+        $data['roles'] = Role::all();
+        $data['permissions'] = Permission::all();
         return view("admin.users.index", $data);
     }
     
@@ -48,6 +57,13 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // Check permission
+        if (!auth()->user()->can('manage-users')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized action.',
+            ], 403);
+        }
 
         $validator = Validator::make($request->all(), [
             "name" => "required",
@@ -116,6 +132,14 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+        // Check permission
+        if (!auth()->user()->can('manage-users')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized action.',
+            ], 403);
+        }
+
         // Soft delete the user (uses Eloquent's SoftDeletes trait)
         $user = User::findOrFail($id);
         $user->delete(); // This will perform a soft delete
@@ -126,6 +150,59 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User deleted successfully.',
+        ]);
+    }
+
+    /**
+     * Assign roles and permissions to a user
+     */
+    public function assignRolesPermissions(Request $request, User $user)
+    {
+        // Check permission
+        if (!auth()->user()->can('manage-roles-permissions')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized action.',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'roles' => 'nullable|array',
+            'roles.*' => 'exists:roles,id',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ]);
+        }
+
+        // Sync roles
+        if ($request->has('roles')) {
+            $roles = Role::whereIn('id', $request->roles)->get();
+            $user->syncRoles($roles);
+        } else {
+            $user->syncRoles([]);
+        }
+
+        // Sync permissions
+        if ($request->has('permissions')) {
+            $permissions = Permission::whereIn('id', $request->permissions)->get();
+            $user->syncPermissions($permissions);
+        } else {
+            $user->syncPermissions([]);
+        }
+
+        session()->flash('success', 'Roles and permissions assigned successfully.');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Roles and permissions assigned successfully.',
+            'user' => $user->load(['roles', 'permissions']),
         ]);
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+
     public function login(Request $request)
     {
 
@@ -29,9 +30,15 @@ class AuthController extends Controller
 
         if (Auth::attempt(["email" => $request->email, "password" => $request->password])) {
             $request->session()->regenerate();
+            
+            // Get the user and determine redirect URL based on permissions
+            $user = Auth::user();
+            $redirectUrl = getFirstAccessibleRoute($user);
+            
             return response()->json([
                 "success" => true,
                 "message" => "Login Successfully.",
+                "redirect_url" => $redirectUrl,
             ], 200);
         }
 

@@ -178,6 +178,20 @@
                             </a>
                         </li>
                         <li>
+                            <a href="{{ route('roles.index') }}"
+                                class="{{ request()->routeIs('roles.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="shield"></i>
+                                <span> Roles </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('permissions.index') }}"
+                                class="{{ request()->routeIs('permissions.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="key"></i>
+                                <span> Permissions </span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="{{ route('customers.index') }}"
                                 class="{{ request()->routeIs('customers.*') ? 'tp-link active' : '' }}">
                                 <i data-feather="user"></i>

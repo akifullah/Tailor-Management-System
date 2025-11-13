@@ -74,6 +74,7 @@
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Worker Type</th>
+                                    <th>Roles & Permissions</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -91,10 +92,41 @@
                                         <td class="text-capitalize">{{ $user->phone }}</td>
                                         <td class="text-capitalize">{{ $user->worker_type }}</td>
                                         <td>
+                                            <div class="mb-2">
+                                                <strong>Roles:</strong>
+                                                @if($user->roles->count() > 0)
+                                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                                        @foreach($user->roles as $role)
+                                                            <span class="badge bg-info-subtle text-info">{{ $role->name }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">No roles</span>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <strong>Permissions:</strong>
+                                                @if($user->permissions->count() > 0)
+                                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                                        @foreach($user->permissions as $permission)
+                                                            <span class="badge bg-success-subtle text-success">{{ $permission->name }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">No permissions</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
                                             <button onclick="handleEdit({{ $user }})"
                                                 class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
                                                 data-bs-original-title="Edit">
                                                 <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                            </button>
+                                            <button onclick="handleAssignRolesPermissions({{ $user->id }}, {{ json_encode(['roles' => $user->roles->pluck('id')->toArray(), 'permissions' => $user->permissions->pluck('id')->toArray()]) }})"
+                                                class="btn btn-sm bg-warning-subtle me-1" data-bs-toggle="tooltip"
+                                                data-bs-original-title="Assign Roles & Permissions">
+                                                <i class="mdi mdi-shield-account fs-14 text-warning"></i>
                                             </button>
                                             <button onclick="handleDelete({{ $user->id }})"
                                                 class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
@@ -107,13 +139,75 @@
 
                                 @else
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted">No user found.</td>
+                                    <td colspan="7" class="text-center text-muted">No user found.</td>
                                 </tr>
                                 @endif
                             </tbody>
                         </table>
                     </div>
 
+                </div>
+            </div>
+        </div>
+
+        <!-- Assign Roles & Permissions Modal -->
+        <div class="modal fade" id="assignRolesPermissionsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="assignRolesPermissionsModalLabel">Assign Roles & Permissions</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="assignRolesPermissionsForm" autocomplete="off">
+                            <input type="hidden" name="user_id" id="user_id" value="">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Roles</label>
+                                    <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                        @if($roles->count() > 0)
+                                            @foreach($roles as $role)
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="checkbox" name="roles[]" 
+                                                        value="{{ $role->id }}" id="role_{{ $role->id }}">
+                                                    <label class="form-check-label" for="role_{{ $role->id }}">
+                                                        {{ $role->name }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <p class="text-muted mb-0">No roles available. <a href="{{ route('roles.index') }}">Create roles first</a></p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Permissions</label>
+                                    <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                        @if($permissions->count() > 0)
+                                            @foreach($permissions as $permission)
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="checkbox" name="permissions[]" 
+                                                        value="{{ $permission->id }}" id="user_permission_{{ $permission->id }}">
+                                                    <label class="form-check-label" for="user_permission_{{ $permission->id }}">
+                                                        {{ $permission->name }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <p class="text-muted mb-0">No permissions available. <a href="{{ route('permissions.index') }}">Create permissions first</a></p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-light"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Assign</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -232,6 +326,29 @@
                 });
             }
         }
+
+        function handleAssignRolesPermissions(userId, userData) {
+            $('#assignRolesPermissionsModal').modal('show');
+            setValById("user_id", userId);
+            
+            // Uncheck all roles and permissions first
+            $('input[name="roles[]"]').prop('checked', false);
+            $('input[name="permissions[]"]').prop('checked', false);
+            
+            // Check the user's current roles
+            if (userData && userData.roles) {
+                userData.roles.forEach(function(roleId) {
+                    $(`input[name="roles[]"][value="${roleId}"]`).prop('checked', true);
+                });
+            }
+            
+            // Check the user's current permissions
+            if (userData && userData.permissions) {
+                userData.permissions.forEach(function(permissionId) {
+                    $(`input[name="permissions[]"][value="${permissionId}"]`).prop('checked', true);
+                });
+            }
+        }
     </script>
     <script>
         function handleCreateUser() {
@@ -297,6 +414,39 @@
                     }
                 }
 
+            });
+
+            // Handle assign roles and permissions form
+            $("#assignRolesPermissionsForm").on('submit', function(e) {
+                e.preventDefault();
+                let $form = $("#assignRolesPermissionsForm");
+                var $btn = $form.find("button[type=submit]");
+                $btn.prop("disabled", true);
+                
+                const userId = $("#user_id").val();
+                
+                $.ajax({
+                    url: "{{ route('users.assign-roles-permissions', ':id') }}".replace(':id', userId),
+                    type: "POST",
+                    data: $form.serialize(),
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#assignRolesPermissionsModal').modal('hide');
+                            location.reload();
+                        } else {
+                            alert(response.message || "Assignment failed.");
+                            $btn.prop("disabled", false);
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        alert(response?.message || "Error assigning roles and permissions.");
+                        $btn.prop("disabled", false);
+                    }
+                });
             });
 
         });

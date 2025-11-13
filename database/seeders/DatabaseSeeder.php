@@ -22,11 +22,19 @@ class DatabaseSeeder extends Seeder
             TypeAndFieldSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            "password"=> Hash::make("12345"),
-            "role"=> "admin"
+        // Create admin user first
+        $adminUser = User::firstOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make("12345"),
+                'role' => 'admin'
+            ]
+        );
+
+        // Seed roles and permissions (this will assign admin role to admin user)
+        $this->call([
+            RolesAndPermissionsSeeder::class,
         ]);
     }
 }
