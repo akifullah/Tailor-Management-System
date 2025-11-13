@@ -3,7 +3,7 @@
 @section('content')
     <div class="container-fluid">
         <div class="py-3">
-            <h4 class="fs-18 fw-semibold mb-0">Create New Order</h4>
+            <h4 class="fs-18 fw-semibold mb-0">Create New Sewing Order</h4>
         </div>
 
         @if (session('error'))
@@ -14,7 +14,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('orders.store') }}" method="POST" id="orderForm" autocomplete="off">
+                        <form action="{{ route('sewing-orders.store') }}" method="POST" id="sewingOrderForm" autocomplete="off">
                             @csrf
 
                             <div class="row mb-3">
@@ -45,14 +45,17 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Order Date *</label>
-                                    <input type="date" name="order_date" class="form-control" value="{{ date('Y-m-d') }}"
-                                        required>
+                                    <input type="date" name="order_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Delivery Date</label>
+                                    <input type="date" name="delivery_date" class="form-control">
                                 </div>
                             </div>
                             <hr>
-                            <h5>Order Items</h5>
-                            <div id="orderItems"></div>
-                            <button type="button" class="btn btn-info" onclick="addItemRow()">Add Item</button>
+                            <h5>Sewing Order Items</h5>
+                            <div id="sewingOrderItems"></div>
+                            <button type="button" class="btn btn-info mb-3" onclick="addItemRow()">Add Item</button>
 
                             <hr>
                             <h5 class="mb-3">Payment Information</h5>
@@ -64,24 +67,19 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <strong>Total Order Amount:</strong>
-                                                    <h5 class="text-primary mb-0">Rs <span
-                                                            id="payment_total_display">0.00</span></h5>
+                                                    <h5 class="text-primary mb-0">Rs <span id="payment_total_display">0.00</span></h5>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <strong>Payment Status:</strong>
-                                                    <select name="payment_status" id="payment_status"
-                                                        class="form-control mt-1" required>
+                                                    <select name="payment_status" id="payment_status" class="form-control mt-1" required>
                                                         <option value="full">Full Payment</option>
                                                         <option value="partial">Partial Payment</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-3" id="partial_amount_div" style="display:none;">
                                                     <strong>Paid Amount:</strong>
-                                                    <input type="number" step="0.01" name="partial_amount"
-                                                        id="partial_amount" class="form-control mt-1" min="0.01"
-                                                        value="0">
-                                                    <small class="text-muted">Remaining: Rs <span
-                                                            id="remaining_amount_display">0.00</span></small>
+                                                    <input type="number" step="0.01" name="partial_amount" id="partial_amount" class="form-control mt-1" min="0.01" value="0">
+                                                    <small class="text-muted">Remaining: Rs <span id="remaining_amount_display">0.00</span></small>
                                                 </div>
                                             </div>
                                         </div>
@@ -101,13 +99,11 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Payment Date</label>
-                                    <input type="datetime-local" name="payment_date" id="payment_date" class="form-control"
-                                        value="{{ now()->format('Y-m-d\TH:i') }}">
+                                    <input type="datetime-local" name="payment_date" id="payment_date" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Person + Reference</label>
-                                    <input type="text" name="person_reference" class="form-control"
-                                        placeholder="e.g., John Doe - INV-123">
+                                    <input type="text" name="person_reference" class="form-control" placeholder="e.g., John Doe - INV-123">
                                 </div>
                             </div>
 
@@ -117,17 +113,24 @@
                                     <textarea name="payment_notes" class="form-control" rows="2"></textarea>
                                 </div>
                             </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">Order Notes</label>
+                                    <textarea name="notes" class="form-control" rows="2"></textarea>
+                                </div>
+                            </div>
                             <hr>
 
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h4>Grand Total: <span id="grandTotal">0.00</span></h4>
+                                    <h4>Grand Total: Rs <span id="grandTotal">0.00</span></h4>
                                 </div>
                             </div>
 
                             <div class="mt-4">
-                                <button type="submit" class="btn btn-success">Create Order</button>
-                                <a href="{{ route('orders.index') }}" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-success">Create Sewing Order</button>
+                                <a href="{{ route('sewing-orders.index') }}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>
@@ -140,7 +143,7 @@
 @section('js')
     <script>
         let itemCount = 1;
-        let custumerMeasurements = null;
+        let customerMeasurements = null;
 
         function getCustomerMeasurement(selectElement) {
             const option = $(selectElement).find(":selected");
@@ -152,9 +155,11 @@
             } catch (err) {
                 measurements = measurementData;
             }
+            
             let ms = document.createElement("select");
             ms.className = "form-select";
             ms.required = true;
+            ms.name = `items[${itemCount}][customer_measurement]`;
 
             let options = `<option value="">Select a Measurement</option>`;
 
@@ -164,50 +169,47 @@
 
             ms.innerHTML = options;
 
-            // Replace old measurement select
-            $("#orderItems").html("");
-
             // Save reference for later
-            custumerMeasurements = ms;
+            customerMeasurements = measurements;
         }
 
         $("#customer_id").on("change", function() {
-            getCustomerMeasurement(this);
+            customerMeasurements = null;
+            const option = $(this).find(":selected");
+            const measurementData = option.attr("data-measurement");
+            try {
+                customerMeasurements = JSON.parse(measurementData);
+            } catch (err) {
+                customerMeasurements = measurementData;
+            }
         });
 
         $(document).ready(function() {
             const select = $("#customer_id")[0];
             if (select?.value) {
-                getCustomerMeasurement(select);
+                const option = $(select).find(":selected");
+                const measurementData = option.attr("data-measurement");
+                try {
+                    customerMeasurements = JSON.parse(measurementData);
+                } catch (err) {
+                    customerMeasurements = measurementData;
+                }
             }
 
-            // -- PATCH START: Payment section UX for required/focus/error on partial_amount --
-
-            // Initially hide and remove required from partial amount
             $('#partial_amount_div').hide();
             $('#partial_amount').prop('required', false);
 
             $('#payment_status').on('change', function() {
                 if ($(this).val() === 'partial') {
                     $('#partial_amount_div').show();
-
-                    // Remove required by default, only add required on focus
                     $('#partial_amount').prop('required', false);
-
-                    // Attach focus event (only once)
                     $('#partial_amount').off('focus.addreq').on('focus.addreq', function() {
                         if ($('#payment_status').val() === 'partial') {
                             $(this).prop('required', true);
                             const grandTotal = parseFloat($('#grandTotal').text()) || 0;
-                            $('#remaining_amount_display').text(grandTotal);
+                            $('#remaining_amount_display').text(grandTotal.toFixed(2));
                         }
                     });
-
-                    // Remove invalid flag on focus (if user was blocked because "is not focusable")
-                    $('#partial_amount').on('focus', function() {
-                        this.setCustomValidity('');
-                    });
-
                 } else {
                     $('#partial_amount_div').hide();
                     $('#partial_amount').prop('required', false).val('');
@@ -215,10 +217,8 @@
                 }
             });
 
-            // If switching to partial from full, reset value, validity, required, focus behavior
             $('#payment_status').trigger('change');
 
-            // Update remaining amount when partial amount changes
             $('#partial_amount').on('input', function() {
                 updateRemainingAmount();
             });
@@ -245,65 +245,13 @@
             }
         }
 
-        function loadProductPrice(select) {
-            const option = $(select).find(':selected');
-            const price = option.data('price');
-            const stock = option.data('stock');
-            const row = $(select).closest('.item-row');
-
-            // always from inventory
-            row.find('.sell-price').val(price || '');
-            if (stock && stock <= 0) {
-                alert('Product is out of stock!');
-            }
-
-            calculateTotal(select);
-            checkAllQuantities();
-        }
-
-        function checkAllQuantities() {
-            let productTotals = {};
-            let productStocks = {};
-            let productRows = {};
-            $('.item-row').each(function(i) {
-                const select = $(this).find('.product-select');
-                const pid = select.val();
-                if (!pid) return;
-                // always from inventory, so always check
-                const stock = parseFloat(select.find('option:selected').data('stock')) || 0;
-                const qtyInput = $(this).find('.quantity');
-                const qty = parseFloat(qtyInput.val() || 0);
-                productTotals[pid] = (productTotals[pid] || 0) + qty;
-                productStocks[pid] = stock;
-                productRows[pid] = productRows[pid] || [];
-                productRows[pid].push({
-                    row: $(this),
-                    qtyInput: qtyInput
-                });
-            });
-            $('.item-row .qty-error').remove();
-            $('.item-row .quantity').removeClass('is-invalid');
-            $.each(productTotals, function(pid, total) {
-                if (total > productStocks[pid]) {
-                    productRows[pid].forEach(function(obj) {
-                        if (obj.qtyInput.parent().find('.qty-error').length === 0) {
-                            obj.qtyInput.after(
-                                '<div class="qty-error text-danger small">Total requested for this product exceeds available stock (' +
-                                productStocks[pid] + 'm).</div>');
-                        }
-                        obj.qtyInput.addClass('is-invalid');
-                    });
-                }
-            });
-        }
-
         function calculateTotal(element) {
             const row = $(element).closest('.item-row');
-            const price = parseFloat(row.find('.sell-price').val()) || 0;
+            const price = parseFloat(row.find('.sewing-price').val()) || 0;
             const qty = parseFloat(row.find('.quantity').val()) || 0;
-            row.find('.item-total').val((price * qty).toFixed(2));
+            const total = price * qty;
+            row.find('.item-total').val(total.toFixed(2));
             updateGrandTotal();
-            checkAllQuantities();
         }
 
         function updateGrandTotal() {
@@ -318,101 +266,83 @@
             }
         }
 
-        // Remove handleCustomerFabric since the checkbox is removed and it's not needed.
-        // function handleCustomerFabric(checkbox) {...}  (REMOVED)
-
         function addItemRow() {
-            // if(!$("#customer_id").val()) {
-            //     alert("Please select a customer");
-            //     return;
-            // }
+            if (!$("#customer_id").val()) {
+                alert("Please select a customer first");
+                return;
+            }
+
+            let measurementOptions = '<option value="">Select a Measurement</option>';
+            if (customerMeasurements && customerMeasurements.length > 0) {
+                customerMeasurements.forEach((m) => {
+                    measurementOptions += `<option value='${JSON.stringify(m)}'>${String(m?.type ?? '')}</option>`;
+                });
+            }
+
             const html = `
             <div class="row align-items-end mb-2 item-row border-bottom pb-2 position-relative">
                 <div class="col-md-2">
-                    <label class="form-label product-label">Product <span class="product-required">*</span></label>
-                    <select name="items[${itemCount}][product_id]" class="form-control product-select" required onchange="loadProductPrice(this)">
-                        <option value="">Select Product</option>
-                        @foreach ($products as $product)
-                        <option value="{{ $product->id }}" 
-                            data-price="{{ $product->sell_price }}"
-                            data-stock="{{ $product->available_meters }}">
-                            {{ $product->title }} ({{ $product->available_meters }}m)
-                        </option>
+                    <label class="form-label">Product Name *</label>
+                    <input type="text" name="items[${itemCount}][product_name]" class="form-control" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Sewing Price *</label>
+                    <input type="number" step="0.01" name="items[${itemCount}][sewing_price]" class="form-control sewing-price" required onchange="calculateTotal(this)">
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Qty *</label>
+                    <select name="items[${itemCount}][qty]" class="form-control quantity" required onchange="calculateTotal(this)">
+                        <option value="">Qty</option>
+                        ${Array.from({length: 20}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Customer Measurement</label>
+                    <select name="items[${itemCount}][customer_measurement]" class="form-select measurement-select">
+                        ${measurementOptions}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Assign To Worker</label>
+                    <select name="items[${itemCount}][assign_to]" class="form-select">
+                        <option value="">Select Worker</option>
+                        @foreach ($workers as $worker)
+                        <option value="{{ $worker->id }}">{{ $worker->name }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Sell Price *</label>
-                    <input type="number" step="0.01" name="items[${itemCount}][sell_price]" class="form-control sell-price" required onchange="calculateTotal(this)">
+                    <label class="form-label">Assign Note</label>
+                    <input type="text" name="items[${itemCount}][assign_note]" class="form-control" placeholder="Assignment notes">
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">Quantity (Meters) *</label>
-                    <input type="number" step="0.01" name="items[${itemCount}][quantity_meters]" class="form-control quantity" required onchange="calculateTotal(this)">
-                </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <label class="form-label">Total</label>
                     <input type="text" class="form-control item-total" readonly>
                 </div>
-                <button type="button" class="btn btn-danger btn-sm remove-item position-absolute w-auto  top-0 end-0">Remove</button>
+                <button type="button" class="btn btn-danger btn-sm remove-item position-absolute w-auto top-0 end-0">Remove</button>
             </div>
         `;
-            $('#orderItems').append(html);
+            $('#sewingOrderItems').append(html);
             itemCount++;
         }
 
-        $(document).on('input change', '.item-row .quantity, .item-row .product-select', function() {
+        $(document).on('input change', '.item-row .quantity, .item-row .sewing-price', function() {
             calculateTotal(this);
         });
 
         $(document).on('click', '.remove-item', function() {
             $(this).closest('.item-row').remove();
             updateGrandTotal();
-            checkAllQuantities();
         });
 
-        // Block form submit if any total qty for any product > stock (only for items from inventory)
-        $('#orderForm').on('submit', function(e) {
-            $('.item-row').each(function() {
-                const isFromInventory = $(this).find('.customer-fabric-check').is(':checked');
-                const select = $(this).find('.product-select');
-                if (!isFromInventory) {
-                    select.prop('required', false);
-                } else {
-                    select.prop('required', true);
-                }
-            });
-
-            checkAllQuantities();
-            let productTotals = {};
-            let productStocks = {};
-            $('.item-row').each(function() {
-                const select = $(this).find('.product-select');
-                const pid = select.val();
-                if (!pid) return;
-                const isFromInventory = $(this).find('.customer-fabric-check').is(':checked');
-                if (!isFromInventory) return;
-                const stock = parseFloat(select.find('option:selected').data('stock')) || 0;
-                const qty = parseFloat($(this).find('.quantity').val() || 0);
-                productTotals[pid] = (productTotals[pid] || 0) + qty;
-                productStocks[pid] = stock;
-            });
-            let hasError = false;
-            $.each(productTotals, function(pid, total) {
-                if (total > productStocks[pid]) {
-                    hasError = true;
-                }
-            });
-            if (hasError || $('.item-row .quantity.is-invalid').length > 0) {
-                alert(
-                    'Order not allowed: One or more products have total quantity > available meters. Please fix highlighted rows.'
-                );
+        $('#sewingOrderForm').on('submit', function(e) {
+            if ($('.item-row').length === 0) {
+                alert('Please add at least one item');
                 e.preventDefault();
                 return false;
             }
 
-            // Extra: Focus partial amount if it's partial and missing, to avoid "not focusable" browser error
-            if ($('#payment_status').val() === 'partial' && ($('#partial_amount_div').is(':hidden') || !$(
-                    '#partial_amount')[0].checkValidity())) {
+            if ($('#payment_status').val() === 'partial' && ($('#partial_amount_div').is(':hidden') || !$('#partial_amount')[0].checkValidity())) {
                 $('#partial_amount_div').show();
                 setTimeout(function() {
                     $('#partial_amount').focus();

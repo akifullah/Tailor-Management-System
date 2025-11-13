@@ -18,4 +18,8 @@ class Customer extends Model
     public function orders() {
         return $this->hasMany(Order::class)->latest();
     }
+
+    public function sewingOrders() {
+        return $this->hasMany(SewingOrder::class)->latest();
+    }
 }

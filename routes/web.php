@@ -17,7 +17,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
-
+use App\Http\Controllers\SewingOrderController;
 
 Route::get("/", function () {
     if (Auth::check()) {
@@ -99,6 +99,14 @@ Route::middleware(["auth"])->group(function () {
         Route::get('orders/create/{customer?}', [OrderController::class, 'create'])
             ->name('orders.create.withCustomer');
     });
+
+    // sewing orders - Require manage-sewing-orders permission
+    // Route::middleware(['permission:manage-sewing-orders'])->group(function () {
+        Route::resource('sewing-orders', SewingOrderController::class);
+        Route::get('sewing-orders/create/{customer?}', [SewingOrderController::class, 'create'])->name('sewing-orders.create.withCustomer');
+        Route::put('sewing-order-items/{item}/status', [SewingOrderController::class, 'updateItemStatus'])->name('sewing-order-items.update-status');
+        Route::get('sewing-orders/worker/dashboard', [SewingOrderController::class, 'workerDashboard'])->name('sewing-orders.worker-dashboard');
+    // });
     
     // Reports - Require view-reports permission
     Route::middleware(['permission:view-reports'])->prefix('reports')->group(function () {

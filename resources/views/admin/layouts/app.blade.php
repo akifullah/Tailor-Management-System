@@ -227,6 +227,14 @@
                                 <span> Suppliers </span>
                             </a>
                         </li>
+                            <li>
+                                <a href="{{ route('sewing-orders.index') }}"
+                                    class="{{ request()->routeIs('sewing-orders.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="scissors"></i>
+                                    <span> Sewing Orders </span>
+                                </a>
+                            </li>
+
 
                         <li class="menu-title mt-2">Inventory</li>
 

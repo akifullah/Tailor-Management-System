@@ -6,8 +6,10 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\InventoryTracking;
+use App\Models\OrderItem;
 use App\Models\Supplier;
 use App\Models\Payment;
+use App\Models\SewingOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -21,7 +23,9 @@ class ReportController extends Controller
         $totalOrderAmount = Order::sum('total_amount');
         $todayOrders = Order::whereDate('order_date', today())->count();
         $todayOrderRevenue = Order::whereDate('order_date', today())->sum('total_amount');
-        
+
+
+
         // Payment Statistics
         $allPayments = Payment::all();
         $totalPaymentsReceived = Payment::where('payable_type', Order::class)->sum('amount');
@@ -30,36 +34,36 @@ class ReportController extends Controller
             ->whereDate('payment_date', today())->sum('amount');
         $todayPaymentsMade = Payment::where('payable_type', InventoryTracking::class)
             ->whereDate('payment_date', today())->sum('amount');
-        
+
         // Order Payment Status
         $orders = Order::with('payments')->get();
-        $totalPaid = $orders->sum(function($order) {
+        $totalPaid = $orders->sum(function ($order) {
             return $order->payments->sum('amount');
         });
         $totalPending = $totalOrderAmount - $totalPaid;
-        $completedOrders = $orders->filter(function($order) {
+        $completedOrders = $orders->filter(function ($order) {
             return $order->payments->sum('amount') >= $order->total_amount;
         })->count();
         $pendingOrders = $totalOrders - $completedOrders;
-        
+
         // Purchase Statistics
         $purchases = InventoryTracking::where('type', 'purchase')->with('payments')->get();
-        $totalPurchaseAmount = $purchases->sum(function($purchase) {
+        $totalPurchaseAmount = $purchases->sum(function ($purchase) {
             return $purchase->quantity_meters * $purchase->price_per_meter;
         });
-        $totalPurchasePaid = $purchases->sum(function($purchase) {
+        $totalPurchasePaid = $purchases->sum(function ($purchase) {
             return $purchase->payments->sum('amount');
         });
         $totalPurchasePending = $totalPurchaseAmount - $totalPurchasePaid;
-        
+
         // Payment Method Breakdown
         $paymentMethods = Payment::select('payment_method', DB::raw('SUM(amount) as total'))
             ->groupBy('payment_method')
             ->get();
-        
+
         // Recent Transactions
         $recentPayments = Payment::with(['payable'])->latest()->take(10)->get();
-        
+
         $stats = [
             'total_products' => Product::count(),
             'total_customers' => Customer::count(),
@@ -98,24 +102,24 @@ class ReportController extends Controller
         }
 
         $orders = $query->get();
-        
+
         // Calculate payment statistics from actual payments
         $allPayments = Payment::where('payable_type', Order::class)
             ->whereIn('payable_id', $orders->pluck('id'))
             ->get();
-        
+
         // Calculate full and partial payments
-        $fullPayments = $orders->filter(function($order) {
+        $fullPayments = $orders->filter(function ($order) {
             return $order->payments->sum('amount') >= $order->total_amount;
         })->sum('total_amount');
-        
-        $partialPayments = $orders->filter(function($order) {
+
+        $partialPayments = $orders->filter(function ($order) {
             $totalPaid = $order->payments->sum('amount');
             return $totalPaid > 0 && $totalPaid < $order->total_amount;
-        })->sum(function($order) {
+        })->sum(function ($order) {
             return $order->payments->sum('amount');
         });
-        
+
         $summary = [
             'total_sales' => $orders->count(),
             'total_revenue' => $orders->sum('total_amount'),
@@ -125,16 +129,16 @@ class ReportController extends Controller
             'cheque_payments' => $allPayments->where('payment_method', 'cheque')->sum('amount'),
             'full_payments' => $fullPayments,
             'partial_payments' => $partialPayments,
-            'total_paid' => $orders->sum(function($order) {
+            'total_paid' => $orders->sum(function ($order) {
                 return $order->payments->sum('amount');
             }),
-            'pending_amount' => $orders->sum(function($order) {
+            'pending_amount' => $orders->sum(function ($order) {
                 return max(0, $order->total_amount - $order->payments->sum('amount'));
             }),
-            'completed_orders' => $orders->filter(function($order) {
+            'completed_orders' => $orders->filter(function ($order) {
                 return $order->payments->sum('amount') >= $order->total_amount;
             })->count(),
-            'pending_orders' => $orders->filter(function($order) {
+            'pending_orders' => $orders->filter(function ($order) {
                 return $order->payments->sum('amount') < $order->total_amount;
             })->count(),
         ];
@@ -150,7 +154,7 @@ class ReportController extends Controller
             $query->where('id', $request->customer_id);
         }
 
-        $customers = $query->get()->map(function($customer) {
+        $customers = $query->get()->map(function ($customer) {
             return [
                 'id' => $customer->id,
                 'name' => $customer->name,
@@ -174,17 +178,17 @@ class ReportController extends Controller
             $query->where('id', $request->supplier_id);
         }
 
-        $suppliers = $query->get()->map(function($supplier) {
+        $suppliers = $query->get()->map(function ($supplier) {
             // Calculate totals from actual purchase records (inventory_tracking)
             $totalStock = \App\Models\InventoryTracking::where('type', 'purchase')
                 ->where('supplier_id', $supplier->id)
                 ->sum('quantity_meters');
-            
+
             $purchases = \App\Models\InventoryTracking::where('type', 'purchase')
                 ->where('supplier_id', $supplier->id)
                 ->get();
-            
-            $totalValue = $purchases->sum(function($purchase) {
+
+            $totalValue = $purchases->sum(function ($purchase) {
                 return $purchase->quantity_meters * $purchase->price_per_meter;
             });
 
@@ -240,11 +244,11 @@ class ReportController extends Controller
     {
         $supplier = \App\Models\Supplier::findOrFail($supplierId);
         $purchases = \App\Models\InventoryTracking::with('product')
-            ->where('type','purchase')
+            ->where('type', 'purchase')
             ->where('supplier_id', $supplierId)
             ->orderByDesc('created_at')
             ->get();
-        return view('admin.reports.supplier-ledger-detail', compact('supplier','purchases'));
+        return view('admin.reports.supplier-ledger-detail', compact('supplier', 'purchases'));
     }
 
     public function transactionsReport(Request $request)
@@ -278,7 +282,7 @@ class ReportController extends Controller
         // Eager load payments for orders and purchases to calculate remaining amounts
         $orderIds = $transactions->where('payable_type', Order::class)->pluck('payable_id')->unique();
         $purchaseIds = $transactions->where('payable_type', InventoryTracking::class)->pluck('payable_id')->unique();
-        
+
         if ($orderIds->count() > 0) {
             $orders = Order::whereIn('id', $orderIds)->with('payments')->get()->keyBy('id');
             // Attach loaded orders to transactions
@@ -314,40 +318,40 @@ class ReportController extends Controller
     {
         // Pending Order Payments
         $orderQuery = Order::with(['payments', 'items']);
-        
+
         if ($request->has('date_from') && $request->date_from) {
             $orderQuery->whereDate('order_date', '>=', $request->date_from);
         }
         if ($request->has('date_to') && $request->date_to) {
             $orderQuery->whereDate('order_date', '<=', $request->date_to);
         }
-        
-        $orders = $orderQuery->get()->filter(function($order) {
+
+        $orders = $orderQuery->get()->filter(function ($order) {
             return $order->payments->sum('amount') < $order->total_amount;
         });
 
         // Pending Purchase Payments
         $purchaseQuery = InventoryTracking::where('type', 'purchase')->with('payments');
-        
+
         if ($request->has('date_from') && $request->date_from) {
             $purchaseQuery->whereDate('created_at', '>=', $request->date_from);
         }
         if ($request->has('date_to') && $request->date_to) {
             $purchaseQuery->whereDate('created_at', '<=', $request->date_to);
         }
-        
-        $purchases = $purchaseQuery->get()->filter(function($purchase) {
+
+        $purchases = $purchaseQuery->get()->filter(function ($purchase) {
             $total = $purchase->quantity_meters * $purchase->price_per_meter;
             return $purchase->payments->sum('amount') < $total;
         });
 
         $summary = [
             'pending_orders_count' => $orders->count(),
-            'pending_orders_amount' => $orders->sum(function($order) {
+            'pending_orders_amount' => $orders->sum(function ($order) {
                 return $order->total_amount - $order->payments->sum('amount');
             }),
             'pending_purchases_count' => $purchases->count(),
-            'pending_purchases_amount' => $purchases->sum(function($purchase) {
+            'pending_purchases_amount' => $purchases->sum(function ($purchase) {
                 $total = $purchase->quantity_meters * $purchase->price_per_meter;
                 return $total - $purchase->payments->sum('amount');
             }),
@@ -360,29 +364,29 @@ class ReportController extends Controller
     {
         // Completed Orders (fully paid)
         $orderQuery = Order::with(['payments', 'items']);
-        
+
         if ($request->has('date_from') && $request->date_from) {
             $orderQuery->whereDate('order_date', '>=', $request->date_from);
         }
         if ($request->has('date_to') && $request->date_to) {
             $orderQuery->whereDate('order_date', '<=', $request->date_to);
         }
-        
-        $orders = $orderQuery->get()->filter(function($order) {
+
+        $orders = $orderQuery->get()->filter(function ($order) {
             return $order->payments->sum('amount') >= $order->total_amount;
         });
 
         // Completed Purchases (fully paid)
         $purchaseQuery = InventoryTracking::where('type', 'purchase')->with('payments');
-        
+
         if ($request->has('date_from') && $request->date_from) {
             $purchaseQuery->whereDate('created_at', '>=', $request->date_from);
         }
         if ($request->has('date_to') && $request->date_to) {
             $purchaseQuery->whereDate('created_at', '<=', $request->date_to);
         }
-        
-        $purchases = $purchaseQuery->get()->filter(function($purchase) {
+
+        $purchases = $purchaseQuery->get()->filter(function ($purchase) {
             $total = $purchase->quantity_meters * $purchase->price_per_meter;
             return $purchase->payments->sum('amount') >= $total;
         });
@@ -391,7 +395,7 @@ class ReportController extends Controller
             'completed_orders_count' => $orders->count(),
             'completed_orders_amount' => $orders->sum('total_amount'),
             'completed_purchases_count' => $purchases->count(),
-            'completed_purchases_amount' => $purchases->sum(function($purchase) {
+            'completed_purchases_amount' => $purchases->sum(function ($purchase) {
                 return $purchase->quantity_meters * $purchase->price_per_meter;
             }),
         ];
@@ -414,29 +418,29 @@ class ReportController extends Controller
         if ($customerId) {
             $customer = Customer::with(['orders.payments'])->findOrFail($customerId);
             $customerOrders = $customer->orders()->with(['payments', 'items'])->get();
-            
+
             $customerPayments = Payment::where('payable_type', Order::class)
                 ->whereIn('payable_id', $customerOrders->pluck('id'))
                 ->with('payable')
                 ->latest('payment_date')
                 ->get();
-            
+
             // Calculate customer summary
             $totalOrderAmount = $customerOrders->sum('total_amount');
-            $totalPaid = $customerOrders->sum(function($order) {
+            $totalPaid = $customerOrders->sum(function ($order) {
                 return $order->payments->sum('amount');
             });
             $totalRemaining = $totalOrderAmount - $totalPaid;
-            
+
             $customerSummary = [
                 'total_orders' => $customerOrders->count(),
                 'total_order_amount' => $totalOrderAmount,
                 'total_paid' => $totalPaid,
                 'total_remaining' => $totalRemaining,
-                'completed_orders' => $customerOrders->filter(function($order) {
+                'completed_orders' => $customerOrders->filter(function ($order) {
                     return $order->payments->sum('amount') >= $order->total_amount;
                 })->count(),
-                'pending_orders' => $customerOrders->filter(function($order) {
+                'pending_orders' => $customerOrders->filter(function ($order) {
                     return $order->payments->sum('amount') < $order->total_amount;
                 })->count(),
             ];
@@ -448,32 +452,32 @@ class ReportController extends Controller
                 ->where('supplier_id', $supplierId)
                 ->with(['payments', 'product'])
                 ->get();
-            
+
             $supplierPayments = Payment::where('payable_type', InventoryTracking::class)
                 ->whereIn('payable_id', $supplierPurchases->pluck('id'))
                 ->with('payable')
                 ->latest('payment_date')
                 ->get();
-            
+
             // Calculate supplier summary
-            $totalPurchaseAmount = $supplierPurchases->sum(function($purchase) {
+            $totalPurchaseAmount = $supplierPurchases->sum(function ($purchase) {
                 return $purchase->quantity_meters * $purchase->price_per_meter;
             });
-            $totalPaid = $supplierPurchases->sum(function($purchase) {
+            $totalPaid = $supplierPurchases->sum(function ($purchase) {
                 return $purchase->payments->sum('amount');
             });
             $totalRemaining = $totalPurchaseAmount - $totalPaid;
-            
+
             $supplierSummary = [
                 'total_purchases' => $supplierPurchases->count(),
                 'total_purchase_amount' => $totalPurchaseAmount,
                 'total_paid' => $totalPaid,
                 'total_remaining' => $totalRemaining,
-                'completed_purchases' => $supplierPurchases->filter(function($purchase) {
+                'completed_purchases' => $supplierPurchases->filter(function ($purchase) {
                     $total = $purchase->quantity_meters * $purchase->price_per_meter;
                     return $purchase->payments->sum('amount') >= $total;
                 })->count(),
-                'pending_purchases' => $supplierPurchases->filter(function($purchase) {
+                'pending_purchases' => $supplierPurchases->filter(function ($purchase) {
                     $total = $purchase->quantity_meters * $purchase->price_per_meter;
                     return $purchase->payments->sum('amount') < $total;
                 })->count(),
@@ -484,15 +488,15 @@ class ReportController extends Controller
         $suppliers = Supplier::all();
 
         return view('admin.reports.user-transactions', compact(
-            'customerPayments', 
-            'supplierPayments', 
+            'customerPayments',
+            'supplierPayments',
             'customerOrders',
             'supplierPurchases',
             'customerSummary',
             'supplierSummary',
-            'customers', 
-            'suppliers', 
-            'customerId', 
+            'customers',
+            'suppliers',
+            'customerId',
             'supplierId'
         ));
     }
@@ -502,46 +506,97 @@ class ReportController extends Controller
         $customerId = $request->get('customer_id');
         $customerPayments = collect();
         $customerOrders = collect();
+        $customerSewingOrders = collect();
+        $customerSewingPayments = collect();
         $customerSummary = null;
 
         if ($customerId) {
-            $customer = Customer::with(['orders.payments'])->findOrFail($customerId);
+            $customer = Customer::with(['orders.payments', 'sewingOrders.payments'])->findOrFail($customerId);
             $customerOrders = $customer->orders()->with(['payments', 'items'])->get();
-            
-            $customerPayments = Payment::where('payable_type', Order::class)
+            $customerSewingOrders = $customer->sewingOrders()->with(['payments', 'items'])->get();
+
+            // Get payments for regular orders
+            $orderPayments = Payment::where('payable_type', Order::class)
                 ->whereIn('payable_id', $customerOrders->pluck('id'))
                 ->with('payable')
                 ->latest('payment_date')
                 ->get();
-            
-            // Calculate customer summary
+
+            // Get payments for sewing orders
+            $sewingOrderPayments = Payment::where('payable_type', SewingOrder::class)
+                ->whereIn('payable_id', $customerSewingOrders->pluck('id'))
+                ->with('payable')
+                ->latest('payment_date')
+                ->get();
+
+            // Combine all payments
+            $customerPayments = $orderPayments->concat($sewingOrderPayments)->sortByDesc('payment_date');
+
+            // Calculate customer summary including both order types
             $totalOrderAmount = $customerOrders->sum('total_amount');
-            $totalPaid = $customerOrders->sum(function($order) {
+            $totalSewingOrderAmount = $customerSewingOrders->sum('total_amount');
+            $totalAmount = $totalOrderAmount + $totalSewingOrderAmount;
+
+            $totalPaid = $customerOrders->sum(function ($order) {
                 return $order->payments->sum('amount');
+            }) + $customerSewingOrders->sum(function ($sewingOrder) {
+                return $sewingOrder->payments->sum('amount');
             });
-            $totalRemaining = $totalOrderAmount - $totalPaid;
-            
+
+            $totalRemaining = $totalAmount - $totalPaid;
+
             $customerSummary = [
-                'total_orders' => $customerOrders->count(),
-                'total_order_amount' => $totalOrderAmount,
+                'total_orders' => $customerOrders->count() + $customerSewingOrders->count(),
+                'total_order_amount' => $totalAmount,
                 'total_paid' => $totalPaid,
                 'total_remaining' => $totalRemaining,
-                'completed_orders' => $customerOrders->filter(function($order) {
+                'completed_orders' => $customerOrders->filter(function ($order) {
                     return $order->payments->sum('amount') >= $order->total_amount;
+                })->count() + $customerSewingOrders->filter(function ($sewingOrder) {
+                    return $sewingOrder->payments->sum('amount') >= $sewingOrder->total_amount;
                 })->count(),
-                'pending_orders' => $customerOrders->filter(function($order) {
+                'pending_orders' => $customerOrders->filter(function ($order) {
                     return $order->payments->sum('amount') < $order->total_amount;
+                })->count() + $customerSewingOrders->filter(function ($sewingOrder) {
+                    return $sewingOrder->payments->sum('amount') < $sewingOrder->total_amount;
                 })->count(),
             ];
+        }
+
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+        $orderType = $request->get('order_type');
+
+        // Filter by dates if provided
+        if (!empty($dateFrom)) {
+            $customerOrders = $customerOrders->filter(fn($order) => $order->order_date && $order->order_date >= $dateFrom);
+            $customerSewingOrders = $customerSewingOrders->filter(fn($order) => $order->order_date && $order->order_date >= $dateFrom);
+        }
+        if (!empty($dateTo)) {
+            $customerOrders = $customerOrders->filter(fn($order) => $order->order_date && $order->order_date <= $dateTo);
+            $customerSewingOrders = $customerSewingOrders->filter(fn($order) => $order->order_date && $order->order_date <= $dateTo);
+        }
+
+        // Filter by order type if provided
+        $showOrders = $showSewingOrders = true;
+        if ($orderType == 'order') {
+            $customerSewingOrders = collect(); // Hide sewing orders by clearing the collection
+            $showSewingOrders = false;
+        }
+        if ($orderType == 'sewing_order') {
+            $customerOrders = collect(); // Hide regular orders by clearing the collection
+            $showOrders = false;
         }
 
         $customers = Customer::all();
 
         return view('admin.reports.customer-transactions', compact(
-            'customerPayments', 
+            'customerPayments',
             'customerOrders',
+            'customerSewingOrders',
+            'customerSewingPayments',
             'customerSummary',
-            'customers', 
+            'customers',
             'customerId'
         ));
     }
@@ -559,32 +614,32 @@ class ReportController extends Controller
                 ->where('supplier_id', $supplierId)
                 ->with(['payments', 'product'])
                 ->get();
-            
+
             $supplierPayments = Payment::where('payable_type', InventoryTracking::class)
                 ->whereIn('payable_id', $supplierPurchases->pluck('id'))
                 ->with('payable')
                 ->latest('payment_date')
                 ->get();
-            
+
             // Calculate supplier summary
-            $totalPurchaseAmount = $supplierPurchases->sum(function($purchase) {
+            $totalPurchaseAmount = $supplierPurchases->sum(function ($purchase) {
                 return $purchase->quantity_meters * $purchase->price_per_meter;
             });
-            $totalPaid = $supplierPurchases->sum(function($purchase) {
+            $totalPaid = $supplierPurchases->sum(function ($purchase) {
                 return $purchase->payments->sum('amount');
             });
             $totalRemaining = $totalPurchaseAmount - $totalPaid;
-            
+
             $supplierSummary = [
                 'total_purchases' => $supplierPurchases->count(),
                 'total_purchase_amount' => $totalPurchaseAmount,
                 'total_paid' => $totalPaid,
                 'total_remaining' => $totalRemaining,
-                'completed_purchases' => $supplierPurchases->filter(function($purchase) {
+                'completed_purchases' => $supplierPurchases->filter(function ($purchase) {
                     $total = $purchase->quantity_meters * $purchase->price_per_meter;
                     return $purchase->payments->sum('amount') >= $total;
                 })->count(),
-                'pending_purchases' => $supplierPurchases->filter(function($purchase) {
+                'pending_purchases' => $supplierPurchases->filter(function ($purchase) {
                     $total = $purchase->quantity_meters * $purchase->price_per_meter;
                     return $purchase->payments->sum('amount') < $total;
                 })->count(),
@@ -594,12 +649,11 @@ class ReportController extends Controller
         $suppliers = Supplier::all();
 
         return view('admin.reports.supplier-transactions', compact(
-            'supplierPayments', 
+            'supplierPayments',
             'supplierPurchases',
             'supplierSummary',
-            'suppliers', 
+            'suppliers',
             'supplierId'
         ));
     }
 }
-

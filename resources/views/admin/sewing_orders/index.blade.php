@@ -4,9 +4,9 @@
     <div class="container-fluid">
         <div class="py-3 d-flex align-items-center justify-content-between">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Orders</h4>
+                <h4 class="fs-18 fw-semibold m-0">Sewing Orders</h4>
             </div>
-            <a href="{{ route('orders.create') }}" class="btn btn-primary btn-sm">Add Order</a>
+            <a href="{{ route('sewing-orders.create') }}" class="btn btn-primary btn-sm">Add Sewing Order</a>
         </div>
 
         @if (session('success'))
@@ -34,11 +34,9 @@
                                         <label for="search_type" class="form-label">Search By</label>
                                         <select name="type" id="search_type" class="form-select" required>
                                             <option value="">-- Select Type --</option>
-                                            <option value="order_number"
-                                                {{ request('type') == 'order_number' ? 'selected' : '' }}>Order Number
-                                            </option>
-                                            <option value="customer" {{ request('type') == 'customer' ? 'selected' : '' }}>
-                                                Customer</option>
+                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>ID</option>
+                                            <option value="customer_id" {{ request('type') == 'customer_id' ? 'selected' : '' }}>Customer ID</option>
+                                            <option value="sewing_order_number" {{ request('type') == 'sewing_order_number' ? 'selected' : '' }}>Order Number</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
@@ -60,7 +58,7 @@
                             <thead>
                                 <tr>
                                     <th>#ID</th>
-                                    <th>Order Number</th>
+                                    <th>Sewing Order Number</th>
                                     <th>Date</th>
                                     <th>Customer</th>
                                     <th>Total Amount</th>
@@ -77,11 +75,15 @@
                                         @endphp
                                         <tr>
                                             <td>{{ $order->id }}</td>
-                                            <td><a href="{{ route('orders.show', $order->id) }}">{{ $order->order_number }}</a></td>
-                                            <td>{{ $order->order_date->format('Y-m-d') }}</td>
+                                            <td><a href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a></td>
+                                            <td>{{ $order->order_date ? $order->order_date->format('Y-m-d') : 'N/A' }}</td>
                                             <td>{{ $order->customer->name ?? 'N/A' }}</td>
-                                            <td>{{ number_format($order->total_amount, 2) }}</td>
+                                            <td>Rs {{ number_format($order->total_amount, 2) }}</td>
                                             <td>
+                                                @php
+                                                    $totalPaid = $order->payments->sum('amount');
+                                                    $remaining = $order->total_amount - $totalPaid;
+                                                @endphp
                                                 <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
                                                     {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
                                                 </span>
@@ -90,10 +92,8 @@
                                                         {{ number_format($remaining, 2) }}</small>
                                                 @endif
                                             </td>
-                                           
-                                           
                                             <td>
-                                                <a href="{{ route('orders.show', $order) }}"
+                                                <a href="{{ route('sewing-orders.show', $order) }}"
                                                     class="btn btn-sm bg-info-subtle">
                                                     <i class="mdi mdi-eye fs-14 text-info"></i>
                                                 </a>

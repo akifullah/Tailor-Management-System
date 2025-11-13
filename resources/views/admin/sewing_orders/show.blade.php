@@ -3,7 +3,7 @@
 @section('content')
     <div class="container-fluid">
         <div class="py-3">
-            <h4 class="fs-18 fw-semibold mb-0">Order Details</h4>
+            <h4 class="fs-18 fw-semibold mb-0">Sewing Order Details</h4>
         </div>
 
         <!-- Alert Container -->
@@ -15,55 +15,81 @@
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <strong>Order Number:</strong> {{ $order->order_number }}
+                                <strong>Sewing Order Number:</strong> {{ $sewingOrder->sewing_order_number ?? 'N/A' }}
                             </div>
                             <div class="col-md-6">
-                                <strong>Order Date:</strong> {{ $order?->order_date?->format('Y-m-d') }}
+                                <strong>Order Date:</strong> {{ $sewingOrder->order_date ? $sewingOrder->order_date->format('Y-m-d') : 'N/A' }}
                             </div>
                         </div>
                      
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <strong>Customer:</strong> {{ $order->customer->name ?? 'N/A' }}
+                                <strong>Customer:</strong> {{ $sewingOrder->customer->name ?? 'N/A' }}
                             </div>
                             <div class="col-md-6">
-                                <strong>Phone:</strong> {{ $order->customer->phone ?? 'N/A' }}
+                                <strong>Phone:</strong> {{ $sewingOrder->customer->phone ?? 'N/A' }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Delivery Date:</strong> {{ $sewingOrder->delivery_date ? $sewingOrder->delivery_date->format('Y-m-d') : 'N/A' }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Order Status:</strong> 
+                                <span class="badge bg-{{ $sewingOrder->order_status == 'completed' ? 'success' : ($sewingOrder->order_status == 'in_progress' ? 'warning' : 'secondary') }}">
+                                    {{ ucfirst(str_replace('_', ' ', $sewingOrder->order_status)) }}
+                                </span>
                             </div>
                         </div>
 
                         <hr>
 
-                        <h5>Order Items</h5>
+                        <h5>Sewing Order Items</h5>
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
-                                        <th>Quantity (Meters)</th>
-                                        <th>Price</th>
-                                        <th>Source</th>
+                                        <th>Product Name</th>
+                                        <th>Sewing Price</th>
+                                        <th>Qty</th>
                                         <th>Total</th>
+                                        <th>Assigned To</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($order->items as $itemIndex => $item)
+                                    @foreach ($sewingOrder->items as $item)
                                         <tr>
-                                            <td>{{ $item->product ? $item->product->title : 'Custom Item' }}</td>
-                                            <td>{{ $item->quantity_meters }}</td>
-                                            <td>{{ number_format($item->sell_price, 2) }}</td>
+                                            <td>{{ $item->product_name }}</td>
+                                            <td>Rs {{ number_format($item->sewing_price, 2) }}</td>
+                                            <td>{{ $item->qty }}</td>
+                                            <td>Rs {{ number_format($item->total_price, 2) }}</td>
+                                            <td>{{ $item->worker->name ?? 'Not Assigned' }}</td>
                                             <td>
-                                                @if ($item->is_from_inventory)
-                                                    <span class="badge bg-success">Inventory</span>
-                                                @else
-                                                    <span class="badge bg-info">Customer's Fabric</span>
+                                                <span class="badge bg-{{ $item->status == 'completed' ? 'success' : ($item->status == 'in_progress' ? 'warning' : 'secondary') }}">
+                                                    {{ ucfirst(str_replace('_', ' ', $item->status)) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if ($item->customer_measurement)
+                                                    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#measurementModal{{ $item->id }}">
+                                                        View Measurement
+                                                    </button>
+                                                @endif
+                                                @if ($item->assign_note)
+                                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#noteModal{{ $item->id }}">
+                                                        View Note
+                                                    </button>
                                                 @endif
                                             </td>
-                                            <td>{{ number_format($item->total_price, 2) }}</td>
                                         </tr>
                                     @endforeach
                                     <tr>
-                                        <td colspan="4" class="text-end"><strong>Grand Total:</strong></td>
-                                        <td><strong>{{ number_format($order->total_amount, 2) }}</strong></td>
+                                        <td colspan="3" class="text-end"><strong>Grand Total:</strong></td>
+                                        <td><strong>Rs {{ number_format($sewingOrder->total_amount, 2) }}</strong></td>
+                                        <td colspan="3"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -81,13 +107,13 @@
                         </div>
                         
                         @php
-                            $totalPaid = $order->payments->sum('amount');
-                            $remaining = $order->total_amount - $totalPaid;
+                            $totalPaid = $sewingOrder->payments->sum('amount');
+                            $remaining = $sewingOrder->total_amount - $totalPaid;
                         @endphp
                         <div class="row mt-3">
                             <div class="col-md-3">
                                 <strong>Total Amount:</strong><br>
-                                <span class="fs-16 fw-semibold">Rs {{ number_format($order->total_amount, 2) }}</span>
+                                <span class="fs-16 fw-semibold">Rs {{ number_format($sewingOrder->total_amount, 2) }}</span>
                             </div>
                             <div class="col-md-3">
                                 <strong>Total Paid:</strong><br>
@@ -107,7 +133,7 @@
                             </div>
                         </div>
 
-                        @if ($order->payments->count() > 0)
+                        @if ($sewingOrder->payments->count() > 0)
                             <div class="row mt-4">
                                 <div class="col-md-12">
                                     <h6>Payment History</h6>
@@ -123,7 +149,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($order->payments as $payment)
+                                                @foreach ($sewingOrder->payments as $payment)
                                                     <tr>
                                                         <td>{{ $payment->payment_date->format('Y-m-d h:i A') }}</td>
                                                         <td><strong>Rs {{ number_format($payment->amount, 2) }}</strong></td>
@@ -141,14 +167,14 @@
                             </div>
                         @endif
 
-                        @if ($order->notes)
+                        @if ($sewingOrder->notes)
                             <div class="mt-3">
-                                <strong>Notes:</strong> {{ $order->notes }}
+                                <strong>Notes:</strong> {{ $sewingOrder->notes }}
                             </div>
                         @endif
 
                         <div class="mt-4">
-                            <a href="{{ route('orders.index') }}" class="btn btn-secondary">Back to Orders</a>
+                            <a href="{{ route('sewing-orders.index') }}" class="btn btn-secondary">Back to Sewing Orders</a>
                             <button onclick="window.print()" class="btn btn-primary">Print</button>
                         </div>
                     </div>
@@ -163,19 +189,19 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addPaymentModalLabel">
-                        <i class="mdi mdi-cash text-success me-2"></i>Add Payment to Order
+                        <i class="mdi mdi-cash text-success me-2"></i>Add Payment to Sewing Order
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="paymentForm">
                     @csrf
                     <div class="modal-body">
-                        <input type="hidden" name="payable_type" value="order">
-                        <input type="hidden" name="payable_id" value="{{ $order->id }}">
+                        <input type="hidden" name="payable_type" value="sewing_order">
+                        <input type="hidden" name="payable_id" value="{{ $sewingOrder->id }}">
                         
                         @php
-                            $totalPaid = $order->payments->sum('amount');
-                            $remaining = max(0, $order->total_amount - $totalPaid);
+                            $totalPaid = $sewingOrder->payments->sum('amount');
+                            $remaining = max(0, $sewingOrder->total_amount - $totalPaid);
                         @endphp
                         <div class="mb-3">
                             <label class="form-label">Amount (Rs) <span class="text-danger">*</span></label>
@@ -225,11 +251,11 @@
     </div>
 
     <!-- Measurement Modals -->
-    @foreach ($order->items as $itemIndex => $item)
-        @if ($item->measurement)
+    @foreach ($sewingOrder->items as $itemIndex => $item)
+        @if ($item->customer_measurement)
             @php
                 // Handle measurement data - could be array or JSON string
-                $measurement = $item->measurement;
+                $measurement = $item->customer_measurement;
                 if (is_string($measurement)) {
                     $measurement = json_decode($measurement, true) ?? [];
                 }
@@ -243,26 +269,12 @@
                         $measurementData = $measurement['data'];
                     }
                 }
-                
-                // Convert keys to readable format (remove first word/type prefix, remove underscores, capitalize)
-                $readableData = [];
-                foreach ($measurementData as $key => $value) {
-                    // Split by underscore
-                    $parts = explode('_', $key);
-                    // Remove the first part (type prefix like "kameez")
-                    if (count($parts) > 1) {
-                        array_shift($parts);
-                    }
-                    // Join remaining parts and capitalize
-                    $readableKey = ucwords(implode(' ', $parts));
-                    $readableData[$readableKey] = $value;
-                }
             @endphp
-            <div class="modal fade" id="measurementModal{{ $itemIndex }}" tabindex="-1" aria-labelledby="measurementModalLabel{{ $itemIndex }}" aria-hidden="true">
+            <div class="modal fade" id="measurementModal{{ $item->id }}" tabindex="-1" aria-labelledby="measurementModalLabel{{ $item->id }}" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="measurementModalLabel{{ $itemIndex }}">
+                            <h5 class="modal-title" id="measurementModalLabel{{ $item->id }}">
                                 Measurement Details: {{ ucfirst(str_replace('_', ' ', $measurement['type'] ?? 'N/A')) }}
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -324,17 +336,27 @@
                                     <p class="mt-2">{{ $measurement['notes'] }}</p>
                                 </div>
                             @endif
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
 
-                            {{-- <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <strong>Created At:</strong>
-                                    {{ isset($measurement['created_at']) ? \Carbon\Carbon::parse($measurement['created_at'])->format('Y-m-d H:i:s') : 'N/A' }}
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Updated At:</strong>
-                                    {{ isset($measurement['updated_at']) ? \Carbon\Carbon::parse($measurement['updated_at'])->format('Y-m-d H:i:s') : 'N/A' }}
-                                </div>
-                            </div> --}}
+        @if ($item->assign_note)
+            <div class="modal fade" id="noteModal{{ $item->id }}" tabindex="-1" aria-labelledby="noteModalLabel{{ $item->id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="noteModalLabel{{ $item->id }}">
+                                Assignment Note
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>{{ $item->assign_note }}</p>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -349,7 +371,6 @@
 
 @section('js')
 <script>
-// Function to show Bootstrap alert
 function showAlert(message, type = 'success') {
     const alertContainer = document.getElementById('alertContainer');
     const alertId = 'alert-' + Date.now();
@@ -365,7 +386,6 @@ function showAlert(message, type = 'success') {
     
     alertContainer.innerHTML = alertHTML;
     
-    // Auto remove after 3 seconds and then refresh
     setTimeout(function() {
         const alertElement = document.getElementById(alertId);
         if (alertElement) {
@@ -378,141 +398,56 @@ function showAlert(message, type = 'success') {
     }, 3000);
 }
 
-function updateOrderField(field, value) {
-    const fieldNames = {
-        'delivery_date': 'Delivery Date',
-        'delivery_status': 'Delivery Status'
-    };
-    const fieldName = fieldNames[field] || field;
-    
-    $.ajax({
-        url: '{{ route("orders.update", $order->id) }}',
-        method: 'PUT',
-        data: {
-            _token: '{{ csrf_token() }}',
-            [field]: value
-        },
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        },
-        success: function(response) {
-            if (response.success) {
-                showAlert(`${fieldName} updated successfully!`, 'success');
-            } else {
-                showAlert('Failed to update ' + fieldName, 'danger');
-            }
-        },
-        error: function(xhr) {
-            const errorMsg = xhr.responseJSON?.message || 'Unknown error occurred';
-            showAlert('Failed to update ' + fieldName + ': ' + errorMsg, 'danger');
-        }
-    });
+function setMaxAmount() {
+    const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, ''));
+    document.getElementById('paymentAmount').value = remaining.toFixed(2);
 }
 
-function updateItemStatus(itemId, status) {
-    // Build the URL - route is defined without 'admin' prefix
-    const baseUrl = '{{ url("/") }}';
-    const url = baseUrl + '/order-items/' + itemId + '/status';
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
     
-    const statusNames = {
-        'pending': 'Pending',
-        'progress': 'In Progress',
-        'completed': 'Completed'
-    };
-    const statusName = statusNames[status] || status;
+    const formData = new FormData(this);
+    const submitButton = this.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Processing...';
     
-    $.ajax({
-        url: url,
-        method: 'PUT',
-        data: {
-            _token: '{{ csrf_token() }}',
-            status: status,
-            _method: 'PUT'
-        },
+    fetch('{{ route("payments.store") }}', {
+        method: 'POST',
+        body: formData,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(response) {
-            if (response.success) {
-                showAlert(`Item status updated to ${statusName} successfully!`, 'success');
-            } else {
-                showAlert('Failed to update item status', 'danger');
-            }
-        },
-        error: function(xhr) {
-            console.error('Error:', xhr);
-            let errorMsg = 'Failed to update item status. ';
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMsg += xhr.responseJSON.message;
-            } else if (xhr.status === 404) {
-                errorMsg += 'Route not found.';
-            } else {
-                errorMsg += 'Please try again.';
-            }
-            showAlert(errorMsg, 'danger');
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
+            modal.hide();
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit Payment';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        submitButton.disabled = false;
+        submitButton.textContent = 'Submit Payment';
     });
-}
+});
 
-        // Set max amount button
-        function setMaxAmount() {
-            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, ''));
-            document.getElementById('paymentAmount').value = remaining.toFixed(2);
-        }
-
-        // Handle payment form submission
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Processing...';
-            
-            fetch('{{ route("payments.store") }}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
-                    modal.hide();
-                    
-                    // Reload page to show updated payment information
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Submit Payment';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-                submitButton.disabled = false;
-                submitButton.textContent = 'Submit Payment';
-            });
-        });
-
-        // Update remaining amount when payment amount changes
-        document.getElementById('paymentAmount').addEventListener('input', function() {
-            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, ''));
-            const entered = parseFloat(this.value) || 0;
-            
-            if (entered > remaining) {
-                this.setCustomValidity('Amount cannot exceed remaining amount');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    </script>
+document.getElementById('paymentAmount').addEventListener('input', function() {
+    const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, ''));
+    const entered = parseFloat(this.value) || 0;
+    
+    if (entered > remaining) {
+        this.setCustomValidity('Amount cannot exceed remaining amount');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
 @endsection

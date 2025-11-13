@@ -13,8 +13,8 @@ return new class extends Migration
             $table->string('order_number')->unique();
             $table->foreignId('customer_id')->constrained()->onDelete('restrict');
             $table->date('order_date');
-            $table->date('delivery_date')->nullable();
-            $table->enum('delivery_status', ['pending', 'delivered'])->default('pending');
+            // $table->date('delivery_date')->nullable();
+            // $table->enum('delivery_status', ['pending', 'delivered'])->default('pending');
             $table->decimal('total_amount', 10, 2);
             $table->enum('payment_method', ['online', 'cash'])->default('cash');
             $table->enum('payment_status', ['partial', 'full'])->default('full');

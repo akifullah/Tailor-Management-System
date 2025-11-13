@@ -55,8 +55,8 @@ class OrderController extends Controller
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'order_date' => 'required|date',
-            'delivery_date' => 'nullable|date',
-            'delivery_status' => 'nullable|in:pending,delivered',
+            // 'delivery_date' => 'nullable|date',
+            // 'delivery_status' => 'nullable|in:pending,delivered',
             'payment_method' => 'required|in:online,cash,bank_transfer,cheque',
             'payment_status' => 'required|in:partial,full',
             'partial_amount' => 'nullable|numeric|min:0',
@@ -64,32 +64,22 @@ class OrderController extends Controller
             'person_reference' => 'nullable|string|max:255',
             'payment_notes' => 'nullable|string',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'nullable|exists:products,id',
-            'items.*.is_from_inventory' => 'nullable|boolean',
+            'items.*.product_id' => 'required|exists:products,id',
+            // Always use inventory, don't allow bypass
+            // 'items.*.is_from_inventory' => 'nullable|boolean',
             'items.*.sell_price' => 'required|numeric',
             'items.*.quantity_meters' => 'required|numeric',
-            'items.*.measurement' => 'required',
+            // 'items.*.measurement' => 'required',
             'items.*.product_name' => 'nullable',
             // 'items.*.status' => 'nullable|in:pending,progress,completed',
-            'items.*.assign_to' => 'nullable',
+            // 'items.*.assign_to' => 'nullable',
         ]);
-        // Validate: product_id is required only if is_from_inventory is true
-        foreach ($validated['items'] as $idx => $item) {
-            $isFromInventory = isset($item['is_from_inventory']) && ($item['is_from_inventory'] == '1' || $item['is_from_inventory'] === true || $item['is_from_inventory'] === 1 || $item['is_from_inventory'] == 'on');
-            if ($isFromInventory && empty($item['product_id'])) {
-                return back()->withInput()->with('error', "Product is required when using inventory stock (Item " . ($idx + 1) . ")");
-            }
-        }
 
-        // Gather total quantity requested per product (only for items from inventory)
+        // Make sure each item is from inventory, so we do not need conditional stock checks
         $totals = [];
         foreach ($validated['items'] as $item) {
-            if (empty($item['product_id'])) continue; // Skip if no product
             $pid = $item['product_id'];
-            $isFromInventory = isset($item['is_from_inventory']) && ($item['is_from_inventory'] == '1' || $item['is_from_inventory'] === true || $item['is_from_inventory'] === 1 || $item['is_from_inventory'] == 'on');
-            if ($isFromInventory) {
-                $totals[$pid] = ($totals[$pid] ?? 0) + $item['quantity_meters'];
-            }
+            $totals[$pid] = ($totals[$pid] ?? 0) + $item['quantity_meters'];
         }
         $errors = [];
         foreach ($totals as $pid => $totalQty) {
@@ -129,8 +119,8 @@ class OrderController extends Controller
                 'order_number' => $orderNumber,
                 'customer_id' => $validated['customer_id'],
                 'order_date' => $validated['order_date'],
-                'delivery_date' => $validated['delivery_date'] ?? null,
-                'delivery_status' => $validated['delivery_status'] ?? 'pending',
+                // 'delivery_date' => $validated['delivery_date'] ?? null,
+                // 'delivery_status' => $validated['delivery_status'] ?? 'pending',
                 'total_amount' => $totalAmount,
                 'payment_method' => $validated['payment_method'],
                 'payment_status' => $validated['payment_status'],
@@ -169,40 +159,37 @@ class OrderController extends Controller
                 // Update order payment status based on payments (this ensures consistency)
                 $this->updateOrderPaymentStatus($order);
             }
+
             foreach ($validated['items'] as $itemData) {
-                $isFromInventory = isset($itemData['is_from_inventory']) && ($itemData['is_from_inventory'] == '1' || $itemData['is_from_inventory'] === true || $itemData['is_from_inventory'] === 1 || $itemData['is_from_inventory'] == 'on');
-                $assignTo = isset($itemData['assign_to']) && $itemData['assign_to'] !== '' ? $itemData['assign_to'] : null;
+                // Force all items as inventory items now
                 $orderItem = OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $itemData['product_id'] ?? null, // Can be null if customer brings own fabric
-                    'assign_to' =>   $assignTo,
-                    'product_name' => $itemData['product_name'] ?? "lkdsajflkdsj", // Can be null if customer brings own fabric
-                    'measurement' => $itemData['measurement'] ?? null, // Can be null if customer brings own fabric
-                    'is_from_inventory' => $isFromInventory,
+                    'product_id' => $itemData['product_id'], // Always required above
+                    // 'assign_to' =>   $assignTo,
+                    'product_name' => $itemData['product_name'] ?? null,
+                    // 'measurement' => $itemData['measurement'] ?? null,
+                    'is_from_inventory' => true, // Always using inventory
                     'sell_price' => $itemData['sell_price'],
                     'quantity_meters' => $itemData['quantity_meters'],
-                    'status' => $itemData['status'] ?? 'pending',
+                    // 'status' => $itemData['status'] ?? 'pending',
                     'total_price' => $itemData['sell_price'] * $itemData['quantity_meters'],
                 ]);
 
-                // Only update inventory if item is from inventory and has product_id
-                if ($isFromInventory && !empty($itemData['product_id'])) {
-                    // Update product stock
-                    $product = Product::findOrFail($itemData['product_id']);
-                    $product->available_meters = max(0, $product->available_meters - $itemData['quantity_meters']);
-                    $product->save();
+                // Always update inventory for each item
+                $product = Product::findOrFail($itemData['product_id']);
+                $product->available_meters = max(0, $product->available_meters - $itemData['quantity_meters']);
+                $product->save();
 
-                    // Track inventory movement
-                    InventoryTracking::create([
-                        'product_id' => $product->id,
-                        'order_id' => $order->id,
-                        'type' => 'sale',
-                        'quantity_meters' => -abs($itemData['quantity_meters']), // negative for sale
-                        'balance_meters' => $product->available_meters,
-                        'notes' => "Sale - Order #{$order->order_number}",
-                        'reference_number' => $order->order_number,
-                    ]);
-                }
+                // Track inventory movement
+                InventoryTracking::create([
+                    'product_id' => $product->id,
+                    'order_id' => $order->id,
+                    'type' => 'sale',
+                    'quantity_meters' => -abs($itemData['quantity_meters']), // negative for sale
+                    'balance_meters' => $product->available_meters,
+                    'notes' => "Sale - Order #{$order->order_number}",
+                    'reference_number' => $order->order_number,
+                ]);
             }
 
             DB::commit();

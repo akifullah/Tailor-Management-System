@@ -11,13 +11,13 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
-        "assign_to",
+        // "assign_to",
         'product_name',
-        'measurement',
+        // 'measurement',
         'is_from_inventory',
         'sell_price',
         'quantity_meters',
-        'status',
+        // 'status',
         'total_price',
     ];
 
@@ -26,7 +26,7 @@ class OrderItem extends Model
         'sell_price' => 'decimal:2',
         'quantity_meters' => 'decimal:2',
         'total_price' => 'decimal:2',
-        'measurement' => 'array',
+        // 'measurement' => 'array',
     ];
 
     public function order()
@@ -38,8 +38,8 @@ class OrderItem extends Model
         return $this->belongsTo(Product::class);
     }
   
-    public function worker()
-    {
-        return $this->belongsTo(User::class, 'assign_to', 'id');
-    }
+    // public function worker()
+    // {
+    //     return $this->belongsTo(User::class, 'assign_to', 'id');
+    // }
 }
