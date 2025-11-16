@@ -19,12 +19,16 @@ class SewingOrderItem extends Model
         'assign_note',
         'status',
         'total_price',
+        'cancelled_at',
+        'cancelled_by',
+        'cancellation_reason',
     ];
 
     protected $casts = [
         'sewing_price' => 'decimal:2',
         'total_price' => 'decimal:2',
         'customer_measurement' => 'array',
+        'cancelled_at' => 'datetime',
     ];
 
     public function sewingOrder()
@@ -35,5 +39,10 @@ class SewingOrderItem extends Model
     public function worker()
     {
         return $this->belongsTo(User::class, 'assign_to');
+    }
+
+    public function cancelledBy()
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
     }
 }

@@ -15,18 +15,101 @@
             </div>
         @endif
 
+        <!-- Stats Cards -->
+        <div class="row align-items-stretch mb-3">
+            <div class="col-md-3">
+                <div class="card h-100 border-primary">
+                    <div class="card-body">
+                        <h5>Total Assigned</h5>
+                        <h2 class="text-primary">{{ $stats['total_assigned'] }}</h2>
+                        {{-- <small class="text-muted">Total Value: Rs {{ number_format($stats['total_value'], 2) }}</small> --}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-secondary">
+                    <div class="card-body">
+                        <h5>Pending</h5>
+                        <h2 class="text-secondary">{{ $stats['pending'] }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-warning">
+                    <div class="card-body">
+                        <h5>In Progress</h5>
+                        <h2 class="text-warning">{{ $stats['in_progress'] }}</h2>
+                        {{-- <small class="text-muted">Value: Rs {{ number_format($stats['in_progress_value'], 2) }}</small> --}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <h5>Completed</h5>
+                        <h2 class="text-success">{{ $stats['completed'] }}</h2>
+                        {{-- <small class="text-muted">Value: Rs {{ number_format($stats['completed_value'], 2) }}</small> --}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Stats Cards -->
+        <div class="row align-items-stretch mb-3">
+            {{-- <div class="col-md-3">
+                <div class="card h-100 border-info">
+                    <div class="card-body">
+                        <h5>On Hold</h5>
+                        <h2 class="text-info">{{ $stats['on_hold'] }}</h2>
+                    </div>
+                </div>
+            </div> --}}
+            {{-- <div class="col-md-3">
+                <div class="card h-100 border-danger">
+                    <div class="card-body">
+                        <h5>Cancelled</h5>
+                        <h2 class="text-danger">{{ $stats['cancelled'] }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <h5>Delivered</h5>
+                        <h2 class="text-success">{{ $stats['delivered'] }}</h2>
+                    </div>
+                </div>
+            </div> --}}
+            {{-- <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5>Completion Rate</h5>
+                        <h2 class="text-primary">
+                            @if ($stats['total_assigned'] > 0)
+                                {{ number_format(($stats['completed'] / $stats['total_assigned']) * 100, 1) }}%
+                            @else
+                                0%
+                            @endif
+                        </h2>
+                        <small class="text-muted">{{ $stats['completed'] }} of {{ $stats['total_assigned'] }} items</small>
+                    </div>
+                </div>
+            </div> --}}
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
                         <div class="mb-3">
-                            <form method="GET" action="{{ route('sewing-orders.worker-dashboard') }}">
+                            <form method="GET" action="{{ route('worker.dashboard') }}">
                                 <div class="row g-2 justify-content-end align-items-end">
                                     <div class="col-md-3">
                                         <label for="status" class="form-label">Filter by Status</label>
                                         <select name="status" id="status" class="form-select">
                                             <option value="">All Statuses</option>
-                                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
+                                                Pending</option>
                                             <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
                                             <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                                         </select>
@@ -44,43 +127,54 @@
                                     <th>Sewing Order #</th>
                                     <th>Customer</th>
                                     <th>Product Name</th>
+                                    <th>Color</th>
                                     <th>Sewing Price</th>
                                     <th>Qty</th>
                                     <th>Total</th>
                                     <th>Status</th>
-                                    <th>Assignment Note</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @if ($items->isNotEmpty())
                                     @foreach ($items as $item)
-                                        <tr>
+                                        <tr @if($item->status == 'cancelled') style="background-color: rgba(255,0,0,0.1);" @endif >
                                             <td>{{ $item->id }}</td>
                                             <td>
                                                 <a href="{{ route('sewing-orders.show', $item->sewingOrder->id) }}">
                                                     {{ $item->sewingOrder->sewing_order_number }}
                                                 </a>
                                             </td>
-                                            <td>{{ $item->sewingOrder->customer->name ?? 'N/A' }}</td>
+                                            <td>{{ $item->sewingOrder->customer->name ?? '--' }}</td>
                                             <td>{{ $item->product_name }}</td>
+                                            <td>{{ $item->color ?? '--' }}</td>
                                             <td>Rs {{ number_format($item->sewing_price, 2) }}</td>
                                             <td>{{ $item->qty }}</td>
                                             <td>Rs {{ number_format($item->total_price, 2) }}</td>
                                             <td>
-                                                <span class="badge bg-{{ $item->status == 'completed' ? 'success' : ($item->status == 'in_progress' ? 'warning' : 'secondary') }}">
+                                                <span
+                                                    class="badge bg-{{ ['pending' => 'secondary', "on_hold" => 'secondary', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', "delivered" => 'success'][$item->status] ?? 'secondary' }}">
                                                     {{ ucfirst(str_replace('_', ' ', $item->status)) }}
                                                 </span>
                                             </td>
-                                            <td>{{ $item->assign_note ?? 'N/A' }}</td>
                                             <td>
-                                                <select class="form-select form-select-sm status-select" data-item-id="{{ $item->id }}" style="width: auto; display: inline-block;">
-                                                    <option value="pending" {{ $item->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                <select class="form-select form-select-sm status-select"
+                                                    data-item-id="{{ $item->id }}" style="width: auto; display: inline-block;">
+                                                    <option value="pending" {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
+                                                    </option>
+                                                    <option value="on_hold" {{ $item->status == 'on_hold' ? 'selected' : '' }}>On Hold
+                                                    </option>
                                                     <option value="in_progress" {{ $item->status == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                                    <option value="completed" {{ $item->status == 'completed' ? 'selected' : '' }}>Completed</option>
+                                                    <option value="completed" {{ $item->status == 'completed' ? 'selected' : '' }}>
+                                                        Completed</option>
+                                                    {{-- <option value="cancelled" {{ $item->status == 'cancelled' ? 'selected' : '' }}>
+                                                        Cancelled</option>
+                                                    <option value="delivered" {{ $item->status == 'delivered' ? 'selected' : '' }}>
+                                                        Delivered</option> --}}
                                                 </select>
                                                 @if ($item->customer_measurement)
-                                                    <button type="button" class="btn btn-sm btn-info mt-1" data-bs-toggle="modal" data-bs-target="#measurementModal{{ $item->id }}">
+                                                    <button type="button" class="btn btn-sm btn-info mt-1" data-bs-toggle="modal"
+                                                        data-bs-target="#measurementModal{{ $item->id }}">
                                                         View Measurement
                                                     </button>
                                                 @endif
@@ -88,11 +182,11 @@
                                         </tr>
                                     @endforeach
                                 @else
-                                <tr>
-                                    <td colspan="10" class="text-center text-muted">
-                                        No assigned items found.
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="10" class="text-center text-muted">
+                                            No assigned items found.
+                                        </td>
+                                    </tr>
                                 @endif
                             </tbody>
                         </table>
@@ -122,7 +216,8 @@
                     }
                 }
             @endphp
-            <div class="modal fade" id="measurementModal{{ $item->id }}" tabindex="-1" aria-labelledby="measurementModalLabel{{ $item->id }}" aria-hidden="true">
+            <div class="modal fade" id="measurementModal{{ $item->id }}" tabindex="-1"
+                aria-labelledby="measurementModalLabel{{ $item->id }}" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -168,7 +263,9 @@
                                             <tbody>
                                                 @foreach ($groupFields as $fieldKey => $fieldValue)
                                                     <tr>
-                                                        <td class="text-capitalize"><strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong></td>
+                                                        <td class="text-capitalize">
+                                                            <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
+                                                        </td>
                                                         <td>{{ $fieldValue ?? 'N/A' }}</td>
                                                     </tr>
                                                 @endforeach
@@ -201,11 +298,14 @@
 
 @section('js')
     <script>
-        $(document).ready(function() {
-            $('.status-select').on('change', function() {
+        $(document).ready(function () {
+            $('.status-select').on('change', function () {
                 const itemId = $(this).data('item-id');
                 const status = $(this).val();
-                
+                if (status == "cancelled" && !confirm("Are you sure you want to cancel this item?")) {
+                    $(this).val("");
+                    return;
+                }
                 $.ajax({
                     url: `/sewing-order-items/${itemId}/status`,
                     method: 'PUT',
@@ -218,14 +318,14 @@
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
                     },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             location.reload();
                         } else {
                             alert('Failed to update status');
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         console.error('Error:', xhr);
                         alert('Failed to update status. Please try again.');
                     }
@@ -234,4 +334,3 @@
         });
     </script>
 @endsection
-

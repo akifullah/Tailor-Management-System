@@ -14,14 +14,15 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('sewing-orders.store') }}" method="POST" id="sewingOrderForm" autocomplete="off">
+                        <form action="{{ route('sewing-orders.store') }}" method="POST" id="sewingOrderForm"
+                            autocomplete="off">
                             @csrf
 
                             <div class="row mb-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Customer *</label>
                                     @if ($selectedCustomer)
-                                        <select id="customer_id" class="form-select" disabled>
+                                        <select id="customer_id" class="form-select select2" disabled>
                                             @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}"
                                                     {{ $selectedCustomer->id == $customer->id ? 'selected' : '' }}
@@ -32,7 +33,7 @@
                                         </select>
                                         <input type="hidden" name="customer_id" value="{{ $selectedCustomer->id }}">
                                     @else
-                                        <select id="customer_id" name="customer_id" class="form-select" required>
+                                        <select id="customer_id" name="customer_id" class="form-select select2" required>
                                             <option value="">Select Customer</option>
                                             @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}"
@@ -45,7 +46,8 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Order Date *</label>
-                                    <input type="date" name="order_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                                    <input type="date" name="order_date" class="form-control" value="{{ date('Y-m-d') }}"
+                                        required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Delivery Date</label>
@@ -67,19 +69,25 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <strong>Total Order Amount:</strong>
-                                                    <h5 class="text-primary mb-0">Rs <span id="payment_total_display">0.00</span></h5>
+                                                    <h5 class="text-primary mb-0">Rs <span
+                                                            id="payment_total_display">0.00</span></h5>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <strong>Payment Status:</strong>
-                                                    <select name="payment_status" id="payment_status" class="form-control mt-1" required>
-                                                        <option value="full">Full Payment</option>
+                                                    <select name="payment_status" id="payment_status"
+                                                        class="form-control mt-1" required>
+                                                        <option value="no_payment" selected>No Payment</option>
                                                         <option value="partial">Partial Payment</option>
+                                                        <option value="full">Full Payment</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-3" id="partial_amount_div" style="display:none;">
                                                     <strong>Paid Amount:</strong>
-                                                    <input type="number" step="0.01" name="partial_amount" id="partial_amount" class="form-control mt-1" min="0.01" value="0">
-                                                    <small class="text-muted">Remaining: Rs <span id="remaining_amount_display">0.00</span></small>
+                                                    <input type="number" step="0.01" name="partial_amount"
+                                                        id="partial_amount" class="form-control mt-1" min="0.01"
+                                                        value="0">
+                                                    <small class="text-muted">Remaining: Rs <span
+                                                            id="remaining_amount_display">0.00</span></small>
                                                 </div>
                                             </div>
                                         </div>
@@ -99,20 +107,22 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Payment Date</label>
-                                    <input type="datetime-local" name="payment_date" id="payment_date" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}">
+                                    <input type="datetime-local" name="payment_date" id="payment_date" class="form-control"
+                                        value="{{ now()->format('Y-m-d\TH:i') }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Person + Reference</label>
-                                    <input type="text" name="person_reference" class="form-control" placeholder="e.g., John Doe - INV-123">
+                                    <input type="text" name="person_reference" class="form-control"
+                                        placeholder="e.g., John Doe - INV-123">
                                 </div>
                             </div>
 
-                            <div class="row mb-3">
+                            {{-- <div class="row mb-3">
                                 <div class="col-md-12">
                                     <label class="form-label">Payment Notes</label>
                                     <textarea name="payment_notes" class="form-control" rows="2"></textarea>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <div class="row mb-3">
                                 <div class="col-md-12">
@@ -286,35 +296,33 @@
                     <input type="text" name="items[${itemCount}][product_name]" class="form-control" required>
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label">Color</label>
+                    <input type="text" name="items[${itemCount}][color]" class="form-control">
+                </div>
+                <div class="col-md-1">
                     <label class="form-label">Sewing Price *</label>
                     <input type="number" step="0.01" name="items[${itemCount}][sewing_price]" class="form-control sewing-price" required onchange="calculateTotal(this)">
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Qty *</label>
-                    <select name="items[${itemCount}][qty]" class="form-control quantity" required onchange="calculateTotal(this)">
-                        <option value="">Qty</option>
-                        ${Array.from({length: 20}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
-                    </select>
+                    <input type="number" name="items[${itemCount}][qty]" class="form-control quantity" required min="1" max="20" onchange="calculateTotal(this)">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Customer Measurement</label>
-                    <select name="items[${itemCount}][customer_measurement]" class="form-select measurement-select">
+                    <select name="items[${itemCount}][customer_measurement]" class="form-select measurement-select" required>
                         ${measurementOptions}
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Assign To Worker</label>
-                    <select name="items[${itemCount}][assign_to]" class="form-select">
+                    <select name="items[${itemCount}][assign_to]" class="form-select" required>
                         <option value="">Select Worker</option>
                         @foreach ($workers as $worker)
                         <option value="{{ $worker->id }}">{{ $worker->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">Assign Note</label>
-                    <input type="text" name="items[${itemCount}][assign_note]" class="form-control" placeholder="Assignment notes">
-                </div>
+              
                 <div class="col-md-1">
                     <label class="form-label">Total</label>
                     <input type="text" class="form-control item-total" readonly>

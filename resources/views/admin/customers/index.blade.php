@@ -33,7 +33,7 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <form id="customerSearchForm" method="GET" action="">
-                                <div class="row g-2 justify-content-end align-items-end">
+                                <div class="row g-2  align-items-end">
                                     <div class="col-md-2">
                                         <label for="search_type" class="form-label">Search Type</label>
                                         <select name="type" id="search_type" class="form-select" required>
@@ -59,7 +59,7 @@
                                 </div>
                             </form>
                         </div>
-                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap">
+                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap data-table">
                             <thead>
                                 <tr>
                                     <th>ID #</th>
@@ -109,6 +109,10 @@
                                                     <a class="dropdown-item "
                                                         href="{{ route('orders.create.withCustomer', ['customer' => $customer->id]) }}">Create
                                                         Order</a>
+
+                                                    <a class="dropdown-item" href="{{ route('reports.customer-transactions', ['customer_id' => $customer->id]) }}">
+                                                        <span>Customer Ledger</span>
+                                                    </a>
 
                                                 </div>
                                             </div>
@@ -163,22 +167,22 @@
                                 <div class="col-xxl-6">
                                     <div>
                                         <label for="customer_id" class="form-label">Customer Old ID</label>
-                                        <input type="text" name="customer_id" class="form-control" id="customer_id"
-                                            placeholder="Customer Old ID">
+                                        <input type="number" name="customer_id" class="form-control" id="customer_id"
+                                            placeholder="Customer Old ID" >
                                     </div>
                                 </div><!--end col-->
                                 <div class="col-xxl-6">
                                     <div>
                                         <label for="name" class="form-label">Name</label>
                                         <input type="text" name="name" class="form-control" id="name"
-                                            placeholder="Enter Full Name">
+                                            placeholder="Enter Full Name" required>
                                     </div>
                                 </div><!--end col-->
                                 <div class="col-xxl-6">
                                     <div>
                                         <label for="phone" class="form-label">Phone</label>
                                         <input type="text" name="phone" class="form-control" id="phone"
-                                            placeholder="Enter phone">
+                                            placeholder="Enter phone" required>
                                     </div>
                                 </div>
                                 <div class="col-xxl-6">

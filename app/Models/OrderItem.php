@@ -17,8 +17,14 @@ class OrderItem extends Model
         'is_from_inventory',
         'sell_price',
         'quantity_meters',
-        // 'status',
+        'status',
         'total_price',
+        'is_return',
+        'return_date',
+        'return_reason',
+        'cancelled_at',
+        'cancelled_by',
+        'cancellation_reason',
     ];
 
     protected $casts = [
@@ -26,7 +32,10 @@ class OrderItem extends Model
         'sell_price' => 'decimal:2',
         'quantity_meters' => 'decimal:2',
         'total_price' => 'decimal:2',
-        // 'measurement' => 'array',
+        'is_return' => 'boolean',
+        'return_date' => 'date',
+        'return_reason' => 'string',
+        'cancelled_at' => 'datetime',
     ];
 
     public function order()
@@ -36,6 +45,10 @@ class OrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+    public function cancelledBy()
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
     }
   
     // public function worker()

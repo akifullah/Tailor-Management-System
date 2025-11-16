@@ -36,7 +36,7 @@ class MeasurementController extends Controller
 
         $selectedCustomer = $customer ? Customer::find($customer) : null;
         $types = Type::get();
-        $customers = Customer::select('id', 'name')->get();
+        $customers = Customer::select('id', 'name', "phone")->get();
         return view('admin.measurements.create', compact('customers', "types", "selectedCustomer"));
     }
 

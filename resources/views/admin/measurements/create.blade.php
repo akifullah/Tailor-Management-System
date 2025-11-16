@@ -54,10 +54,10 @@
                                         <input type="hidden" name="customer_id" value="{{ $selectedCustomer->id }}">
                                     @else
                                         <!-- Allow user to select manually -->
-                                        <select name="customer_id" class="form-select" required>
+                                        <select name="customer_id" class="form-select select2" required>
                                             <option value="">Select Customer</option>
                                             @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                                <option value="{{ $customer->id }}">{{ $customer->name }} | {{$customer->phone}}</option>
                                             @endforeach
                                         </select>
                                     @endif
@@ -249,12 +249,10 @@
         </div>
 
     </div>
-@endsection()
+@endsection
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 @section('js')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         // const options = {
         //     pant: {

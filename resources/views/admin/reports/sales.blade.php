@@ -89,7 +89,11 @@
                             <tbody>
                                 @foreach($orders as $order)
                                 <tr>
-                                    <td>{{ $order->order_number }}</td>
+                                    <td>
+                                        <a href="{{ route('orders.show', $order->id) }}">
+                                            {{ $order->order_number }}
+                                        </a>
+                                    </td>
                                     <td>{{ $order->order_date }}</td>
                                     <td>{{ $order->customer->name ?? 'N/A' }}</td>
                                     <td>{{ number_format($order->total_amount, 2) }}</td>

@@ -131,11 +131,15 @@
                         @forelse($transactions as $transaction)
                         <tr>
                             <td>{{ $transaction->payment_date->format('Y-m-d H:i A') }}</td>
-                            <td>
+                            <td style="text-transform: capitalize">
                                 @if($transaction->payable_type === 'App\Models\Order')
-                                    <span class="badge bg-success">Order Payment</span>
+                                    @if($transaction->type === 'refund')
+                                        <span class="badge bg-secondary">Order refund</span>
+                                    @else
+                                        <span class="badge bg-success">Order payment</span>
+                                    @endif
                                     @if($transaction->payable)
-                                        <br><small>{{ $transaction->payable->order_number }}</small>
+                                        <br><small><a href="{{ route('orders.show', $transaction->payable->id) }}">{{ $transaction->payable->order_number }}</a></small>
                                     @endif
                                 @else
                                     <span class="badge bg-info">Purchase Payment</span>

@@ -10,6 +10,7 @@ use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -94,10 +95,13 @@ Route::middleware(["auth"])->group(function () {
     
     // orders - Require manage-orders permission
     Route::middleware(['permission:manage-orders'])->group(function () {
-        Route::resource('orders', \App\Http\Controllers\OrderController::class);
-        Route::put('order-items/{item}/status', [\App\Http\Controllers\OrderItemController::class, 'updateStatus'])->name('order-items.update-status');
+        Route::resource('orders', OrderController::class);
+        Route::put('order-items/{item}/status', [OrderItemController::class, 'updateStatus'])->name('order-items.update-status');
         Route::get('orders/create/{customer?}', [OrderController::class, 'create'])
             ->name('orders.create.withCustomer');
+        Route::post('orders/{order}/return', [OrderController::class, 'returnOrder'])->name('orders.return');
+        Route::post('order-items/{item}/return', [OrderItemController::class, 'returnItem'])->name('order-items.return');
+        Route::post('order-items/{item}/cancel', [OrderController::class, 'cancelItem'])->name('order-items.cancel');
     });
 
     // sewing orders - Require manage-sewing-orders permission
@@ -105,7 +109,9 @@ Route::middleware(["auth"])->group(function () {
         Route::resource('sewing-orders', SewingOrderController::class);
         Route::get('sewing-orders/create/{customer?}', [SewingOrderController::class, 'create'])->name('sewing-orders.create.withCustomer');
         Route::put('sewing-order-items/{item}/status', [SewingOrderController::class, 'updateItemStatus'])->name('sewing-order-items.update-status');
-        Route::get('sewing-orders/worker/dashboard', [SewingOrderController::class, 'workerDashboard'])->name('sewing-orders.worker-dashboard');
+        Route::get('worker/dashboard', [SewingOrderController::class, 'workerDashboard'])->name('worker.dashboard');
+    // Route for storing a refund for a sewing order (for AJAX)
+    Route::post('refunds', [\App\Http\Controllers\SewingOrderController::class, 'createRefund'])->name('refunds.store');
     // });
     
     // Reports - Require view-reports permission
@@ -134,6 +140,7 @@ Route::middleware(["auth"])->group(function () {
     Route::middleware(['permission:manage-payments'])->group(function () {
         Route::post('payments', [\App\Http\Controllers\PaymentController::class, 'store'])->name('payments.store');
         Route::get('payments', [\App\Http\Controllers\PaymentController::class, 'getPayments'])->name('payments.get');
+        Route::post('payments/{payment}/refund', [\App\Http\Controllers\PaymentController::class, 'createRefund'])->name('payments.refund');
     });
     
     // Roles & Permissions - Require manage-roles-permissions permission

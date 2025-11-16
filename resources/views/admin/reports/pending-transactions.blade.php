@@ -76,6 +76,7 @@
                             <th>Total Amount</th>
                             <th>Paid</th>
                             <th>Remaining</th>
+                            <th>Order Status</th>
                             <th>Items Status</th>
                             <th>Actions</th>
                         </tr>
@@ -91,12 +92,38 @@
                             $totalItems = $order->items->count();
                         @endphp
                         <tr>
-                            <td>{{ $order->order_number }}</td>
+                            <td>
+                                <a href="{{ route('orders.show', $order->id) }}">
+                                    {{ $order->order_number }}
+                                </a>
+                            </td>
                             <td>{{ $order->customer->name ?? 'N/A' }}</td>
                             <td>{{ $order->order_date }}</td>
                             <td>Rs {{ number_format($order->total_amount, 2) }}</td>
                             <td class="text-success">Rs {{ number_format($totalPaid, 2) }}</td>
                             <td class="text-warning"><strong>Rs {{ number_format($remaining, 2) }}</strong></td>
+                            <td>
+                                @if(isset($order->order_status))
+                                    @switch($order->order_status)
+                                        @case('pending')
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            @break
+                                        @case('completed')
+                                            <span class="badge bg-success">Completed</span>
+                                            @break
+                                        @case('returned')
+                                            <span class="badge bg-danger">Returned</span>
+                                            @break
+                                        @case('cancelled')
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                            @break
+                                        @default
+                                            <span class="badge bg-light text-dark">{{ ucfirst($order->status) }}</span>
+                                    @endswitch
+                                @else
+                                    <span class="badge bg-light text-dark">N/A</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($totalItems > 0)
                                     @if($itemsCompleted == $totalItems)
@@ -112,7 +139,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No pending orders</td>
+                            <td colspan="8" class="text-center text-muted">No pending orders</td>
                         </tr>
                         @endforelse
                     </tbody>

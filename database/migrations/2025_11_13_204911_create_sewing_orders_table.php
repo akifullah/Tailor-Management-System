@@ -22,9 +22,13 @@ return new class extends Migration
             $table->decimal('remaining_amount', 10, 2)->default(0);
             $table->enum('payment_method', ['cash', 'online', 'bank_transfer', 'cheque'])->default('cash');
             $table->decimal('partial_amount', 10, 2)->nullable();
-            $table->enum('payment_status', ['partial', 'full'])->default('full');
-            $table->enum('order_status', ['pending', 'in_progress', 'completed'])->default('pending');
+            $table->enum('payment_status', ['partial', 'full', "no_payment"])->default('partial');
+            $table->enum('order_status', ['pending', 'in_progress', 'completed', "cancelled", "delivered"])->default('pending');
             $table->text('notes')->nullable();
+            $table->date('delivered_date')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
+            $table->foreignId('cancelled_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->text('cancellation_reason')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

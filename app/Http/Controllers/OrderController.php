@@ -10,7 +10,9 @@ use App\Models\InventoryTracking;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class OrderController extends Controller
 {
@@ -20,6 +22,9 @@ class OrderController extends Controller
 
         $type = $request->input('type');
         $value = $request->input('value');
+        $orderStatus = $request->input('order_status');
+        $paymentStatus = $request->input('payment_status');
+        $itemStatus = $request->input('item_status');
 
         // Search by order_number or customer (name or id)
         if ($type && $value !== null && $value !== '') {
@@ -33,7 +38,56 @@ class OrderController extends Controller
             }
         }
 
+        // New filter: order status
+        if ($orderStatus !== null && $orderStatus !== '') {
+            if ($orderStatus === 'returned') {
+                $query->where(function($q) {
+                    $q->where('is_return', true);
+                });
+            } else {
+                $query->where('order_status', $orderStatus);
+            }
+        }
+
+        // New filter: payment status
+        if ($paymentStatus !== null && $paymentStatus !== '') {
+            if ($paymentStatus === 'paid') {
+                $query->where(function($q) {
+                    $q->where('payment_status', 'full');
+                });
+            }
+            if ($paymentStatus === 'pending') {
+                $query->where(function($q) {
+                    $q->where('payment_status', '!=', 'full');
+                });
+            }
+        }
+
         $orders = $query->latest()->get();
+
+        // New filter: item status (filter in PHP since it depends on loaded relations)
+        if ($itemStatus !== null && $itemStatus !== '') {
+            $orders = $orders->filter(function($order) use ($itemStatus) {
+                $items = $order->items;
+                $count = $items->count();
+                $countReturned = $items->where('is_return', true)->count();
+                $countCompleted = $items->where('status', 'completed')->count();
+                $countPending = $items->where('status', 'pending')->count();
+                if ($itemStatus == 'all_done') {
+                    return $count > 0 && $countCompleted === $count;
+                }
+                if ($itemStatus == 'partial') {
+                    return $count > 0 && $countCompleted > 0 && $countCompleted < $count;
+                }
+                if ($itemStatus == 'returned') {
+                    return $count > 0 && $countReturned === $count;
+                }
+                if ($itemStatus == 'not_returned') {
+                    return $count > 0 && $countReturned < $count;
+                }
+                return true;
+            });
+        }
 
         return view('admin.orders.index', compact('orders'));
     }
@@ -57,8 +111,8 @@ class OrderController extends Controller
             'order_date' => 'required|date',
             // 'delivery_date' => 'nullable|date',
             // 'delivery_status' => 'nullable|in:pending,delivered',
-            'payment_method' => 'required|in:online,cash,bank_transfer,cheque',
-            'payment_status' => 'required|in:partial,full',
+            'payment_method' => 'nullable|in:online,cash,bank_transfer,cheque',
+            'payment_status' => 'required|in:no_payment,partial,full',
             'partial_amount' => 'nullable|numeric|min:0',
             'payment_date' => 'nullable|date',
             'person_reference' => 'nullable|string|max:255',
@@ -106,6 +160,7 @@ class OrderController extends Controller
             } elseif ($validated['payment_status'] === 'partial' && isset($validated['partial_amount']) && $validated['partial_amount'] > 0) {
                 $paymentAmount = min($validated['partial_amount'], $totalAmount); // Ensure payment doesn't exceed total
             }
+            // If payment_status is 'no_payment', paymentAmount remains 0 and no payment record is created
 
             // Generate unique order number
             $orderNumber = null;
@@ -115,18 +170,25 @@ class OrderController extends Controller
                 $orderNumber = 'ORD-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
             } while (Order::where('order_number', $orderNumber)->exists());
 
-            $order = Order::create([
+            $orderData = [
                 'order_number' => $orderNumber,
                 'customer_id' => $validated['customer_id'],
                 'order_date' => $validated['order_date'],
                 // 'delivery_date' => $validated['delivery_date'] ?? null,
                 // 'delivery_status' => $validated['delivery_status'] ?? 'pending',
                 'total_amount' => $totalAmount,
-                'payment_method' => $validated['payment_method'],
+                'payment_method' => $validated['payment_status'] !== 'no_payment' ? ($validated['payment_method'] ?? null) : null,
                 'payment_status' => $validated['payment_status'],
                 'partial_amount' => $paymentAmount > 0 ? $paymentAmount : null,
                 'remaining_amount' => max(0, $totalAmount - $paymentAmount),
-            ]);
+            ];
+            
+            // Only set order_status if the column exists
+            if (Schema::hasColumn('orders', 'order_status')) {
+                $orderData['order_status'] = 'pending';
+            }
+            
+            $order = Order::create($orderData);
 
             // Create payment record if payment amount > 0
             if ($paymentAmount > 0) {
@@ -149,11 +211,13 @@ class OrderController extends Controller
                 Payment::create([
                     'payable_type' => Order::class,
                     'payable_id' => $order->id,
+                    'type' => 'payment',
                     'amount' => $paymentAmount,
                     'payment_method' => $validated['payment_method'],
                     'person_reference' => $validated['person_reference'] ?? null,
                     'payment_date' => $paymentDate,
                     'notes' => $validated['payment_notes'] ?? null,
+                    'created_by' => Auth::id(),
                 ]);
 
                 // Update order payment status based on payments (this ensures consistency)
@@ -171,7 +235,7 @@ class OrderController extends Controller
                     'is_from_inventory' => true, // Always using inventory
                     'sell_price' => $itemData['sell_price'],
                     'quantity_meters' => $itemData['quantity_meters'],
-                    // 'status' => $itemData['status'] ?? 'pending',
+                    'status' => 'pending',
                     'total_price' => $itemData['sell_price'] * $itemData['quantity_meters'],
                 ]);
 
@@ -227,13 +291,26 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         $validated = $request->validate([
+            'order_status' => 'nullable|in:pending,in_progress,completed,on_hold,cancelled,delivered',
             'delivery_date' => 'nullable|date',
             'delivery_status' => 'nullable|in:pending,delivered',
         ]);
 
-        $order->update($validated);
-
-        return response()->json(['success' => true, 'message' => 'Order updated successfully']);
+        DB::beginTransaction();
+        try {
+            $order->update($validated);
+            
+            // If order is being cancelled, handle refunds
+            if ($validated['order_status'] === 'cancelled' && $order->order_status !== 'cancelled') {
+                $this->cancelOrder($order, $request->input('cancellation_reason'));
+            }
+            
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Order updated successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to update order: ' . $e->getMessage()], 500);
+        }
     }
 
     public function destroy(Order $order)
@@ -274,12 +351,14 @@ class OrderController extends Controller
     }
 
     /**
-     * Update order payment status based on total payments
+     * Update order payment status based on total payments (accounting for refunds)
      */
     private function updateOrderPaymentStatus(Order $order)
     {
-        $totalPaid = $order->payments()->sum('amount');
-        $remaining = $order->total_amount - $totalPaid;
+        $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');
+        $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
+        $netPaid = $totalPaid - $totalRefunded;
+        $remaining = $order->total_amount - $netPaid;
 
         // Update payment status
         if ($remaining <= 0) {
@@ -290,8 +369,299 @@ class OrderController extends Controller
             $order->remaining_amount = $remaining;
         }
 
-        // Update partial_amount to total paid
-        $order->partial_amount = $totalPaid;
+        // Update partial_amount to net paid
+        $order->partial_amount = $netPaid;
         $order->save();
+    }
+
+    /**
+     * Cancel an order item and process refund if payment was made
+     */
+    public function cancelItem(Request $request, OrderItem $item)
+    {
+        $validated = $request->validate([
+            'cancellation_reason' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Update item status
+            $item->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancelled_by' => Auth::id(),
+                'cancellation_reason' => $validated['cancellation_reason'] ?? null,
+            ]);
+
+            // Restore inventory if from inventory
+            if ($item->is_from_inventory && $item->product_id) {
+                $product = $item->product;
+                if ($product) {
+                    $product->available_meters += $item->quantity_meters;
+                    $product->save();
+
+                    InventoryTracking::create([
+                        'product_id' => $product->id,
+                        'order_id' => $item->order_id,
+                        'type' => 'return',
+                        'quantity_meters' => $item->quantity_meters,
+                        'balance_meters' => $product->available_meters,
+                        'notes' => "Item Cancelled - Order #{$item->order->order_number}",
+                        'reference_number' => $item->order->order_number,
+                    ]);
+                }
+            }
+
+            // Get order before updating
+            $order = $item->order;
+            $originalOrderTotal = $order->total_amount;
+
+            // Process refund if payment was made (before reducing order total)
+            $this->processItemRefund($order, $item, $originalOrderTotal);
+
+            // Reduce order total amount
+            $order->total_amount -= $item->total_price;
+            $order->save();
+
+            // Check if all items are cancelled
+            if ($order->allItemsCancelled()) {
+                $order->update([
+                    'order_status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'cancelled_by' => Auth::id(),
+                    'cancellation_reason' => 'All items cancelled',
+                ]);
+            }
+
+            // Update payment status
+            $this->updateOrderPaymentStatus($order);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Item cancelled successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to cancel item: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Cancel entire order and process refunds
+     */
+    public function cancelOrder(Order $order, $reason = null)
+    {
+        DB::beginTransaction();
+        try {
+            // Cancel all items
+            foreach ($order->items as $item) {
+                if ($item->status !== 'cancelled') {
+                    $item->update([
+                        'status' => 'cancelled',
+                        'cancelled_at' => now(),
+                        'cancelled_by' => Auth::id(),
+                        'cancellation_reason' => $reason ?? 'Order cancelled',
+                    ]);
+
+                    // Restore inventory
+                    if ($item->is_from_inventory && $item->product_id) {
+                        $product = $item->product;
+                        if ($product) {
+                            $product->available_meters += $item->quantity_meters;
+                            $product->save();
+
+                            InventoryTracking::create([
+                                'product_id' => $product->id,
+                                'order_id' => $order->id,
+                                'type' => 'return',
+                                'quantity_meters' => $item->quantity_meters,
+                                'balance_meters' => $product->available_meters,
+                                'notes' => "Order Cancelled - Order #{$order->order_number}",
+                                'reference_number' => $order->order_number,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            // Update order status
+            $order->update([
+                'order_status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancelled_by' => Auth::id(),
+                'cancellation_reason' => $reason ?? 'Order cancelled',
+            ]);
+
+            // Process refunds for all payments
+            $this->processOrderRefund($order, $reason);
+
+            // Update payment status
+            $this->updateOrderPaymentStatus($order);
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Process refund for a cancelled item
+     */
+    private function processItemRefund(Order $order, OrderItem $item, $originalOrderTotal = null)
+    {
+        // Use original order total if provided, otherwise use current
+        $orderTotal = $originalOrderTotal ?? $order->total_amount;
+        
+        // Calculate proportional refund amount
+        if ($orderTotal > 0) {
+            $itemProportion = $item->total_price / $orderTotal;
+        } else {
+            $itemProportion = 0;
+        }
+        
+        // Get all payments for this order
+        $payments = $order->payments()->where('type', 'payment')->orderBy('payment_date', 'asc')->get();
+        
+        foreach ($payments as $payment) {
+            $proportionalAmount = $payment->amount * $itemProportion;
+            
+            // Only create refund if amount > 0
+            if ($proportionalAmount > 0) {
+                // Create refund record
+                Payment::create([
+                    'payable_type' => Order::class,
+                    'payable_id' => $order->id,
+                    'type' => 'refund',
+                    'refund_for_payment_id' => $payment->id,
+                    'amount' => $proportionalAmount,
+                    'payment_method' => $payment->payment_method,
+                    'payment_date' => now(),
+                    'refund_reason' => "Item cancelled: {$item->product_name}",
+                    'notes' => "Refund for cancelled item - Order #{$order->order_number}",
+                    'created_by' => Auth::id(),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Process refund for entire cancelled order
+     */
+    private function processOrderRefund(Order $order, $reason = null)
+    {
+        // Get all payments for this order
+        $payments = $order->payments()->where('type', 'payment')->get();
+        
+        foreach ($payments as $payment) {
+            // Check if already refunded
+            $existingRefund = Payment::where('refund_for_payment_id', $payment->id)
+                ->where('type', 'refund')
+                ->first();
+            
+            if (!$existingRefund) {
+                // Create full refund
+                Payment::create([
+                    'payable_type' => Order::class,
+                    'payable_id' => $order->id,
+                    'type' => 'refund',
+                    'refund_for_payment_id' => $payment->id,
+                    'amount' => $payment->amount,
+                    'payment_method' => $payment->payment_method,
+                    'payment_date' => now(),
+                    'refund_reason' => $reason ?? 'Order cancelled',
+                    'notes' => "Refund for cancelled order - Order #{$order->order_number}",
+                    'created_by' => Auth::id(),
+                ]);
+            }
+        }
+    }
+
+
+
+    // RETURN ORDER
+    public function returnOrder(Order $order, Request $request)
+    {
+        $validated = $request->validate([
+            'return_date' => 'required|date',
+            'reason' => 'nullable|string', // Form uses 'reason' field name
+            'refund' => 'nullable|boolean', // Add refund option
+        ]);
+
+        try {
+            DB::beginTransaction();
+            
+            // Update order return status
+            $returnReason = $validated['reason'] ?? null;
+            $order->update([
+                'is_return' => true,
+                'return_date' => $validated['return_date'],
+                'return_reason' => $returnReason,
+            ]);
+            
+            // Return all items and restore inventory
+            $orderItems = OrderItem::where('order_id', $order->id)->get();
+            foreach ($orderItems as $item) {
+                // Restore inventory if from inventory
+                if ($item->is_from_inventory && $item->product_id) {
+                    $product = Product::find($item->product_id);
+                    if ($product) {
+                        $product->update([
+                            'available_meters' => $product->available_meters + $item->quantity_meters,
+                        ]);
+                        
+                        InventoryTracking::create([
+                            'product_id' => $product->id,
+                            'order_id' => $order->id,
+                            'type' => 'return',
+                            'quantity_meters' => $item->quantity_meters,
+                            'balance_meters' => $product->available_meters,
+                            'notes' => "Order Return - Order #{$order->order_number}",
+                            'reference_number' => $order->order_number,
+                        ]);
+                    }
+                }
+                
+                // Mark item as returned
+                $item->update([
+                    'is_return' => true,
+                    'return_date' => $validated['return_date'],
+                    'return_reason' => $returnReason,
+                ]);
+            }
+            
+            // Check for refund option
+            if (array_key_exists('refund', $validated) ? $validated['refund'] : true) {
+                // Process refunds for all payments if any payments were made
+                $this->processOrderRefund($order, $returnReason ?? 'Order returned');
+            }
+            
+            // Update payment status after refunds
+            $this->updateOrderPaymentStatus($order);
+            
+            DB::commit();
+            
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order returned successfully.' . ((array_key_exists('refund', $validated) ? $validated['refund'] : true) ? ' Refunds processed if payments were made.' : ' No refund processed.')
+                ]);
+            }
+            
+            session()->flash('success', 'Order returned successfully.' . ((array_key_exists('refund', $validated) ? $validated['refund'] : true) ? ' Refunds processed if payments were made.' : ' No refund processed.'));
+            return redirect()->route('orders.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to return order: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return back()->with('error', 'Failed to return order: ' . $e->getMessage());
+        }
     }
 }

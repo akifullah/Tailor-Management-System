@@ -22,6 +22,9 @@ class SewingOrder extends Model
         'payment_status',
         'order_status',
         'notes',
+        'cancelled_at',
+        'cancelled_by',
+        'cancellation_reason',
     ];
 
     protected $casts = [
@@ -31,6 +34,7 @@ class SewingOrder extends Model
         'paid_amount' => 'decimal:2',
         'remaining_amount' => 'decimal:2',
         'partial_amount' => 'decimal:2',
+        'cancelled_at' => 'datetime',
     ];
 
     protected $appends = ['total_paid'];
@@ -50,9 +54,29 @@ class SewingOrder extends Model
         return $this->morphMany(Payment::class, 'payable');
     }
 
-    // Calculate total paid amount from payments
+    public function cancelledBy()
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    // Calculate total paid amount from payments (only payments, not refunds)
     public function getTotalPaidAttribute()
     {
-        return $this->payments()->sum('amount');
+        return $this->payments()->where('type', 'payment')->sum('amount') - 
+               $this->payments()->where('type', 'refund')->sum('amount');
     }
+
+    // Check if all items are cancelled
+    public function allItemsCancelled()
+    {
+        $items = $this->items;
+        if ($items->isEmpty()) {
+            return false;
+        }
+        return $items->every(function ($item) {
+            return $item->status === 'cancelled';
+        });
+    }
+
+
 }

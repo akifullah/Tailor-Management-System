@@ -74,9 +74,9 @@
                                         @if($txn->type == 'purchase')
                                             <span class="badge bg-success">Purchase</span>
                                         @elseif($txn->type == 'sale')
-                                            <span class="badge bg-danger">Sale</span>
+                                            <span class="badge bg-primary">Sale</span>
                                         @elseif($txn->type == 'return')
-                                            <span class="badge bg-info">Return</span>
+                                            <span class="badge bg-danger">Return</span>
                                         @else
                                             <span class="badge bg-warning">Adjustment</span>
                                         @endif

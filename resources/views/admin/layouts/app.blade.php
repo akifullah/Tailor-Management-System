@@ -26,6 +26,18 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
 
     <script src="{{ asset('assets/js/head.js') }}"></script>
+    <style>
+        td {
+            background-color: transparent !important;
+        }
+    </style>
+
+
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet" />
 
 
 </head>
@@ -89,16 +101,16 @@
                                 </div>
 
                                 <!-- item-->
-                                <a class='dropdown-item notify-item' href='pages-profile.html'>
+                                {{-- <a class='dropdown-item notify-item' href='pages-profile.html'>
                                     <i class="mdi mdi-account-circle-outline fs-16 align-middle"></i>
                                     <span>My Account</span>
-                                </a>
+                                </a> --}}
 
                                 <!-- item-->
-                                <a class='dropdown-item notify-item' href='auth-lock-screen.html'>
+                                {{-- <a class='dropdown-item notify-item' href='auth-lock-screen.html'>
                                     <i class="mdi mdi-lock-outline fs-16 align-middle"></i>
                                     <span>Lock Screen</span>
-                                </a>
+                                </a> --}}
 
                                 <div class="dropdown-divider"></div>
 
@@ -124,7 +136,7 @@
 
                     <div class="logo-box">
 
-                        <a class='logo logo-light' href='index.html'>
+                        <a class='logo logo-light'>
                             <h3 class="logo-text mt-3">TMS</h3>
                             {{-- <span class="logo-sm">
                                 <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
@@ -167,6 +179,14 @@
                                 class="{{ request()->routeIs('reports.dashboard') ? 'tp-link active' : '' }}">
                                 <i data-feather="bar-chart-2"></i>
                                 <span> Dashboard </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('worker.dashboard') }}"
+                                class="{{ request()->routeIs('worker.dashboard') ? 'tp-link active' : '' }}">
+                                <i data-feather="bar-chart-2"></i>
+                                <span> Worker Dashboard </span>
                             </a>
                         </li>
 
@@ -227,13 +247,13 @@
                                 <span> Suppliers </span>
                             </a>
                         </li>
-                            <li>
-                                <a href="{{ route('sewing-orders.index') }}"
-                                    class="{{ request()->routeIs('sewing-orders.*') ? 'tp-link active' : '' }}">
-                                    <i data-feather="scissors"></i>
-                                    <span> Sewing Orders </span>
-                                </a>
-                            </li>
+                        <li>
+                            <a href="{{ route('sewing-orders.index') }}"
+                                class="{{ request()->routeIs('sewing-orders.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="scissors"></i>
+                                <span> Sewing Orders </span>
+                            </a>
+                        </li>
 
 
                         <li class="menu-title mt-2">Inventory</li>
@@ -270,7 +290,7 @@
                                 <span> Sales Report </span>
                             </a>
                         </li>
-                        <li>
+                        {{-- <li>
                             <a href="{{ route('reports.customers') }}"
                                 class="{{ request()->routeIs('reports.customers') ? 'tp-link active' : '' }}">
                                 <i data-feather="users"></i>
@@ -283,12 +303,26 @@
                                 <i data-feather="pie-chart"></i>
                                 <span> Supplier Ledger </span>
                             </a>
-                        </li>
+                        </li> --}}
                         <li>
                             <a href="{{ route('reports.inventory-history') }}"
                                 class="{{ request()->routeIs('reports.inventory-history') ? 'tp-link active' : '' }}">
                                 <i data-feather="activity"></i>
                                 <span> Inventory History </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('reports.customer-transactions') }}"
+                                class="{{ request()->routeIs('reports.customer-transactions') ? 'tp-link active' : '' }}">
+                                <i data-feather="users"></i>
+                                <span> Customer Ledger </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('reports.supplier-transactions') }}"
+                                class="{{ request()->routeIs('reports.supplier-transactions') ? 'tp-link active' : '' }}">
+                                <i data-feather="truck"></i>
+                                <span> Supplier Ledger </span>
                             </a>
                         </li>
                         <li>
@@ -312,27 +346,14 @@
                                 <span> Completed Transactions </span>
                             </a>
                         </li>
-                        <li>
+                        {{-- <li>
                             <a href="{{ route('reports.user-transactions') }}"
                                 class="{{ request()->routeIs('reports.user-transactions') ? 'tp-link active' : '' }}">
                                 <i data-feather="user-check"></i>
                                 <span> User Transactions </span>
                             </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('reports.customer-transactions') }}"
-                                class="{{ request()->routeIs('reports.customer-transactions') ? 'tp-link active' : '' }}">
-                                <i data-feather="users"></i>
-                                <span> Customer Transactions </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('reports.supplier-transactions') }}"
-                                class="{{ request()->routeIs('reports.supplier-transactions') ? 'tp-link active' : '' }}">
-                                <i data-feather="truck"></i>
-                                <span> Supplier Transactions </span>
-                            </a>
-                        </li>
+                        </li> --}}
+
 
                     </ul>
 
@@ -351,7 +372,6 @@
 
         <div class="content-page">
             <div class="content">
-
                 @yield('content')
 
             </div> <!-- content -->
@@ -387,6 +407,8 @@
     <script src="{{ asset('assets/libs/waypoints/lib/jquery.waypoints.min.js') }}"></script>
     <script src="{{ asset('assets/libs/jquery.counterup/jquery.counterup.min.js') }}"></script>
     <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
     {{-- 
     <!-- Datatables js -->
     <script src="assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
@@ -422,10 +444,22 @@
     <script src="{{ asset('assets/libs/jsvectormap/js/jsvectormap.min.js') }}"></script>
     <script src="{{ asset('assets/libs/jsvectormap/maps/world-merc.js') }}"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
 
 
     <!-- App js-->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                theme: 'bootstrap-5',
+                width: '100%'
+            });
+
+            $('.data-table').DataTable();
+        });
+    </script>
 
     @yield('js')
 

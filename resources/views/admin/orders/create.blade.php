@@ -3,7 +3,11 @@
 @section('content')
     <div class="container-fluid">
         <div class="py-3">
-            <h4 class="fs-18 fw-semibold mb-0">Create New Order</h4>
+            <div class="d-flex align-items-center justify-content-between">
+                <h4 class="fs-18 fw-semibold mb-0">Create New Order</h4>
+                <button data-bs-toggle="modal" data-bs-target='#userModal' class="btn btn-primary btn-sm"
+                    onclick="handleCreateCustomer()">Add Customer</button>
+            </div>
         </div>
 
         @if (session('error'))
@@ -21,23 +25,23 @@
                                 <div class="col-md-4">
                                     <label class="form-label">Customer *</label>
                                     @if ($selectedCustomer)
-                                        <select id="customer_id" class="form-select" disabled>
+                                        <select id="customer_id" class="form-select select2" disabled>
                                             @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}"
                                                     {{ $selectedCustomer->id == $customer->id ? 'selected' : '' }}
                                                     data-measurement='@json($customer->measurements)'>
-                                                    {{ $customer->name }}
+                                                    {{ $customer->name }} | {{ $customer->phone }} |
                                                 </option>
                                             @endforeach
                                         </select>
                                         <input type="hidden" name="customer_id" value="{{ $selectedCustomer->id }}">
                                     @else
-                                        <select id="customer_id" name="customer_id" class="form-select" required>
+                                        <select id="customer_id" name="customer_id" class="form-select select2" required>
                                             <option value="">Select Customer</option>
                                             @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}"
                                                     data-measurement='@json($customer->measurements)'>
-                                                    {{ $customer->name }}
+                                                    {{ $customer->name }} | {{ $customer->phone }}</p>
                                                 </option>
                                             @endforeach
                                         </select>
@@ -71,8 +75,9 @@
                                                     <strong>Payment Status:</strong>
                                                     <select name="payment_status" id="payment_status"
                                                         class="form-control mt-1" required>
-                                                        <option value="full">Full Payment</option>
+                                                        <option value="no_payment" selected>No Payment</option>
                                                         <option value="partial">Partial Payment</option>
+                                                        <option value="full">Full Payment</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-3" id="partial_amount_div" style="display:none;">
@@ -89,11 +94,13 @@
                                 </div>
                             </div>
 
-                            <div class="row mb-3">
+                            <div class="row mb-3" id="payment_method_row">
                                 <div class="col-md-3">
-                                    <label class="form-label">Payment Method *</label>
-                                    <select name="payment_method" id="payment_method" class="form-control" required>
-                                        <option value="cash">Cash</option>
+                                    <label class="form-label">Payment Method <span
+                                            id="payment_method_required">*</span></label>
+                                    <select name="payment_method" id="payment_method" class="form-control">
+                                        {{-- <option disabled value="">Select Payment Method</option> --}}
+                                        <option value="cash" selected>Cash</option>
                                         <option value="online">Online</option>
                                         <option value="bank_transfer">Bank Transfer</option>
                                         <option value="cheque">Cheque</option>
@@ -135,6 +142,64 @@
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="userModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Add Customer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm" autocomplete="off">
+                        <input type="hidden" name="id" id="id" autocomplete="off" value="">
+                        <div class="row g-3">
+                            <div class="col-xxl-6">
+                                <div>
+                                    <label for="customer_id" class="form-label">Customer Old ID</label>
+                                    <input type="number" name="customer_id" class="form-control" id="customer_id"
+                                        placeholder="Customer Old ID">
+                                </div>
+                            </div><!--end col-->
+                            <div class="col-xxl-6">
+                                <div>
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" name="name" class="form-control" id="name"
+                                        placeholder="Enter Full Name" required>
+                                </div>
+                            </div><!--end col-->
+                            <div class="col-xxl-6">
+                                <div>
+                                    <label for="phone" class="form-label">Phone</label>
+                                    <input type="text" name="phone" class="form-control" id="phone"
+                                        placeholder="Enter phone" required>
+                                </div>
+                            </div>
+                            <div class="col-xxl-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" id="email"
+                                    placeholder="Enter your email">
+                            </div><!--end col-->
+                            <div class="col-xxl-12">
+                                <label for="address" class="form-label">Address</label>
+                                <input type="address" class="form-control" id="address" name="address" value=""
+                                    placeholder="Enter Address" autocomplete="off">
+                            </div><!--end col-->
+                            <div class="col-lg-12">
+                                <div class="hstack gap-2 justify-content-end">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" id="submit_btn">Submit</button>
+                                </div>
+                            </div><!-- end col -->
+                        </div><!-- end row -->
+                    </form> <!-- end form -->
+                </div> <!-- end modal body -->
+            </div> <!-- end modal content -->
+        </div>
+    </div>
+
+
 @endsection
 
 @section('js')
@@ -187,9 +252,15 @@
             $('#partial_amount_div').hide();
             $('#partial_amount').prop('required', false);
 
-            $('#payment_status').on('change', function() {
-                if ($(this).val() === 'partial') {
+            // Function to handle payment status changes
+            function handlePaymentStatusChange() {
+                const paymentStatus = $('#payment_status').val();
+
+                if (paymentStatus === 'partial') {
                     $('#partial_amount_div').show();
+                    $('#payment_method_row').show();
+                    $('#payment_method').prop('required', true);
+                    $('#payment_method_required').show();
 
                     // Remove required by default, only add required on focus
                     $('#partial_amount').prop('required', false);
@@ -208,15 +279,27 @@
                         this.setCustomValidity('');
                     });
 
-                } else {
+                } else if (paymentStatus === 'full') {
                     $('#partial_amount_div').hide();
                     $('#partial_amount').prop('required', false).val('');
                     $('#remaining_amount_display').text('0.00');
+                    $('#payment_method_row').show();
+                    $('#payment_method').prop('required', true);
+                    $('#payment_method_required').show();
+                } else if (paymentStatus === 'no_payment') {
+                    $('#partial_amount_div').hide();
+                    $('#partial_amount').prop('required', false).val('');
+                    $('#remaining_amount_display').text('0.00');
+                    $('#payment_method_row').show();
+                    $('#payment_method').prop('required', false).val('cash');
+                    $('#payment_method_required').hide();
                 }
-            });
+            }
 
-            // If switching to partial from full, reset value, validity, required, focus behavior
-            $('#payment_status').trigger('change');
+            $('#payment_status').on('change', handlePaymentStatusChange);
+
+            // Initialize on page load
+            handlePaymentStatusChange();
 
             // Update remaining amount when partial amount changes
             $('#partial_amount').on('input', function() {
@@ -330,7 +413,7 @@
             <div class="row align-items-end mb-2 item-row border-bottom pb-2 position-relative">
                 <div class="col-md-2">
                     <label class="form-label product-label">Product <span class="product-required">*</span></label>
-                    <select name="items[${itemCount}][product_id]" class="form-control product-select" required onchange="loadProductPrice(this)">
+                    <select name="items[${itemCount}][product_id]" class="form-select select2 product-select" required onchange="loadProductPrice(this)">
                         <option value="">Select Product</option>
                         @foreach ($products as $product)
                         <option value="{{ $product->id }}" 
@@ -418,6 +501,131 @@
                     $('#partial_amount').focus();
                 }, 50);
             }
+        });
+    </script>
+
+
+
+
+    <script>
+        function setValById(id, val) {
+            let $input = $(`#${id}`).val(val);
+        }
+
+        function handleEdit(user) {
+            $('#userModal').modal('show');
+            console.log(user)
+            const {
+                id,
+                customer_id,
+                name,
+                phone,
+                email,
+                address
+            } = user;
+            setValById("id", id)
+            setValById("customer_id", customer_id)
+            setValById("name", name)
+            setValById("email", email)
+            setValById("phone", phone)
+            setValById("address", address)
+
+            $("#userModalLabel").text("Edit Customer");
+            $("#submit_btn").text("Update");
+
+
+        }
+
+
+        function handleDelete(id) {
+            if (confirm("Are you sure! you want to delete?")) {
+                $.ajax({
+                    url: "{{ route('customers.destroy', ':id') }}".replace(':id', id),
+                    type: 'DELETE',
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert(response.message || "Delete failed.");
+                        }
+                    },
+                    error: function(xhr) {
+                        alert("Error deleting user.");
+                    }
+                });
+            }
+        }
+    </script>
+    <script>
+        function handleCreateCustomer() {
+            setValById("id", "")
+            setValById("name", "")
+            setValById("email", "")
+            setValById("phone", "")
+            setValById("address", "")
+
+            $('#userModal').modal('show');
+            $("#userModalLabel").text("Add Customer");
+            $("#submit_btn").text("Submit");
+
+
+        }
+
+        $(document).ready(function() {
+            $("#userForm").on('submit', function(e) {
+                e.preventDefault();
+                let $form = $("#userForm");
+                // Serialize the form as an array and log it
+                var formArray = $form.serializeArray();
+
+                // Remove previous errors
+                $form.find('.text-danger').remove();
+
+                $.ajax({
+                    url: "{{ route('customers.store') }}",
+                    type: "POST",
+                    data: formArray,
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Redirect to dashboard or wherever
+                            location.reload();
+                        } else {
+                            const errors = response?.errors;
+
+
+                            Object.keys(errors).forEach(function(key) {
+                                var input = $form.find('[id="' + key + '"]');
+                                if (input.length) {
+                                    input.after(
+                                        '<div class="text-danger" style="font-size: 13px;">' +
+                                        errors[key][0] + '</div>');
+                                }
+                            });
+                        }
+                    },
+
+                    // showError(xhr.responseJSON && xhr.responseJSON.message ? xhr
+                    //     .responseJSON.message : "Login failed.");
+                });
+
+                function showError(msg) {
+                    // Show error somewhere at the top of the form
+                    if ($form.find('.form-error').length === 0) {
+                        $form.prepend('<div class="form-error text-danger mb-3" style="font-size: 14px;">' +
+                            msg + '</div>');
+                    } else {
+                        $form.find('.form-error').html(msg);
+                    }
+                }
+
+            });
+
         });
     </script>
 @endsection

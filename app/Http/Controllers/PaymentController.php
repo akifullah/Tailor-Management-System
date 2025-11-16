@@ -52,11 +52,13 @@ class PaymentController extends Controller
             $payment = Payment::create([
                 'payable_type' => $payableType,
                 'payable_id' => $validated['payable_id'],
+                'type' => 'payment',
                 'amount' => $validated['amount'],
                 'payment_method' => $validated['payment_method'],
                 'person_reference' => $validated['person_reference'] ?? null,
                 'payment_date' => $paymentDate,
                 'notes' => $validated['notes'] ?? null,
+                'created_by' => auth()->id(),
             ]);
 
             // Update order or purchase status
@@ -86,8 +88,10 @@ class PaymentController extends Controller
 
     private function updateOrderPaymentStatus(Order $order)
     {
-        $totalPaid = $order->payments()->sum('amount');
-        $remaining = $order->total_amount - $totalPaid;
+        $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');
+        $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
+        $netPaid = $totalPaid - $totalRefunded;
+        $remaining = $order->total_amount - $netPaid;
 
         // Update payment status
         if ($remaining <= 0) {
@@ -98,15 +102,17 @@ class PaymentController extends Controller
             $order->remaining_amount = $remaining;
         }
 
-        // Update partial_amount to total paid
-        $order->partial_amount = $totalPaid;
+        // Update partial_amount to net paid
+        $order->partial_amount = $netPaid;
         $order->save();
     }
 
     private function updateSewingOrderPaymentStatus(SewingOrder $sewingOrder)
     {
-        $totalPaid = $sewingOrder->payments()->sum('amount');
-        $remaining = $sewingOrder->total_amount - $totalPaid;
+        $totalPaid = $sewingOrder->payments()->where('type', 'payment')->sum('amount');
+        $totalRefunded = $sewingOrder->payments()->where('type', 'refund')->sum('amount');
+        $netPaid = $totalPaid - $totalRefunded;
+        $remaining = $sewingOrder->total_amount - $netPaid;
 
         if ($remaining <= 0) {
             $sewingOrder->payment_status = 'full';
@@ -116,8 +122,8 @@ class PaymentController extends Controller
             $sewingOrder->remaining_amount = $remaining;
         }
 
-        $sewingOrder->paid_amount = $totalPaid;
-        $sewingOrder->partial_amount = $totalPaid;
+        $sewingOrder->paid_amount = $netPaid;
+        $sewingOrder->partial_amount = $netPaid;
         $sewingOrder->save();
     }
 
@@ -144,12 +150,101 @@ class PaymentController extends Controller
         
         $remaining = $totalAmount - $payable->payments->sum('amount');
 
+        $totalPaid = $payable->payments()->where('type', 'payment')->sum('amount');
+        $totalRefunded = $payable->payments()->where('type', 'refund')->sum('amount');
+        $netPaid = $totalPaid - $totalRefunded;
+        $remaining = $totalAmount - $netPaid;
+
         return response()->json([
             'success' => true,
             'payments' => $payable->payments,
-            'total_paid' => $payable->payments->sum('amount'),
+            'total_paid' => $totalPaid,
+            'total_refunded' => $totalRefunded,
+            'net_paid' => $netPaid,
             'total_amount' => $totalAmount,
             'remaining' => $remaining,
         ]);
+    }
+
+    /**
+     * Create a refund for a payment
+     */
+    public function createRefund(Request $request, Payment $payment)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'refund_reason' => 'nullable|string|max:255',
+            'payment_date' => 'required|date',
+            'notes' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Check if payment exists and is a payment (not already a refund)
+            if ($payment->type !== 'payment') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Can only refund payment records, not refunds.',
+                ], 400);
+            }
+
+            // Check if refund amount exceeds available amount
+            $alreadyRefunded = Payment::where('refund_for_payment_id', $payment->id)
+                ->where('type', 'refund')
+                ->sum('amount');
+            
+            $availableToRefund = $payment->amount - $alreadyRefunded;
+            
+            if ($validated['amount'] > $availableToRefund) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Refund amount cannot exceed available amount. Available: Rs " . number_format($availableToRefund, 2),
+                ], 400);
+            }
+
+            // Parse payment_date
+            $refundDate = $validated['payment_date'];
+            if (strpos($refundDate, 'T') !== false) {
+                $refundDate = str_replace('T', ' ', $refundDate);
+                if (strlen($refundDate) === 16) {
+                    $refundDate .= ':00';
+                }
+            }
+
+            // Create refund record
+            $refund = Payment::create([
+                'payable_type' => $payment->payable_type,
+                'payable_id' => $payment->payable_id,
+                'type' => 'refund',
+                'refund_for_payment_id' => $payment->id,
+                'amount' => $validated['amount'],
+                'payment_method' => $payment->payment_method,
+                'payment_date' => $refundDate,
+                'refund_reason' => $validated['refund_reason'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'created_by' => auth()->id(),
+            ]);
+
+            // Update order or sewing order payment status
+            $payable = $payment->payable;
+            if ($payable instanceof Order) {
+                $this->updateOrderPaymentStatus($payable);
+            } elseif ($payable instanceof SewingOrder) {
+                $this->updateSewingOrderPaymentStatus($payable);
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Refund created successfully.',
+                'refund' => $refund,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create refund: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

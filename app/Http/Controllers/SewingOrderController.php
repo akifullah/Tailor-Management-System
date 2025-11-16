@@ -60,7 +60,7 @@ class SewingOrderController extends Controller
             'order_date' => 'required|date',
             'delivery_date' => 'nullable|date',
             'payment_method' => 'required|in:cash,online,bank_transfer,cheque',
-            'payment_status' => 'required|in:partial,full',
+            'payment_status' => 'required|in:partial,full,no_payment',
             'partial_amount' => 'nullable|numeric|min:0',
             'payment_date' => 'nullable|date',
             'person_reference' => 'nullable|string|max:255',
@@ -82,12 +82,14 @@ class SewingOrderController extends Controller
                 $totalAmount += $item['sewing_price'] * $item['qty'];
             }
 
-            // Determine payment amount
+            // Determine payment amount and treat all status types
             $paymentAmount = 0;
             if ($validated['payment_status'] === 'full') {
                 $paymentAmount = $totalAmount;
             } elseif ($validated['payment_status'] === 'partial' && isset($validated['partial_amount']) && $validated['partial_amount'] > 0) {
                 $paymentAmount = min($validated['partial_amount'], $totalAmount);
+            } elseif ($validated['payment_status'] === 'no_payment') {
+                $paymentAmount = 0;
             }
 
             // Generate unique order number
@@ -113,7 +115,7 @@ class SewingOrderController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            // Create payment record if payment amount > 0
+            // Only create payment record if paymentAmount > 0 (i.e., not for no_payment)
             if ($paymentAmount > 0) {
                 $paymentDate = $validated['payment_date'] ?? $validated['order_date'];
                 if (is_string($paymentDate) && str_contains($paymentDate, 'T')) {
@@ -128,15 +130,18 @@ class SewingOrderController extends Controller
                 Payment::create([
                     'payable_type' => SewingOrder::class,
                     'payable_id' => $sewingOrder->id,
+                    'type' => 'payment',
                     'amount' => $paymentAmount,
                     'payment_method' => $validated['payment_method'],
                     'person_reference' => $validated['person_reference'] ?? null,
                     'payment_date' => $paymentDate,
                     'notes' => $validated['payment_notes'] ?? null,
+                    'created_by' => Auth::id(),
                 ]);
-
-                $this->updateSewingOrderPaymentStatus($sewingOrder);
             }
+
+            // Always update sewing order payment status (even for no_payment)
+            $this->updateSewingOrderPaymentStatus($sewingOrder);
 
             // Create order items
             foreach ($validated['items'] as $itemData) {
@@ -174,6 +179,7 @@ class SewingOrderController extends Controller
     public function show(SewingOrder $sewingOrder)
     {
         $sewingOrder->load(['customer', 'items.worker', 'payments']);
+
         return view('admin.sewing_orders.show', compact('sewingOrder'));
     }
 
@@ -198,14 +204,84 @@ class SewingOrderController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'order_date' => 'required|date',
             'delivery_date' => 'nullable|date',
-            'order_status' => 'required|in:pending,in_progress,completed',
+            'order_status' => 'required|in:pending,in_progress,completed,on_hold,cancelled,delivered',
             'notes' => 'nullable|string',
+            'cancellation_reason' => 'nullable|string',
         ]);
 
-        $sewingOrder->update($validated);
+        DB::beginTransaction();
+        try {
+            // If order is being cancelled, handle refunds
+            if ($validated['order_status'] === 'cancelled' && $sewingOrder->order_status !== 'cancelled') {
+                $this->cancelSewingOrder($sewingOrder, $validated['cancellation_reason'] ?? null);
+            }
 
-        session()->flash('success', 'Sewing order updated successfully.');
-        return redirect()->route('sewing-orders.show', $sewingOrder);
+            $sewingOrder->update($validated);
+            $this->updateSewingOrderPaymentStatus($sewingOrder);
+
+            DB::commit();
+            session()->flash('success', 'Sewing order updated successfully.');
+            return redirect()->route('sewing-orders.show', $sewingOrder);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to update sewing order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cancel entire sewing order and process refunds
+     */
+    private function cancelSewingOrder(SewingOrder $sewingOrder, $reason = null)
+    {
+        // Cancel all items
+        foreach ($sewingOrder->items as $item) {
+            if ($item->status !== 'cancelled') {
+                $this->cancelSewingOrderItem($item, $reason ?? 'Order cancelled');
+            }
+        }
+
+        // Update order status
+        $sewingOrder->update([
+            'order_status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancelled_by' => Auth::id(),
+            'cancellation_reason' => $reason ?? 'Order cancelled',
+        ]);
+
+        // Process refunds for all payments
+        $this->processSewingOrderRefund($sewingOrder, $reason);
+    }
+
+    /**
+     * Process refund for entire cancelled sewing order
+     */
+    private function processSewingOrderRefund(SewingOrder $sewingOrder, $reason = null)
+    {
+        // Get all payments for this order
+        $payments = $sewingOrder->payments()->where('type', 'payment')->get();
+        
+        foreach ($payments as $payment) {
+            // Check if already refunded
+            $existingRefund = Payment::where('refund_for_payment_id', $payment->id)
+                ->where('type', 'refund')
+                ->first();
+            
+            if (!$existingRefund) {
+                // Create full refund
+                Payment::create([
+                    'payable_type' => SewingOrder::class,
+                    'payable_id' => $sewingOrder->id,
+                    'type' => 'refund',
+                    'refund_for_payment_id' => $payment->id,
+                    'amount' => $payment->amount,
+                    'payment_method' => $payment->payment_method,
+                    'payment_date' => now(),
+                    'refund_reason' => $reason ?? 'Order cancelled',
+                    'notes' => "Refund for cancelled order - Sewing Order #{$sewingOrder->sewing_order_number}",
+                    'created_by' => Auth::id(),
+                ]);
+            }
+        }
     }
 
     /**
@@ -233,21 +309,116 @@ class SewingOrderController extends Controller
     public function updateItemStatus(Request $request, SewingOrderItem $item)
     {
         $validated = $request->validate([
-            'status' => 'required|in:pending,in_progress,completed',
+            'status' => 'required|in:pending,in_progress,completed,on_hold,cancelled,delivered',
+            'cancellation_reason' => 'nullable|string',
         ]);
 
-        $item->update($validated);
+        DB::beginTransaction();
+        try {
+            $sewingOrder = $item->sewingOrder;
+            
+            if ($validated['status'] === 'cancelled' && $item->status !== 'cancelled') {
+                // Cancel item with refund processing
+                $this->cancelSewingOrderItem($item, $validated['cancellation_reason'] ?? null);
+            } else {
+                // Just update status
+                $item->update($validated);
+            }
 
-        return response()->json(['success' => true, 'message' => 'Item status updated successfully']);
+            // Check if all items are cancelled
+            if ($sewingOrder->allItemsCancelled()) {
+                $sewingOrder->update([
+                    'order_status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'cancelled_by' => Auth::id(),
+                    'cancellation_reason' => 'All items cancelled',
+                ]);
+            }
+
+            // Update payment status
+            $this->updateSewingOrderPaymentStatus($sewingOrder);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Item status updated successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to update item status: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
-     * Update sewing order payment status based on total payments
+     * Cancel a sewing order item and process refund
+     */
+    private function cancelSewingOrderItem(SewingOrderItem $item, $reason = null)
+    {
+        $sewingOrder = $item->sewingOrder;
+        $originalOrderTotal = $sewingOrder->total_amount;
+
+        // Update item status
+        $item->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancelled_by' => Auth::id(),
+            'cancellation_reason' => $reason ?? 'Item cancelled',
+        ]);
+
+        // Process refund if payment was made
+        $this->processSewingItemRefund($sewingOrder, $item, $originalOrderTotal);
+
+        // Reduce order total amount
+        $sewingOrder->total_amount -= $item->total_price;
+        $sewingOrder->save();
+    }
+
+    /**
+     * Process refund for a cancelled sewing order item
+     */
+    private function processSewingItemRefund(SewingOrder $sewingOrder, SewingOrderItem $item, $originalOrderTotal = null)
+    {
+        // Use original order total if provided, otherwise use current
+        $orderTotal = $originalOrderTotal ?? $sewingOrder->total_amount;
+        
+        // Calculate proportional refund amount
+        if ($orderTotal > 0) {
+            $itemProportion = $item->total_price / $orderTotal;
+        } else {
+            $itemProportion = 0;
+        }
+        
+        // Get all payments for this order
+        $payments = $sewingOrder->payments()->where('type', 'payment')->orderBy('payment_date', 'asc')->get();
+        
+        foreach ($payments as $payment) {
+            $proportionalAmount = $payment->amount * $itemProportion;
+            
+            // Only create refund if amount > 0
+            if ($proportionalAmount > 0) {
+                // Create refund record
+                Payment::create([
+                    'payable_type' => SewingOrder::class,
+                    'payable_id' => $sewingOrder->id,
+                    'type' => 'refund',
+                    'refund_for_payment_id' => $payment->id,
+                    'amount' => $proportionalAmount,
+                    'payment_method' => $payment->payment_method,
+                    'payment_date' => now(),
+                    'refund_reason' => "Item cancelled: {$item->product_name}",
+                    'notes' => "Refund for cancelled item - Sewing Order #{$sewingOrder->sewing_order_number}",
+                    'created_by' => Auth::id(),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Update sewing order payment status based on total payments (accounting for refunds)
      */
     private function updateSewingOrderPaymentStatus(SewingOrder $sewingOrder)
     {
-        $totalPaid = $sewingOrder->payments()->sum('amount');
-        $remaining = $sewingOrder->total_amount - $totalPaid;
+        $totalPaid = $sewingOrder->payments()->where('type', 'payment')->sum('amount');
+        $totalRefunded = $sewingOrder->payments()->where('type', 'refund')->sum('amount');
+        $netPaid = $totalPaid - $totalRefunded;
+        $remaining = $sewingOrder->total_amount - $netPaid;
 
         if ($remaining <= 0) {
             $sewingOrder->payment_status = 'full';
@@ -257,8 +428,8 @@ class SewingOrderController extends Controller
             $sewingOrder->remaining_amount = $remaining;
         }
 
-        $sewingOrder->paid_amount = $totalPaid;
-        $sewingOrder->partial_amount = $totalPaid;
+        $sewingOrder->paid_amount = $netPaid;
+        $sewingOrder->partial_amount = $netPaid;
         $sewingOrder->save();
     }
 
@@ -268,6 +439,27 @@ class SewingOrderController extends Controller
     public function workerDashboard(Request $request)
     {
         $userId = Auth::id();
+        
+        // Base query builder for all assigned items
+        $baseQuery = function() use ($userId) {
+            return SewingOrderItem::where('assign_to', $userId);
+        };
+
+        // Calculate statistics
+        $stats = [
+            'total_assigned' => $baseQuery()->count(),
+            'pending' => $baseQuery()->where('status', 'pending')->count(),
+            'on_hold' => $baseQuery()->where('status', 'on_hold')->count(),
+            'in_progress' => $baseQuery()->where('status', 'in_progress')->count(),
+            'completed' => $baseQuery()->where('status', 'completed')->count(),
+            'cancelled' => $baseQuery()->where('status', 'cancelled')->count(),
+            'delivered' => $baseQuery()->where('status', 'delivered')->count(),
+            'total_value' => $baseQuery()->sum('total_price'),
+            'completed_value' => $baseQuery()->where('status', 'completed')->sum('total_price'),
+            'in_progress_value' => $baseQuery()->where('status', 'in_progress')->sum('total_price'),
+        ];
+
+        // Filtered query for table display
         $query = SewingOrderItem::with(['sewingOrder.customer', 'worker'])
             ->where('assign_to', $userId);
 
@@ -278,6 +470,11 @@ class SewingOrderController extends Controller
 
         $items = $query->latest()->get();
 
-        return view('admin.sewing_orders.worker_dashboard', compact('items'));
+        return view('admin.sewing_orders.worker_dashboard', compact('items', 'stats'));
     }
+
+
+    
+    
+    
 }
