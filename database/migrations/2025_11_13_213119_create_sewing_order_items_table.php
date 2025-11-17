@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('customer_measurement')->nullable(); // JSON or text
             $table->foreignId('assign_to')->nullable()->constrained('users')->onDelete('restrict');
             $table->text('assign_note')->nullable();
-            $table->enum('status', ['pending', "on_hold", 'in_progress', 'completed', 'cancelled', "delivered"])->default('pending');
+            $table->enum('status', ['pending', "on_hold", 'in_progress', "cutter", "sewing", 'completed', 'cancelled', "delivered"])->default('pending');
             $table->date('delivered_date')->nullable();
             $table->date('cancelled_date')->nullable();
             $table->decimal('total_price', 10, 2)->default(0);

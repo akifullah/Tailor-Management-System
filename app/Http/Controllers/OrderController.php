@@ -268,7 +268,13 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['customer', 'items.product', 'payments']);
+        $order->load([
+            'customer', 
+            'items.product', 
+            'payments' => function ($query) {
+                $query->orderBy('created_at');
+            }
+        ]);
         // Convert the measurement field in each item to parsed JSON
         $orderArray = $order->toArray();
         if (!empty($orderArray['items'])) {

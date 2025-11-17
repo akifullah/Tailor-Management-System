@@ -295,13 +295,18 @@
                                         $netPaid = $totalPaid - $totalRefunded;
                                         $remaining = $sewingOrder->total_amount - $netPaid;
                                         $itemsPending = $sewingOrder->items->where('status', 'pending')->count();
-                                        $itemsInProgress = $sewingOrder->items->where('status', 'in_progress', "on_hold", "cutter", "sewing")->count();
-                                        $itemsCompleted = $sewingOrder->items->where('status', 'completed')->count();
+                                        $itemsInProgress = $sewingOrder->items->whereIn('status', ['in_progress', "on_hold", "cutter", "sewing"])->count();
+                                        $itemsCompleted = $sewingOrder->items->whereIn('status', ['completed', 'delivered'])->count();
                                         $totalItems = $sewingOrder->items->where("status", "!=", "cancelled")->count();
+
                                     @endphp
                                     <tr>
-                                        <td><span class="badge bg-info">Sewing Order</span></td>
-                                        <td>{{ $sewingOrder->sewing_order_number ?? 'N/A' }}</td>
+                                        <td><span class="badge bg-success">Sewing Order</span></td>
+                                        <td>
+                                            <a href="{{ route('sewing-orders.show', $sewingOrder->id) }}">
+                                                {{ $sewingOrder->sewing_order_number ?? 'N/A' }}
+                                            </a>
+                                        </td>
                                         <td>{{ $sewingOrder->order_date ? $sewingOrder->order_date->format('Y-m-d') : 'N/A' }}
                                         </td>
                                         <td><strong>Rs {{ number_format($sewingOrder->total_amount, 2) }}</strong></td>
@@ -331,9 +336,9 @@
                                                         Done</span>
                                                     <br>
                                                     <small class="text-muted">
+                                                        <span class="badge bg-warning">{{ $itemsInProgress }} In
+                                                            Progress</span> 
                                                         @if ($itemsInProgress > 0)
-                                                            <span class="badge bg-warning">{{ $itemsInProgress }} In
-                                                                Progress</span>
                                                         @endif
                                                         @if ($itemsPending > 0)
                                                             <span class="badge bg-secondary">{{ $itemsPending }}

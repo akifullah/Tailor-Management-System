@@ -158,6 +158,7 @@
                                                 </span>
                                             </td>
                                             <td>
+                                                @if(!in_array($item->status, ['cancelled', 'delivered']))
                                                 <select class="form-select form-select-sm status-select"
                                                     data-item-id="{{ $item->id }}" style="width: auto; display: inline-block;">
                                                     <option value="pending" {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
@@ -172,6 +173,7 @@
                                                     <option value="delivered" {{ $item->status == 'delivered' ? 'selected' : '' }}>
                                                         Delivered</option> --}}
                                                 </select>
+                                                @endif
                                                 @if ($item->customer_measurement)
                                                     <button type="button" class="btn btn-sm btn-info mt-1" data-bs-toggle="modal"
                                                         data-bs-target="#measurementModal{{ $item->id }}">

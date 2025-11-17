@@ -316,14 +316,22 @@ class SewingOrderController extends Controller
         DB::beginTransaction();
         try {
             $sewingOrder = $item->sewingOrder;
-            
             if ($validated['status'] === 'cancelled' && $item->status !== 'cancelled') {
-                // Cancel item with refund processing
-                $this->cancelSewingOrderItem($item, $validated['cancellation_reason'] ?? null);
-            } else {
-                // Just update status
-                $item->update($validated);
+                // If cancelling, decrease item total_price from SewingOrder's total_amount
+                $sewingOrder->total_amount -= $item->total_price;
+                if ($sewingOrder->total_amount < 0) {
+                    $sewingOrder->total_amount = 0;
+                }
+                $sewingOrder->save();
             }
+            
+            // if ($validated['status'] === 'cancelled' && $item->status !== 'cancelled') {
+            //     // Cancel item with refund processing
+            //     $this->cancelSewingOrderItem($item, $validated['cancellation_reason'] ?? null);
+            // } else {
+            //     // Just update status
+            // }
+            $item->update($validated);
 
             // Check if all items are cancelled
             if ($sewingOrder->allItemsCancelled()) {

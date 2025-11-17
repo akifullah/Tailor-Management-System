@@ -73,7 +73,8 @@
                                             <td>
                                                 {{ $item->worker->name ?? 'Not Assigned' }}
                                                 @if ($item->assign_note)
-                                                    <p class="text-muted mb-0" style="font-size: 14px;">Notes: {{ $item->assign_note }}</p>
+                                                    <p class="text-muted mb-0" style="font-size: 14px;">Notes:
+                                                        {{ $item->assign_note }}</p>
                                                 @endif
                                             </td>
                                             <td>
@@ -81,28 +82,33 @@
                                                     class="badge bg-{{ ['pending' => 'secondary', 'on_hold' => 'secondary', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', 'delivered' => 'success'][$item->status] ?? 'secondary' }}">
                                                     {{ ucfirst(str_replace('_', ' ', $item->status)) }}
                                                 </span>
-                                                <select class="form-select form-select-sm status-select"
-                                                    data-item-id="{{ $item->id }}"
-                                                    style="width: auto; display: inline-block;">
-                                                    <option value="pending"
-                                                        {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
-                                                    </option>
-                                                    <option value="on_hold"
-                                                        {{ $item->status == 'on_hold' ? 'selected' : '' }}>On Hold
-                                                    </option>
-                                                    <option value="in_progress"
-                                                        {{ $item->status == 'in_progress' ? 'selected' : '' }}>In Progress
-                                                    </option>
-                                                    <option value="completed"
-                                                        {{ $item->status == 'completed' ? 'selected' : '' }}>
-                                                        Completed</option>
-                                                    <option value="cancelled"
-                                                        {{ $item->status == 'cancelled' ? 'selected' : '' }}>
-                                                        Cancelled</option>
-                                                    <option value="delivered"
-                                                        {{ $item->status == 'delivered' ? 'selected' : '' }}>
-                                                        Delivered</option>
-                                                </select>
+
+
+                                                @if (!in_array($item->status, ['cancelled', 'delivered']))
+                                                    <select class="form-select form-select-sm status-select"
+                                                        data-item-id="{{ $item->id }}"
+                                                        style="width: auto; display: inline-block;">
+                                                        <option value="pending"
+                                                            {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
+                                                        </option>
+                                                        <option value="on_hold"
+                                                            {{ $item->status == 'on_hold' ? 'selected' : '' }}>On Hold
+                                                        </option>
+                                                        <option value="in_progress"
+                                                            {{ $item->status == 'in_progress' ? 'selected' : '' }}>In
+                                                            Progress
+                                                        </option>
+                                                        <option value="completed"
+                                                            {{ $item->status == 'completed' ? 'selected' : '' }}>
+                                                            Completed</option>
+                                                        <option value="cancelled"
+                                                            {{ $item->status == 'cancelled' ? 'selected' : '' }}>
+                                                            Cancelled</option>
+                                                        <option value="delivered"
+                                                            {{ $item->status == 'delivered' ? 'selected' : '' }}>
+                                                            Delivered</option>
+                                                    </select>
+                                                @endif
                                             </td>
                                             <td>
                                                 @if ($item->customer_measurement)
@@ -125,23 +131,6 @@
                         </div>
 
                         <hr>
-
-                        <div class="row mt-3">
-                            <div class="col-md-12 d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">Payment Information</h5>
-                                <div>
-                                    <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
-                                        data-bs-target="#addPaymentModal">
-                                        <i class="mdi mdi-plus"></i> Add Payment
-                                    </button>
-                                    {{-- <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#addRefundModal">
-                                        <i class="mdi mdi-minus"></i> Add Refund
-                                    </button> --}}
-                                </div>
-                            </div>
-                        </div>
-
                         {{-- Payment & Refund Calculations with Safe Null Checks --}}
                         @php
                             // Safe-get collections, fallback to empty if null
@@ -151,6 +140,25 @@
                             $totalRefunded = $refunds ? $refunds->sum('amount') : 0;
                             $remaining = $sewingOrder->total_amount - $totalPaid + $totalRefunded;
                         @endphp
+                        <div class="row mt-3">
+                            <div class="col-md-12 d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Payment Information</h5>
+                                <div>
+                                    @if ($remaining > 0)
+                                        <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
+                                            data-bs-target="#addPaymentModal">
+                                            <i class="mdi mdi-plus"></i> Add Payment
+                                        </button>
+                                    @endif
+                                    {{-- <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#addRefundModal">
+                                        <i class="mdi mdi-minus"></i> Add Refund
+                                    </button> --}}
+                                </div>
+                            </div>
+                        </div>
+
+
                         <div class="row mt-3">
                             <div class="col-md-3">
                                 <strong>Total Amount:</strong><br>
@@ -163,7 +171,8 @@
                             </div>
                             <div class="col-md-3">
                                 <strong>Total Refunded:</strong><br>
-                                <span class="fs-16 fw-semibold text-danger">Rs {{ number_format($totalRefunded, 2) }}</span>
+                                <span class="fs-16 fw-semibold text-danger">Rs
+                                    {{ number_format($totalRefunded, 2) }}</span>
                             </div>
                             <div class="col-md-3">
                                 <strong>Remaining:</strong><br>
@@ -181,7 +190,7 @@
                             </div>
                         </div>
 
-                        @if(!empty($payments) && $payments->count() > 0)
+                        @if (!empty($payments) && $payments->count() > 0)
                             <div class="row mt-4">
                                 <div class="col-md-12">
                                     <h6>Payment History</h6>
@@ -199,7 +208,8 @@
                                             <tbody>
                                                 @foreach ($payments as $payment)
                                                     <tr>
-                                                        <td>{{ optional($payment->payment_date)->format('Y-m-d h:i A') }}</td>
+                                                        <td>{{ optional($payment->payment_date)->format('Y-m-d h:i A') }}
+                                                        </td>
                                                         <td><strong>Rs {{ number_format($payment->amount, 2) }}</strong>
                                                         </td>
                                                         <td>
@@ -217,7 +227,7 @@
                             </div>
                         @endif
 
-                        @if(!empty($refunds) && $refunds->count() > 0)
+                        @if (!empty($refunds) && $refunds->count() > 0)
                             <div class="row mt-3">
                                 <div class="col-md-12">
                                     <h6>Refund History</h6>
@@ -235,7 +245,8 @@
                                             <tbody>
                                                 @foreach ($refunds as $refund)
                                                     <tr>
-                                                        <td>{{ optional($refund->refund_date)->format('Y-m-d h:i A') }}</td>
+                                                        <td>{{ optional($refund->refund_date)->format('Y-m-d h:i A') }}
+                                                        </td>
                                                         <td><strong>Rs {{ number_format($refund->amount, 2) }}</strong>
                                                         </td>
                                                         <td>
@@ -344,7 +355,8 @@
     </div>
 
     <!-- Add Refund Modal -->
-    <div class="modal fade" id="addRefundModal" tabindex="-1" aria-labelledby="addRefundModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addRefundModal" tabindex="-1" aria-labelledby="addRefundModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -428,12 +440,12 @@
                 }
 
                 // Parse the nested data field if it's a JSON string
-                $measurementData = [];
-                if (isset($measurement['data'])) {
-                    if (is_string($measurement['data'])) {
-                        $measurementData = json_decode($measurement['data'], true) ?? [];
-                    } elseif (is_array($measurement['data'])) {
-                        $measurementData = $measurement['data'];
+$measurementData = [];
+if (isset($measurement['data'])) {
+    if (is_string($measurement['data'])) {
+        $measurementData = json_decode($measurement['data'], true) ?? [];
+    } elseif (is_array($measurement['data'])) {
+        $measurementData = $measurement['data'];
                     }
                 }
             @endphp
@@ -454,17 +466,17 @@
                                 $dataGroups = [];
                                 // $measurement['data'] is an object of objects: ['kameez' => [...], 'shalwar' => [...] ]
                                 // If it's a JSON string, decode it. If already array/object, use directly.
-                                if (isset($measurement['data'])) {
-                                    // Handle if $measurement['data'] is still JSON string (sometimes double-encoded)
-                                    if (is_string($measurement['data'])) {
-                                        $decoded = json_decode($measurement['data'], true);
-                                        if (is_array($decoded)) {
-                                            $dataGroups = $decoded;
-                                        }
-                                    } elseif (is_array($measurement['data'])) {
-                                        $dataGroups = $measurement['data'];
-                                    } elseif (is_object($measurement['data'])) {
-                                        $dataGroups = (array) $measurement['data'];
+if (isset($measurement['data'])) {
+    // Handle if $measurement['data'] is still JSON string (sometimes double-encoded)
+    if (is_string($measurement['data'])) {
+        $decoded = json_decode($measurement['data'], true);
+        if (is_array($decoded)) {
+            $dataGroups = $decoded;
+        }
+    } elseif (is_array($measurement['data'])) {
+        $dataGroups = $measurement['data'];
+    } elseif (is_object($measurement['data'])) {
+        $dataGroups = (array) $measurement['data'];
                                     }
                                 }
                             @endphp
@@ -578,7 +590,8 @@
         }
 
         function setMaxRefund() {
-            const refundable = parseFloat(document.getElementById('refundableAmount').textContent.replace(/[^0-9.-]+/g, ''));
+            const refundable = parseFloat(document.getElementById('refundableAmount').textContent.replace(/[^0-9.-]+/g,
+                ''));
             document.getElementById('refundAmount').value = refundable.toFixed(2);
         }
 
@@ -639,31 +652,31 @@
             submitButton.textContent = 'Processing...';
 
             fetch('{{ route('refunds.store') }}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addRefundModal'));
-                    modal.hide();
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + data.message);
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addRefundModal'));
+                        modal.hide();
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Refund';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
                     submitButton.disabled = false;
                     submitButton.textContent = 'Submit Refund';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-                submitButton.disabled = false;
-                submitButton.textContent = 'Submit Refund';
-            });
+                });
         });
 
         document.getElementById('refundAmount').addEventListener('input', function() {

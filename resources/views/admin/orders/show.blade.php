@@ -8,7 +8,8 @@
                 <h4 class="fs-18 fw-semibold mb-0">Order Details</h4>
 
                 @if (!$order->is_return && $order->order_status !== 'cancelled')
-                    <button type="button" class="btn fw-bold" style="background-color:#F59E0B; color:#000;" data-bs-toggle="modal" data-bs-target="#returnOrderModal">
+                    <button type="button" class="btn fw-bold" style="background-color:#F59E0B; color:#000;"
+                        data-bs-toggle="modal" data-bs-target="#returnOrderModal">
                         Return Order
                     </button>
                 @endif
@@ -276,7 +277,8 @@
                                                                         $payment->amount - $alreadyRefunded;
                                                                 @endphp
                                                                 @if ($availableToRefund > 0)
-                                                                    <button type="button" class="btn btn-sm" style="background-color:#16A34A; color:#fff;"
+                                                                    <button type="button" class="btn btn-sm"
+                                                                        style="background-color:#16A34A; color:#fff;"
                                                                         data-bs-toggle="modal"
                                                                         data-bs-target="#refundModal{{ $payment->id }}">
                                                                         <i class="mdi mdi-cash-refund me-1"></i> Refund
@@ -286,6 +288,36 @@
                                                         </td>
                                                     </tr>
                                                 @endforeach
+                                                <tr>
+                                                    <th colspan="2" class="text-end">
+                                                        Total Paid:
+                                                    </th>
+                                                    <th colspan="5">
+                                                        <h5 class="text-success fw-bold mb-0">
+                                                            Rs {{ number_format($totalPaid, 2) }}
+                                                        </h5>
+                                                    </th>
+                                                </tr>
+
+                                                <tr>
+                                                    <th colspan="2" class="text-end">
+                                                        Total Refunded:
+                                                    </th>
+                                                    <th colspan="5">
+                                                        <h5 class="text-danger fw-bold mb-0"> Rs
+                                                            -{{ number_format($totalRefunded, 2) }}
+                                                        </h5>
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="2" class="text-end">
+                                                        Total Net Paid:
+                                                    </th>
+                                                    <th colspan="5">
+                                                        <h5 class="text-success fw-bold mb-0"> Rs
+                                                            {{ number_format($netPaid, 2) }}</h5>
+                                                    </th>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
