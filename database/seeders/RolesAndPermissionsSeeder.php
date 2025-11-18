@@ -34,8 +34,24 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage-orders',
             'manage-purchases',
             'manage-payments',
-            'view-reports',
             'manage-roles-permissions',
+            "manage-sewing-orders",
+            "worker-dashboard",
+
+            // Report dashboard & sub-permissions from routes/web.php
+            'view-reports-dashboard',
+            'view-reports-sales',
+            'view-reports-customers',
+            'view-reports-suppliers',
+            'view-reports-inventory-history',
+            'view-reports-customer-ledger',
+            'view-reports-supplier-ledger',
+            'view-reports-transactions',
+            'view-reports-pending-transactions',
+            'view-reports-completed-transactions',
+            'view-reports-user-transactions',
+            'view-reports-customer-transactions',
+            'view-reports-supplier-transactions',
         ];
 
         $createdPermissions = [];

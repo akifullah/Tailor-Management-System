@@ -111,6 +111,16 @@
                                     <i class="mdi mdi-lock-outline fs-16 align-middle"></i>
                                     <span>Lock Screen</span>
                                 </a> --}}
+                                @can('manage-roles-permissions')
+                                    <a class="dropdown-item notify-item" href="{{ route('roles.index') }}">
+                                        <i class="mdi mdi-shield fs-16 align-middle"></i>
+                                        <span>Roles</span>
+                                    </a>
+                                    <a class="dropdown-item notify-item" href="{{ route('permissions.index') }}">
+                                        <i class="mdi mdi-key fs-16 align-middle"></i>
+                                        <span>Permissions</span>
+                                    </a>
+                                @endcan
 
                                 <div class="dropdown-divider"></div>
 
@@ -126,7 +136,6 @@
             </div>
         </div>
         <!-- end Topbar -->
-
         <!-- Left Sidebar Start -->
         <div class="app-sidebar-menu">
             <div class="h-100" data-simplebar>
@@ -173,14 +182,15 @@
                                 <span> Dashboard </span>
                             </a>
                         </li> --}}
-
-                        <li>
-                            <a href="{{ route('reports.dashboard') }}"
-                                class="{{ request()->routeIs('reports.dashboard') ? 'tp-link active' : '' }}">
-                                <i data-feather="bar-chart-2"></i>
-                                <span> Dashboard </span>
-                            </a>
-                        </li>
+                        @can('view-reports-customers')
+                            <li>
+                                <a href="{{ route('reports.dashboard') }}"
+                                    class="{{ request()->routeIs('reports.dashboard') ? 'tp-link active' : '' }}">
+                                    <i data-feather="bar-chart-2"></i>
+                                    <span> Dashboard </span>
+                                </a>
+                            </li>
+                        @endcan
 
                         <li>
                             <a href="{{ route('worker.dashboard') }}"
@@ -189,107 +199,123 @@
                                 <span> Worker Dashboard </span>
                             </a>
                         </li>
+                        @can('manage-users')
+                            <li>
+                                <a href="{{ route('users.index') }}"
+                                    class="{{ request()->routeIs('users.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="users"></i>
+                                    <span> Users </span>
+                                </a>
+                            </li>
+                        @endcan
+                      
+                        @can('manage-customers')
+                            <li>
+                                <a href="{{ route('customers.index') }}"
+                                    class="{{ request()->routeIs('customers.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="user"></i>
+                                    <span> Customers </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            <a href="{{ route('users.index') }}"
-                                class="{{ request()->routeIs('users.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="users"></i>
-                                <span> Users </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('roles.index') }}"
-                                class="{{ request()->routeIs('roles.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="shield"></i>
-                                <span> Roles </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('permissions.index') }}"
-                                class="{{ request()->routeIs('permissions.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="key"></i>
-                                <span> Permissions </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('customers.index') }}"
-                                class="{{ request()->routeIs('customers.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="user"></i>
-                                <span> Customers </span>
-                            </a>
-                        </li>
+                        @can('manage-measurements')
+                            <li>
+                                <a href="{{ route('measurements.create') }}"
+                                    class="{{ request()->routeIs('measurements.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="user"></i>
+                                    <span> Measurements </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('manage-brands')
+                            <li>
+                                <a href="{{ route('brands.index') }}"
+                                    class="{{ request()->routeIs('brands.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="package"></i>
+                                    <span> Brands </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('manage-categories')
+                            <li>
+                                <a href="{{ route('categories.index') }}"
+                                    class="{{ request()->routeIs('categories.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="grid"></i>
+                                    <span> Categories </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('manage-suppliers')
+                            <li>
+                                <a href="{{ route('suppliers.index') }}"
+                                    class="{{ request()->routeIs('suppliers.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="truck"></i>
+                                    <span> Suppliers </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            <a href="{{ route('measurements.create') }}"
-                                class="{{ request()->routeIs('measurements.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="user"></i>
-                                <span> Measurements </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('brands.index') }}"
-                                class="{{ request()->routeIs('brands.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="package"></i>
-                                <span> Brands </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('categories.index') }}"
-                                class="{{ request()->routeIs('categories.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="grid"></i>
-                                <span> Categories </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('suppliers.index') }}"
-                                class="{{ request()->routeIs('suppliers.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="truck"></i>
-                                <span> Suppliers </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('sewing-orders.index') }}"
-                                class="{{ request()->routeIs('sewing-orders.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="scissors"></i>
-                                <span> Sewing Orders </span>
-                            </a>
-                        </li>
+                        @can('manage-sewing-orders')
+                            <li>
+                                <a href="{{ route('sewing-orders.index') }}"
+                                    class="{{ request()->routeIs('sewing-orders.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="scissors"></i>
+                                    <span> Sewing Orders </span>
+                                </a>
+                            </li>
+                        @endcan
 
+                        @canany(['manage-purchases', 'manage-products', 'manage-orders'])
+                            <li class="menu-title mt-2">Inventory</li>
+                        @endcan
+                        @can('manage-products')
+                            <li>
+                                <a href="{{ route('products.index') }}"
+                                    class="{{ request()->routeIs('products.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="box"></i>
+                                    <span> Products </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('manage-purchases')
+                            <li>
+                                <a href="{{ route('purchases.index') }}"
+                                    class="{{ request()->routeIs('purchases.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="download"></i>
+                                    <span> Purchases (Stock In) </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('manage-orders')
+                            <li>
+                                <a href="{{ route('orders.index') }}"
+                                    class="{{ request()->routeIs('orders.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="shopping-cart"></i>
+                                    <span> Orders </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li class="menu-title mt-2">Inventory</li>
-
-                        <li>
-                            <a href="{{ route('products.index') }}"
-                                class="{{ request()->routeIs('products.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="box"></i>
-                                <span> Products </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('purchases.index') }}"
-                                class="{{ request()->routeIs('purchases.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="download"></i>
-                                <span> Purchases (Stock In) </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('orders.index') }}"
-                                class="{{ request()->routeIs('orders.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="shopping-cart"></i>
-                                <span> Orders </span>
-                            </a>
-                        </li>
-
-                        <li class="menu-title mt-2">Reports</li>
+                        @canany(['view-reports-dashboard', 'view-reports-sales', 'view-reports-customers',
+                            'view-reports-suppliers', 'view-reports-inventory-history', 'view-reports-customer-ledger',
+                            'view-reports-supplier-ledger', 'view-reports-transactions',
+                            'view-reports-pending-transactions', 'view-reports-completed-transactions',
+                            'view-reports-user-transactions', 'view-reports-customer-transactions',
+                            'view-reports-supplier-transactions'])
+                            <li class="menu-title mt-2">Reports</li>
+                        @endcanany
 
 
-                        <li>
-                            <a href="{{ route('reports.sales') }}"
-                                class="{{ request()->routeIs('reports.sales') ? 'tp-link active' : '' }}">
-                                <i data-feather="trending-up"></i>
-                                <span> Sales Report </span>
-                            </a>
-                        </li>
+                        @can('view-reports-sales')
+                            <li>
+                                <a href="{{ route('reports.sales') }}"
+                                    class="{{ request()->routeIs('reports.sales') ? 'tp-link active' : '' }}">
+                                    <i data-feather="trending-up"></i>
+                                    <span> Sales Report </span>
+                                </a>
+                            </li>
+                        @endcan
                         {{-- <li>
                             <a href="{{ route('reports.customers') }}"
                                 class="{{ request()->routeIs('reports.customers') ? 'tp-link active' : '' }}">
@@ -304,48 +330,60 @@
                                 <span> Supplier Ledger </span>
                             </a>
                         </li> --}}
-                        <li>
-                            <a href="{{ route('reports.inventory-history') }}"
-                                class="{{ request()->routeIs('reports.inventory-history') ? 'tp-link active' : '' }}">
-                                <i data-feather="activity"></i>
-                                <span> Inventory History </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('reports.customer-transactions') }}"
-                                class="{{ request()->routeIs('reports.customer-transactions') ? 'tp-link active' : '' }}">
-                                <i data-feather="users"></i>
-                                <span> Customer Ledger </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('reports.supplier-transactions') }}"
-                                class="{{ request()->routeIs('reports.supplier-transactions') ? 'tp-link active' : '' }}">
-                                <i data-feather="truck"></i>
-                                <span> Supplier Ledger </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('reports.transactions') }}"
-                                class="{{ request()->routeIs('reports.transactions') ? 'tp-link active' : '' }}">
-                                <i data-feather="dollar-sign"></i>
-                                <span> All Transactions </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('reports.pending-transactions') }}"
-                                class="{{ request()->routeIs('reports.pending-transactions') ? 'tp-link active' : '' }}">
-                                <i data-feather="clock"></i>
-                                <span> Pending Transactions </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('reports.completed-transactions') }}"
-                                class="{{ request()->routeIs('reports.completed-transactions') ? 'tp-link active' : '' }}">
-                                <i data-feather="check-circle"></i>
-                                <span> Completed Transactions </span>
-                            </a>
-                        </li>
+                        @can('view-reports-inventory-history')
+                            <li>
+                                <a href="{{ route('reports.inventory-history') }}"
+                                    class="{{ request()->routeIs('reports.inventory-history') ? 'tp-link active' : '' }}">
+                                    <i data-feather="activity"></i>
+                                    <span> Inventory History </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('view-reports-customer-transactions')
+                            <li>
+                                <a href="{{ route('reports.customer-transactions') }}"
+                                    class="{{ request()->routeIs('reports.customer-transactions') ? 'tp-link active' : '' }}">
+                                    <i data-feather="users"></i>
+                                    <span> Customer Ledger </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('view-reports-supplier-transactions')
+                            <li>
+                                <a href="{{ route('reports.supplier-transactions') }}"
+                                    class="{{ request()->routeIs('reports.supplier-transactions') ? 'tp-link active' : '' }}">
+                                    <i data-feather="truck"></i>
+                                    <span> Supplier Ledger </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('view-reports-transactions')
+                            <li>
+                                <a href="{{ route('reports.transactions') }}"
+                                    class="{{ request()->routeIs('reports.transactions') ? 'tp-link active' : '' }}">
+                                    <i data-feather="dollar-sign"></i>
+                                    <span> All Transactions </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('view-reports-pending-transactions')
+                            <li>
+                                <a href="{{ route('reports.pending-transactions') }}"
+                                    class="{{ request()->routeIs('reports.pending-transactions') ? 'tp-link active' : '' }}">
+                                    <i data-feather="clock"></i>
+                                    <span> Pending Transactions </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('view-reports-completed-transactions')
+                            <li>
+                                <a href="{{ route('reports.completed-transactions') }}"
+                                    class="{{ request()->routeIs('reports.completed-transactions') ? 'tp-link active' : '' }}">
+                                    <i data-feather="check-circle"></i>
+                                    <span> Completed Transactions </span>
+                                </a>
+                            </li>
+                        @endcan
                         {{-- <li>
                             <a href="{{ route('reports.user-transactions') }}"
                                 class="{{ request()->routeIs('reports.user-transactions') ? 'tp-link active' : '' }}">

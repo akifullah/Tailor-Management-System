@@ -50,22 +50,22 @@ Route::middleware(["auth"])->group(function () {
         Route::resource("customers", CustomerController::class);
         Route::get('/customers/{id}/measurements', [CustomerController::class, 'getMeasurementsByUser'])->name('customers.measurements');
     });
-    
+
     // MEASUREMENTS - Require manage-measurements permission
     Route::middleware(['permission:manage-measurements'])->group(function () {
         Route::resource("naap", MeasurementsController::class);
         Route::resource('measurements', MeasurementController::class);
         Route::get('measurements/create/{customer?}', [MeasurementController::class, 'create'])
-        ->name('measurements.create.withCustomer');
+            ->name('measurements.create.withCustomer');
     });
-    
-    
+
+
     // TYPE - Require manage-types permission
     Route::middleware(['permission:manage-types'])->group(function () {
         Route::get("types/get", [TypeController::class, "getType"])->name('type.get');
         Route::resource("types", TypeController::class);
     });
-    
+
     // field - Require manage-fields permission
     Route::middleware(['permission:manage-fields'])->group(function () {
         Route::get("fields/{id}", [FieldController::class, "getFieldsByTypeId"])->name('field.byType');
@@ -77,22 +77,22 @@ Route::middleware(["auth"])->group(function () {
     Route::middleware(['permission:manage-brands'])->group(function () {
         Route::resource("brands", \App\Http\Controllers\BrandController::class);
     });
-    
+
     // Supplier - Require manage-suppliers permission
     Route::middleware(['permission:manage-suppliers'])->group(function () {
         Route::resource("suppliers", \App\Http\Controllers\SupplierController::class);
     });
-    
+
     // category - Require manage-categories permission
     Route::middleware(['permission:manage-categories'])->group(function () {
         Route::resource("categories", \App\Http\Controllers\CategoryController::class);
     });
-    
+
     // products - Require manage-products permission
     Route::middleware(['permission:manage-products'])->group(function () {
         Route::resource('products', \App\Http\Controllers\ProductController::class);
     });
-    
+
     // orders - Require manage-orders permission
     Route::middleware(['permission:manage-orders'])->group(function () {
         Route::resource('orders', OrderController::class);
@@ -105,44 +105,73 @@ Route::middleware(["auth"])->group(function () {
     });
 
     // sewing orders - Require manage-sewing-orders permission
-    // Route::middleware(['permission:manage-sewing-orders'])->group(function () {
+    Route::middleware(['permission:manage-sewing-orders'])->group(function () {
         Route::resource('sewing-orders', SewingOrderController::class);
         Route::get('sewing-orders/create/{customer?}', [SewingOrderController::class, 'create'])->name('sewing-orders.create.withCustomer');
         Route::put('sewing-order-items/{item}/status', [SewingOrderController::class, 'updateItemStatus'])->name('sewing-order-items.update-status');
-        Route::get('worker/dashboard', [SewingOrderController::class, 'workerDashboard'])->name('worker.dashboard');
-    // Route for storing a refund for a sewing order (for AJAX)
-    Route::post('refunds', [\App\Http\Controllers\SewingOrderController::class, 'createRefund'])->name('refunds.store');
-    // });
+        // Route for storing a refund for a sewing order (for AJAX)
+        Route::post('refunds', [\App\Http\Controllers\SewingOrderController::class, 'createRefund'])->name('refunds.store');
+    });
     
+    Route::middleware(['permission:worker-dashboard'])->group(function () {
+        Route::get('worker/dashboard', [SewingOrderController::class, 'workerDashboard'])->name('worker.dashboard');
+    });
+
     // Reports - Require view-reports permission
-    Route::middleware(['permission:view-reports'])->prefix('reports')->group(function () {
-        Route::get('/dashboard', [\App\Http\Controllers\ReportController::class, 'dashboard'])->name('reports.dashboard');
-        Route::get('/sales', [\App\Http\Controllers\ReportController::class, 'salesReport'])->name('reports.sales');
-        Route::get('/customers', [\App\Http\Controllers\ReportController::class, 'customerReport'])->name('reports.customers');
-        Route::get('/suppliers', [\App\Http\Controllers\ReportController::class, 'supplierReport'])->name('reports.suppliers');
-        Route::get('/inventory-history', [\App\Http\Controllers\ReportController::class, 'inventoryHistory'])->name('reports.inventory-history');
-        Route::get('/customers/{customer}/ledger', [ReportController::class, 'customerLedgerDetail'])->name('reports.customers.ledger');
-        Route::get('/suppliers/{supplier}/ledger', [\App\Http\Controllers\ReportController::class, 'supplierLedgerDetail'])->name('reports.suppliers.ledger');
-        Route::get('/transactions', [\App\Http\Controllers\ReportController::class, 'transactionsReport'])->name('reports.transactions');
-        Route::get('/pending-transactions', [\App\Http\Controllers\ReportController::class, 'pendingTransactionsReport'])->name('reports.pending-transactions');
-        Route::get('/completed-transactions', [\App\Http\Controllers\ReportController::class, 'completedTransactionsReport'])->name('reports.completed-transactions');
-        Route::get('/user-transactions', [\App\Http\Controllers\ReportController::class, 'userTransactionsReport'])->name('reports.user-transactions');
-        Route::get('/customer-transactions', [\App\Http\Controllers\ReportController::class, 'customerTransactionsReport'])->name('reports.customer-transactions');
-        Route::get('/supplier-transactions', [\App\Http\Controllers\ReportController::class, 'supplierTransactionsReport'])->name('reports.supplier-transactions');
+    Route::prefix('reports')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\ReportController::class, 'dashboard'])
+            ->middleware('permission:view-reports-dashboard')
+            ->name('reports.dashboard');
+        Route::get('/sales', [\App\Http\Controllers\ReportController::class, 'salesReport'])
+            ->middleware('permission:view-reports-sales')
+            ->name('reports.sales');
+        Route::get('/customers', [\App\Http\Controllers\ReportController::class, 'customerReport'])
+            ->middleware('permission:view-reports-customers')
+            ->name('reports.customers');
+        Route::get('/suppliers', [\App\Http\Controllers\ReportController::class, 'supplierReport'])
+            ->middleware('permission:view-reports-suppliers')
+            ->name('reports.suppliers');
+        Route::get('/inventory-history', [\App\Http\Controllers\ReportController::class, 'inventoryHistory'])
+            ->middleware('permission:view-reports-inventory-history')
+            ->name('reports.inventory-history');
+        Route::get('/customers/{customer}/ledger', [ReportController::class, 'customerLedgerDetail'])
+            ->middleware('permission:view-reports-customer-ledger')
+            ->name('reports.customers.ledger');
+        Route::get('/suppliers/{supplier}/ledger', [\App\Http\Controllers\ReportController::class, 'supplierLedgerDetail'])
+            ->middleware('permission:view-reports-supplier-ledger')
+            ->name('reports.suppliers.ledger');
+        Route::get('/transactions', [\App\Http\Controllers\ReportController::class, 'transactionsReport'])
+            ->middleware('permission:view-reports-transactions')
+            ->name('reports.transactions');
+        Route::get('/pending-transactions', [\App\Http\Controllers\ReportController::class, 'pendingTransactionsReport'])
+            ->middleware('permission:view-reports-pending-transactions')
+            ->name('reports.pending-transactions');
+        Route::get('/completed-transactions', [\App\Http\Controllers\ReportController::class, 'completedTransactionsReport'])
+            ->middleware('permission:view-reports-completed-transactions')
+            ->name('reports.completed-transactions');
+        Route::get('/user-transactions', [\App\Http\Controllers\ReportController::class, 'userTransactionsReport'])
+            ->middleware('permission:view-reports-user-transactions')
+            ->name('reports.user-transactions');
+        Route::get('/customer-transactions', [\App\Http\Controllers\ReportController::class, 'customerTransactionsReport'])
+            ->middleware('permission:view-reports-customer-transactions')
+            ->name('reports.customer-transactions');
+        Route::get('/supplier-transactions', [\App\Http\Controllers\ReportController::class, 'supplierTransactionsReport'])
+            ->middleware('permission:view-reports-supplier-transactions')
+            ->name('reports.supplier-transactions');
     });
 
     // Purchases - Require manage-purchases permission
     Route::middleware(['permission:manage-purchases'])->group(function () {
         Route::resource('purchases', PurchaseController::class)->only(['index', 'create', 'store']);
     });
-    
+
     // Payments - Require manage-payments permission
     Route::middleware(['permission:manage-payments'])->group(function () {
         Route::post('payments', [\App\Http\Controllers\PaymentController::class, 'store'])->name('payments.store');
         Route::get('payments', [\App\Http\Controllers\PaymentController::class, 'getPayments'])->name('payments.get');
         Route::post('payments/{payment}/refund', [\App\Http\Controllers\PaymentController::class, 'createRefund'])->name('payments.refund');
     });
-    
+
     // Roles & Permissions - Require manage-roles-permissions permission
     Route::middleware(['permission:manage-roles-permissions'])->group(function () {
         Route::resource('roles', RoleController::class);

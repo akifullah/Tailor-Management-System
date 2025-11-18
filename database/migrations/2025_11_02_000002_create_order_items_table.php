@@ -23,7 +23,6 @@ return new class extends Migration
             $table->boolean("is_return")->default(false);
             $table->date("return_date")->nullable();
             $table->text("return_reason")->nullable();
-            $table->text("return_reason")->nullable();
             $table->enum('status', ['pending', 'progress', 'completed'])->default('pending');
             // $table->enum('status', ['pending', 'in_progress', 'completed', 'on_hold', 'cancelled', 'delivered'])->default('pending')->after('total_price');
             // $table->timestamp('cancelled_at')->nullable()->after('status');
