@@ -175,7 +175,7 @@
                                                 </select>
                                                 @endif
                                                 @if ($item->customer_measurement)
-                                                    <button type="button" class="btn btn-sm btn-info mt-1" data-bs-toggle="modal"
+                                                    <button type="button" class="btn btn-sm btn-primary mt-1" data-bs-toggle="modal"
                                                         data-bs-target="#measurementModal{{ $item->id }}">
                                                         View Measurement
                                                     </button>

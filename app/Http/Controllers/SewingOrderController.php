@@ -459,7 +459,7 @@ class SewingOrderController extends Controller
             'pending' => $baseQuery()->where('status', 'pending')->count(),
             'on_hold' => $baseQuery()->where('status', 'on_hold')->count(),
             'in_progress' => $baseQuery()->where('status', 'in_progress')->count(),
-            'completed' => $baseQuery()->where('status', 'completed')->count(),
+            'completed' => $baseQuery()->whereIn('status', ['completed', "delivered"])->count(),
             'cancelled' => $baseQuery()->where('status', 'cancelled')->count(),
             'delivered' => $baseQuery()->where('status', 'delivered')->count(),
             'total_value' => $baseQuery()->sum('total_price'),
@@ -482,7 +482,21 @@ class SewingOrderController extends Controller
     }
 
 
-    
+    /**
+     * Update the status of a sewing order (used by PATCH: sewing-orders/{sewing_order}/update-status)
+     */
+    public function updateStatus(Request $request, SewingOrder $sewing_order)
+    {
+        $validated = $request->validate([
+            'order_status' => 'required|in:pending,completed,delivered,cancelled',
+        ]);
+
+        $sewing_order->order_status = $validated['order_status'];
+        $sewing_order->save();
+
+        return redirect()->route('sewing-orders.show', $sewing_order->id)
+            ->with('success', 'Order status updated successfully.');
+    }
     
     
 }

@@ -111,8 +111,11 @@ Route::middleware(["auth"])->group(function () {
         Route::put('sewing-order-items/{item}/status', [SewingOrderController::class, 'updateItemStatus'])->name('sewing-order-items.update-status');
         // Route for storing a refund for a sewing order (for AJAX)
         Route::post('refunds', [\App\Http\Controllers\SewingOrderController::class, 'createRefund'])->name('refunds.store');
+
+        // Route to update the status of a sewing order (PATCH)
+        Route::patch('sewing-orders/{sewing_order}/update-status', [SewingOrderController::class, 'updateStatus'])->name('sewing-orders.update-status');
     });
-    
+
     Route::middleware(['permission:worker-dashboard'])->group(function () {
         Route::get('worker/dashboard', [SewingOrderController::class, 'workerDashboard'])->name('worker.dashboard');
     });

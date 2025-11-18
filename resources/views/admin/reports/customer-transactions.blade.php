@@ -336,9 +336,9 @@
                                                         Done</span>
                                                     <br>
                                                     <small class="text-muted">
+                                                        @if ($itemsInProgress > 0)
                                                         <span class="badge bg-warning">{{ $itemsInProgress }} In
                                                             Progress</span> 
-                                                        @if ($itemsInProgress > 0)
                                                         @endif
                                                         @if ($itemsPending > 0)
                                                             <span class="badge bg-secondary">{{ $itemsPending }}
@@ -480,8 +480,8 @@
                                 </tr>
                                 @if ($totalRefunds > 0)
                                     <tr>
-                                        <th colspan="3" class="text-end">Total Refunded:</th>
-                                        <th class="text-danger fw-bold bg-light rounded px-1 py-0">Rs {{ number_format($totalRefunds, 2) }}</th>
+                                        <th colspan="3" class="text-end">Refundeded:</th>
+                                        <th class="text-danger fw-bold bg-light rounded px-1 py-0">Rs -{{ number_format($totalRefunds, 2) }}</th>
                                         <th colspan="4"></th>
                                     </tr>
                                     <tr>

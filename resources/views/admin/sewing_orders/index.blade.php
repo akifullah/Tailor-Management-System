@@ -59,10 +59,12 @@
                                 <tr>
                                     <th>#ID</th>
                                     <th>Sewing Order Number</th>
-                                    <th>Date</th>
                                     <th>Customer</th>
+
+                                    <th>Date</th>
+                                    <th>Delivery Date</th>
                                     <th>Total Amount</th>
-                                    <th>Payment Status</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -76,16 +78,24 @@
                                         <tr>
                                             <td>{{ $order->id }}</td>
                                             <td><a href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a></td>
-                                            <td>{{ $order->order_date ? $order->order_date->format('Y-m-d') : 'N/A' }}</td>
                                             <td>{{ $order->customer->name ?? 'N/A' }}</td>
+
+                                            <td>{{ $order->order_date ? $order->order_date->format('Y-m-d') : 'N/A' }}</td>
+                                            <td>
+                                                {{ $order->delivery_date->format('Y-m-d') }}
+                                            </td>
                                             <td>Rs {{ number_format($order->total_amount, 2) }}</td>
                                             <td>
                                                 @php
                                                     $totalPaid = $order->payments->sum('amount');
                                                     $remaining = $order->total_amount - $totalPaid;
                                                 @endphp
-                                                <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
+                                                {{-- <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
                                                     {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
+                                                </span> --}}
+
+                                                <span class="badge bg-{{ $order->order_status == 'completed' ? 'success' : ($order->order_status == 'in_progress' ? 'warning' : 'warning') }}">
+                                                    {{ ucfirst(str_replace('_', ' ', $order->order_status)) }}
                                                 </span>
                                                 @if ($remaining > 0)
                                                     <br><small class="text-muted">Remaining: Rs

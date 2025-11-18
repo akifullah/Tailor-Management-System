@@ -4,6 +4,26 @@
     <div class="container-fluid">
         <div class="py-3">
             <h4 class="fs-18 fw-semibold mb-0">Sewing Order Details</h4>
+
+            <div class="my-3">
+                <form action="{{ route('sewing-orders.update-status', $sewingOrder->id) }}" method="POST"
+                    class="d-flex align-items-center gap-2">
+                    @csrf
+                    @method('PATCH')
+                    <label for="order_status" class="form-label mb-0 fw-semibold me-2">Update Status:</label>
+                    <select name="order_status" id="order_status" class="form-select form-select-sm w-auto" required>
+                        <option value="pending" {{ $sewingOrder->order_status == 'pending' ? 'selected' : '' }}>Pending
+                        </option>
+                        <option value="completed" {{ $sewingOrder->order_status == 'completed' ? 'selected' : '' }}>
+                            Completed</option>
+                        <option value="delivered" {{ $sewingOrder->order_status == 'delivered' ? 'selected' : '' }}>
+                            Delivered</option>
+                        <option value="cancelled" {{ $sewingOrder->order_status == 'cancelled' ? 'selected' : '' }}>
+                            Cancelled</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                </form>
+            </div>
         </div>
 
         <!-- Alert Container -->
@@ -40,7 +60,7 @@
                             <div class="col-md-6">
                                 <strong>Order Status:</strong>
                                 <span
-                                    class="badge bg-{{ $sewingOrder->order_status == 'completed' ? 'success' : ($sewingOrder->order_status == 'in_progress' ? 'warning' : 'secondary') }}">
+                                    class="badge bg-{{ in_array($sewingOrder->order_status, ['completed', 'delivered']) ? 'success' : ($sewingOrder->order_status == 'in_progress' ? 'warning' : 'warning') }}">
                                     {{ ucfirst(str_replace('_', ' ', $sewingOrder->order_status)) }}
                                 </span>
                             </div>
@@ -79,7 +99,7 @@
                                             </td>
                                             <td>
                                                 <span
-                                                    class="badge bg-{{ ['pending' => 'secondary', 'on_hold' => 'secondary', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', 'delivered' => 'success'][$item->status] ?? 'secondary' }}">
+                                                    class="badge bg-{{ ['pending' => 'warning', 'on_hold' => 'warning', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', 'delivered' => 'success'][$item->status] ?? 'warning' }}">
                                                     {{ ucfirst(str_replace('_', ' ', $item->status)) }}
                                                 </span>
 
@@ -91,9 +111,9 @@
                                                         <option value="pending"
                                                             {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
                                                         </option>
-                                                        <option value="on_hold"
+                                                        {{-- <option value="on_hold"
                                                             {{ $item->status == 'on_hold' ? 'selected' : '' }}>On Hold
-                                                        </option>
+                                                        </option> --}}
                                                         <option value="in_progress"
                                                             {{ $item->status == 'in_progress' ? 'selected' : '' }}>In
                                                             Progress
@@ -112,7 +132,7 @@
                                             </td>
                                             <td>
                                                 @if ($item->customer_measurement)
-                                                    <button type="button" class="btn btn-sm btn-info"
+                                                    <button type="button" class="btn btn-sm btn-primary"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#measurementModal{{ $item->id }}">
                                                         View Measurement
@@ -136,8 +156,8 @@
                             // Safe-get collections, fallback to empty if null
                             $payments = $sewingOrder->payments ?? collect([]);
                             $refunds = $sewingOrder->refunds ?? collect([]);
-                            $totalPaid = $payments ? $payments->sum('amount') : 0;
-                            $totalRefunded = $refunds ? $refunds->sum('amount') : 0;
+                            $totalPaid = $payments ? $payments->where('type', 'payment')->sum('amount') : 0;
+                            $totalRefunded = $payments ? $payments->where('type', 'refund')->sum('amount') : 0;
                             $remaining = $sewingOrder->total_amount - $totalPaid + $totalRefunded;
                         @endphp
                         <div class="row mt-3">
@@ -167,7 +187,8 @@
                             </div>
                             <div class="col-md-3">
                                 <strong>Total Paid:</strong><br>
-                                <span class="fs-16 fw-semibold text-success">Rs {{ number_format($totalPaid, 2) }}</span>
+                                {{-- <span class="fs-16 fw-semibold text-success">Rs {{ number_format($totalPaid, 2) }}</span> --}}
+                                <span class="fs-16 fw-semibold text-success">Rs {{ number_format(($totalPaid ?? 0) - ($totalRefunded ?? 0), 2) }}</span>
                             </div>
                             <div class="col-md-3">
                                 <strong>Total Refunded:</strong><br>
@@ -200,73 +221,115 @@
                                                 <tr>
                                                     <th>Date & Time</th>
                                                     <th>Amount</th>
-                                                    <th>Payment Method</th>
+                                                    <th>Method</th>
                                                     <th>Person / Reference</th>
-                                                    <th>Notes</th>
+                                                    <th>Notes / Reason</th>
+                                                    <th>Status / Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach ($payments as $payment)
                                                     <tr>
-                                                        <td>{{ optional($payment->payment_date)->format('Y-m-d h:i A') }}
+                                                        <td>
+                                                            @if ($payment->type === 'refund')
+                                                                {{ optional($payment->payment_date ?? $payment->refund_date)->format('Y-m-d h:i A') }}
+                                                            @else
+                                                                {{ optional($payment->payment_date)->format('Y-m-d h:i A') }}
+                                                            @endif
                                                         </td>
-                                                        <td><strong>Rs {{ number_format($payment->amount, 2) }}</strong>
+                                                        <td>
+                                                            @if ($payment->type === 'refund')
+                                                                <span class="text-danger">
+                                                                    - Rs {{ number_format($payment->amount, 2) }}
+                                                                </span>
+                                                            @else
+                                                                <strong>Rs {{ number_format($payment->amount, 2) }}</strong>
+                                                            @endif
                                                         </td>
                                                         <td>
                                                             <span
-                                                                class="badge bg-info">{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</span>
+                                                                class="badge {{ $payment->type === 'refund' ? 'bg-danger' : 'bg-info' }}">
+                                                                {{ ucfirst(str_replace('_', ' ', $payment->payment_method ?? $payment->refund_method ?? 'cash')) }}
+                                                                @if ($payment->type === 'refund')
+                                                                    (Refund)
+                                                                @else
+                                                                    (Payment)
+                                                                @endif
+                                                            </span>
                                                         </td>
                                                         <td>{{ $payment->person_reference ?? 'N/A' }}</td>
-                                                        <td>{{ $payment->notes ?? 'N/A' }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if (!empty($refunds) && $refunds->count() > 0)
-                            <div class="row mt-3">
-                                <div class="col-md-12">
-                                    <h6>Refund History</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th>Date & Time</th>
-                                                    <th>Amount</th>
-                                                    <th>Refund Method</th>
-                                                    <th>Person / Reference</th>
-                                                    <th>Notes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($refunds as $refund)
-                                                    <tr>
-                                                        <td>{{ optional($refund->refund_date)->format('Y-m-d h:i A') }}
-                                                        </td>
-                                                        <td><strong>Rs {{ number_format($refund->amount, 2) }}</strong>
+                                                        <td>
+                                                            @if ($payment->type === 'refund')
+                                                                {!! nl2br(e($payment->refund_reason ?? $payment->notes ?? 'N/A')) !!}
+                                                            @else
+                                                                {{ $payment->notes ?? 'N/A' }}
+                                                            @endif
                                                         </td>
                                                         <td>
-                                                            <span
-                                                                class="badge bg-danger">{{ ucfirst(str_replace('_', ' ', $refund->refund_method ?? 'cash')) }}</span>
+                                                            @if ($payment->type === 'payment')
+                                                                @php
+                                                                    $alreadyRefunded = \App\Models\Payment::where(
+                                                                        'refund_for_payment_id',
+                                                                        $payment->id,
+                                                                    )
+                                                                        ->where('type', 'refund')
+                                                                        ->sum('amount');
+                                                                    $availableToRefund =
+                                                                        $payment->amount - $alreadyRefunded;
+                                                                @endphp
+                                                                @if ($availableToRefund > 0)
+                                                                    <button type="button" class="btn btn-sm"
+                                                                        style="background-color:#16A34A; color:#fff;"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#refundModal{{ $payment->id }}">
+                                                                        <i class="mdi mdi-cash-refund me-1"></i> Refund
+                                                                    </button>
+                                                                @else
+                                                                    <span class="badge bg-secondary">Refunded</span>
+                                                                @endif
+                                                            @else
+                                                                <span class="badge bg-danger">Refunded</span>
+                                                            @endif
                                                         </td>
-                                                        <td>{{ $refund->person_reference ?? 'N/A' }}</td>
-                                                        <td>{{ $refund->notes ?? 'N/A' }}</td>
                                                     </tr>
                                                 @endforeach
+
+                                                <tr>
+                                                    <th colspan="1" class="text-end">
+                                                        Total Paid:
+                                                    </th>
+                                                    <th colspan="5">
+                                                        <h5 class="text-success fw-bold mb-0">
+                                                            Rs {{ number_format($totalPaid ?? 0, 2) }}
+                                                        </h5>
+                                                    </th>
+                                                </tr>
+
+                                                <tr>
+                                                    <th colspan="1" class="text-end">
+                                                        Total Refunded:
+                                                    </th>
+                                                    <th colspan="5">
+                                                        <h5 class="text-danger fw-bold mb-0">
+                                                            -{{ number_format($totalRefunded ?? 0, 2) }}
+                                                        </h5>
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="1" class="text-end">
+                                                        Total Net Paid:
+                                                    </th>
+                                                    <th colspan="5">
+                                                        <h5 class="text-success fw-bold mb-0">
+                                                            {{ number_format(($totalPaid ?? 0) - ($totalRefunded ?? 0), 2) }}
+                                                        </h5>
+                                                    </th>
+                                                </tr>
+
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-
-                        @if ($sewingOrder->notes)
-                            <div class="mt-3">
-                                <strong>Notes:</strong> {{ $sewingOrder->notes }}
                             </div>
                         @endif
 
@@ -282,7 +345,8 @@
     </div>
 
     <!-- Add Payment Modal -->
-    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -300,9 +364,8 @@
 
                         @php
                             $payments = $sewingOrder->payments ?? collect([]);
-                            $refunds = $sewingOrder->refunds ?? collect([]);
-                            $totalPaid = $payments ? $payments->sum('amount') : 0;
-                            $totalRefunded = $refunds ? $refunds->sum('amount') : 0;
+                            $totalPaid = $payments ? $payments->where('type', 'payment')->sum('amount') : 0;
+                            $totalRefunded = $payments ? $payments->where('type', 'refund')->sum('amount') : 0;
                             $remaining = max(0, $sewingOrder->total_amount - $totalPaid + $totalRefunded);
                         @endphp
                         <div class="mb-3">
@@ -354,7 +417,7 @@
         </div>
     </div>
 
-    <!-- Add Refund Modal -->
+    <!-- Add Refund Modal (general refund for sewing_order)-->
     <div class="modal fade" id="addRefundModal" tabindex="-1" aria-labelledby="addRefundModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
@@ -365,7 +428,6 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                {{-- Send order info in form, using expected backend parameter: sewing_order_id --}}
                 <form id="refundForm">
                     @csrf
                     <input type="hidden" name="sewing_order_id" value="{{ $sewingOrder->id }}">
@@ -375,9 +437,8 @@
 
                         @php
                             $payments = $sewingOrder->payments ?? collect([]);
-                            $refunds = $sewingOrder->refunds ?? collect([]);
-                            $totalPaid = $payments ? $payments->sum('amount') : 0;
-                            $totalRefunded = $refunds ? $refunds->sum('amount') : 0;
+                            $totalPaid = $payments ? $payments->where('type', 'payment')->sum('amount') : 0;
+                            $totalRefunded = $payments ? $payments->where('type', 'refund')->sum('amount') : 0;
                             $maxRefund = max(0, $totalPaid - $totalRefunded);
                         @endphp
                         <div class="mb-3">
@@ -429,6 +490,82 @@
         </div>
     </div>
 
+    {{-- Per-payment refund modals --}}
+    @foreach ($sewingOrder->payments as $payment)
+        @if ($payment->type === 'payment')
+            @php
+                $alreadyRefunded = \App\Models\Payment::where('refund_for_payment_id', $payment->id)
+                    ->where('type', 'refund')
+                    ->sum('amount');
+                $availableToRefund = $payment->amount - $alreadyRefunded;
+            @endphp
+            @if ($availableToRefund > 0)
+                <div class="modal fade" id="refundModal{{ $payment->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Create Refund for Payment</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form id="refundForm{{ $payment->id }}">
+                                @csrf
+                                <input type="hidden" name="refund_for_payment_id" value="{{ $payment->id }}">
+                                <input type="hidden" name="sewing_order_id" value="{{ $sewingOrder->id }}">
+                                <input type="hidden" name="refundable_type" value="sewing_order">
+                                <input type="hidden" name="refundable_id" value="{{ $sewingOrder->id }}">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Payment Amount</label>
+                                        <input type="text" class="form-control"
+                                            value="Rs {{ number_format($payment->amount, 2) }}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Already Refunded</label>
+                                        <input type="text" class="form-control"
+                                            value="Rs {{ number_format($alreadyRefunded, 2) }}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Available to Refund <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control"
+                                            id="availableRefund{{ $payment->id }}"
+                                            value="Rs {{ number_format($availableToRefund, 2) }}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Refund Amount (Rs) <span
+                                                class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="amount"
+                                            id="refundAmount{{ $payment->id }}" step="0.01" min="0.01"
+                                            max="{{ number_format($availableToRefund, 2, '.', '') }}"
+                                            value="{{ number_format($availableToRefund, 2, '.', '') }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Refund Reason</label>
+                                        <textarea class="form-control" name="refund_reason" rows="2"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Date & Time <span class="text-danger">*</span></label>
+                                        <input type="datetime-local" class="form-control" name="payment_date"
+                                            value="{{ now()->format('Y-m-d\TH:i') }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Notes</label>
+                                        <textarea class="form-control" name="notes" rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-danger">Create Refund</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endif
+    @endforeach
+
     <!-- Measurement Modals -->
     @foreach ($sewingOrder->items as $itemIndex => $item)
         @if ($item->customer_measurement)
@@ -440,12 +577,12 @@
                 }
 
                 // Parse the nested data field if it's a JSON string
-$measurementData = [];
-if (isset($measurement['data'])) {
-    if (is_string($measurement['data'])) {
-        $measurementData = json_decode($measurement['data'], true) ?? [];
-    } elseif (is_array($measurement['data'])) {
-        $measurementData = $measurement['data'];
+                $measurementData = [];
+                if (isset($measurement['data'])) {
+                    if (is_string($measurement['data'])) {
+                        $measurementData = json_decode($measurement['data'], true) ?? [];
+                    } elseif (is_array($measurement['data'])) {
+                        $measurementData = $measurement['data'];
                     }
                 }
             @endphp
@@ -464,19 +601,17 @@ if (isset($measurement['data'])) {
                             @php
                                 // $measurement['data'] is now a nested keyed array like ['kameez' => [...], 'shalwar' => [...]]
                                 $dataGroups = [];
-                                // $measurement['data'] is an object of objects: ['kameez' => [...], 'shalwar' => [...] ]
-                                // If it's a JSON string, decode it. If already array/object, use directly.
-if (isset($measurement['data'])) {
-    // Handle if $measurement['data'] is still JSON string (sometimes double-encoded)
-    if (is_string($measurement['data'])) {
-        $decoded = json_decode($measurement['data'], true);
-        if (is_array($decoded)) {
-            $dataGroups = $decoded;
-        }
-    } elseif (is_array($measurement['data'])) {
-        $dataGroups = $measurement['data'];
-    } elseif (is_object($measurement['data'])) {
-        $dataGroups = (array) $measurement['data'];
+                                if (isset($measurement['data'])) {
+                                    // Handle if $measurement['data'] is still JSON string (sometimes double-encoded)
+                                    if (is_string($measurement['data'])) {
+                                        $decoded = json_decode($measurement['data'], true);
+                                        if (is_array($decoded)) {
+                                            $dataGroups = $decoded;
+                                        }
+                                    } elseif (is_array($measurement['data'])) {
+                                        $dataGroups = $measurement['data'];
+                                    } elseif (is_object($measurement['data'])) {
+                                        $dataGroups = (array) $measurement['data'];
                                     }
                                 }
                             @endphp
@@ -651,7 +786,9 @@ if (isset($measurement['data'])) {
             submitButton.disabled = true;
             submitButton.textContent = 'Processing...';
 
-            fetch('{{ route('refunds.store') }}', {
+            // Use the payments.refund route for the general refund form;
+            // Patch: the sewing order does NOT have a Payment model for the refund, so find the latest payment to refund against.
+            fetch('{{ route('payments.refund', ['payment' => $sewingOrder->payments->where('type', 'payment')->last()?->id ?? 0]) }}', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -690,6 +827,69 @@ if (isset($measurement['data'])) {
                 this.setCustomValidity('');
             }
         });
+
+        // Add Ajax for per-payment refund forms
+        @foreach ($sewingOrder->payments as $payment)
+        @if ($payment->type === 'payment')
+        @php
+            $alreadyRefunded = \App\Models\Payment::where('refund_for_payment_id', $payment->id)
+                ->where('type', 'refund')
+                ->sum('amount');
+            $availableToRefund = $payment->amount - $alreadyRefunded;
+        @endphp
+        @if ($availableToRefund > 0)
+        document.getElementById('refundForm{{ $payment->id }}').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+
+            // Use the payments.refund route for per-payment refund forms
+            fetch('{{ route('payments.refund', ['payment' => $payment->id]) }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('refundModal{{ $payment->id }}'));
+                        modal.hide();
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Create Refund';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Create Refund';
+                });
+        });
+
+        document.getElementById('refundAmount{{ $payment->id }}').addEventListener('input', function() {
+            const refundable = parseFloat(document.getElementById('availableRefund{{ $payment->id }}').value.replace(
+                /[^0-9.-]+/g, ''));
+            const entered = parseFloat(this.value) || 0;
+
+            if (entered > refundable) {
+                this.setCustomValidity('Amount cannot exceed available to refund');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+        @endif
+        @endif
+        @endforeach
+
     </script>
 
     <script>
