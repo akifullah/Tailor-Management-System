@@ -245,6 +245,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @if($recentOrders->count() > 0)
                                     @foreach ($recentOrders as $order)
                                         @php
                                             $totalPaid = $order->payments->sum('amount');
@@ -252,7 +253,7 @@
                                         @endphp
                                         <tr>
                                             <td>{{ $order->order_number }}</td>
-                                            <td>{{ $order->customer->name }}</td>
+                                            <td>{{ $order?->customer?->name }}</td>
                                             <td>{{ $order->order_date }}</td>
                                             <td>Rs {{ number_format($order->total_amount, 2) }}</td>
                                             <td>
@@ -264,6 +265,11 @@
                                             </td>
                                         </tr>
                                     @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">No recent orders</td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>

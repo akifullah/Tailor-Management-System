@@ -371,7 +371,7 @@
                     <div class="mt-4">
                         <a href="{{ route('sewing-orders.index') }}" class="btn btn-secondary">Back to Sewing
                             Orders</a>
-                        <button onclick="window.print()" class="btn btn-primary">Print</button>
+                        <a href="{{ route('sewing-orders.print', $sewingOrder) }}" target="_blank" class="btn btn-primary">Print</a>
                     </div>
                 </div>
             </div>

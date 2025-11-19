@@ -96,6 +96,7 @@ Route::middleware(["auth"])->group(function () {
     // orders - Require manage-orders permission
     Route::middleware(['permission:manage-orders'])->group(function () {
         Route::resource('orders', OrderController::class);
+        Route::get('orders/{order}/print', [OrderController::class, 'print'])->name('orders.print');
         Route::put('order-items/{item}/status', [OrderItemController::class, 'updateStatus'])->name('order-items.update-status');
         Route::get('orders/create/{customer?}', [OrderController::class, 'create'])
             ->name('orders.create.withCustomer');
@@ -107,6 +108,7 @@ Route::middleware(["auth"])->group(function () {
     // sewing orders - Require manage-sewing-orders permission
     Route::middleware(['permission:manage-sewing-orders'])->group(function () {
         Route::resource('sewing-orders', SewingOrderController::class);
+        Route::get('sewing-orders/{sewing_order}/print', [SewingOrderController::class, 'print'])->name('sewing-orders.print');
         Route::get('sewing-orders/create/{customer?}', [SewingOrderController::class, 'create'])->name('sewing-orders.create.withCustomer');
         Route::put('sewing-order-items/{item}/status', [SewingOrderController::class, 'updateItemStatus'])->name('sewing-order-items.update-status');
         // Route for storing a refund for a sewing order (for AJAX)

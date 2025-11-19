@@ -183,6 +183,13 @@ class SewingOrderController extends Controller
         return view('admin.sewing_orders.show', compact('sewingOrder'));
     }
 
+    public function print(SewingOrder $sewingOrder)
+    {
+        $sewingOrder->load(['customer', 'items.worker', 'payments']);
+
+        return view('admin.sewing_orders.receipt', compact('sewingOrder'));
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
