@@ -54,7 +54,7 @@
                                 </div>
                             </form>
                         </div>
-                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap">
+                        <table id="datatable-buttons" class="table data-table table-striped table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
                                     <th>#ID</th>
@@ -75,7 +75,18 @@
                                             $totalPaid = $order->payments->sum('amount');
                                             $remaining = $order->total_amount - $totalPaid;
                                         @endphp
-                                        <tr>
+                                        @php
+                                            // Calculate if delivery date is today or tomorrow
+                                            $deliveryDate = $order->delivery_date;
+                                            $now = \Carbon\Carbon::now();
+                                            $isDeliveryClose = false;
+                                            if ($deliveryDate) {
+                                                // Check if delivery date is today or tomorrow
+                                                $daysDiff = $now->diffInDays($deliveryDate, false);
+                                                $isDeliveryClose = $daysDiff >= 0 && $daysDiff <= 1;
+                                            }
+                                        @endphp
+                                        <tr @if($isDeliveryClose) style="background-color:rgba(255,87,34,0.1);" @endif>
                                             <td>{{ $order->id }}</td>
                                             <td><a href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a></td>
                                             <td>{{ $order->customer->name ?? 'N/A' }}</td>

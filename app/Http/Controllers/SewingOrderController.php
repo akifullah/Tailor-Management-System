@@ -494,6 +494,12 @@ class SewingOrderController extends Controller
         $sewing_order->order_status = $validated['order_status'];
         $sewing_order->save();
 
+        // If the order is delivered OR cancelled, update all items
+        if (in_array($sewing_order->order_status, ['delivered', 'cancelled'])) {
+            \App\Models\SewingOrderItem::where('sewing_order_id', $sewing_order->id)
+                ->update(['status' => $sewing_order->order_status]);
+        }
+
         return redirect()->route('sewing-orders.show', $sewing_order->id)
             ->with('success', 'Order status updated successfully.');
     }

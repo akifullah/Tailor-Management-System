@@ -229,10 +229,11 @@
                                         <td>{{ $order->order_date }}</td>
                                         <td><strong>Rs {{ number_format($order->total_amount, 2) }}</strong></td>
                                         <td>
-                                            <span class="text-success">Rs {{ number_format($totalPaid, 2) }}</span>
+                                            {{-- <span class="text-success">Rs {{ number_format($totalPaid, 2) }}</span> --}}
+                                            <span class="text-success">Rs {{ number_format($netPaid, 2) }}</span>
                                             @if ($totalRefunded > 0)
                                                 <br><small class="text-danger fw-bold bg-light rounded px-1 py-0">Refunded: Rs {{ number_format($totalRefunded, 2) }}</small>
-                                                <br><small class="text-info">Net: Rs {{ number_format($netPaid, 2) }}</small>
+                                                {{-- <br><small class="text-info">Net: Rs {{ number_format($netPaid, 2) }}</small> --}}
                                             @endif
                                         </td>
                                         <td class="text-{{ ($order->order_status == 'cancelled' || $order->is_return) ? 'secondary' : ($remaining > 0 ? 'warning' : ($remaining < 0 ? 'danger' : 'success')) }}">
@@ -254,7 +255,8 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if ($totalItems > 0)
+                                            --
+                                            {{-- @if ($totalItems > 0)
                                                 @if ($itemsCompleted == $totalItems)
                                                     <span class="badge bg-success">All Done</span>
                                                 @else
@@ -274,7 +276,7 @@
                                                 @endif
                                             @else
                                                 <span class="text-muted">No items</span>
-                                            @endif
+                                            @endif --}}
                                         </td>
                                         <td>
                                             <a href="{{ route('orders.show', $order->id) }}"
@@ -311,10 +313,11 @@
                                         </td>
                                         <td><strong>Rs {{ number_format($sewingOrder->total_amount, 2) }}</strong></td>
                                         <td>
-                                            <span class="text-success">Rs {{ number_format($totalPaid, 2) }}</span>
+                                            {{-- <span class="text-success">Rs {{ number_format($totalPaid, 2) }}</span> --}}
+                                            <span class="text-success">Rs {{ number_format($netPaid, 2) }}</span>
                                             @if ($totalRefunded > 0)
                                                 <br><small class="text-danger fw-bold bg-light rounded px-1 py-0">Refunded: Rs {{ number_format($totalRefunded, 2) }}</small>
-                                                <br><small class="text-info">Net: Rs {{ number_format($netPaid, 2) }}</small>
+                                                {{-- <br><small class="text-info">Net: Rs {{ number_format($netPaid, 2) }}</small> --}}
                                             @endif
                                         </td>
                                         <td class="text-{{ $remaining > 0 ? 'warning' : ($remaining < 0 ? 'danger' : 'success') }}">
@@ -407,7 +410,7 @@
                                 @foreach ($customerPayments as $payment)
                                     @if (!request('refund_filter') || request('refund_filter') === $payment->type)
                                     <tr class="{{ $payment->type === 'refund' ? 'refund-row' : '' }}">
-                                        <td>{{ $payment->payment_date->format('Y-m-d H:i A') }}</td>
+                                        <td>{{ $payment->payment_date->format('Y-m-d h:i A') }}</td>
                                         <td>
                                             @if ($payment->type === 'refund')
                                                 <span class="badge bg-danger">Refund</span>

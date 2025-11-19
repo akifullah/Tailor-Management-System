@@ -44,7 +44,7 @@
                     </form>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered data-table">
                         <thead>
                             <tr>
                                 <th>ID</th>

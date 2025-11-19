@@ -44,7 +44,7 @@
                             </div>
                         </form>
                     </div>
-                    <table class="table table-striped">
+                    <table class="table table-striped data-table">
                         <thead>
                         <tr>
                             <th>Date</th>

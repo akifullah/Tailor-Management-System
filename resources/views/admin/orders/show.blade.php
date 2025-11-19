@@ -188,12 +188,12 @@
                             </div>
                             <div class="col-md-3 col-lg-2">
                                 <strong>Total Paid:</strong><br>
-                                <span class="fs-16 fw-semibold text-success">Rs {{ number_format($totalPaid, 2) }}</span>
-                                @if ($totalRefunded > 0)
+                                <span class="fs-16 fw-semibold text-success">Rs {{ number_format($netPaid, 2) }}</span>
+                                {{-- @if ($totalRefunded > 0)
                                     <br><small class="text-danger">Refunded: Rs
                                         {{ number_format($totalRefunded, 2) }}</small>
                                     <br><small class="text-info">Net Paid: Rs {{ number_format($netPaid, 2) }}</small>
-                                @endif
+                                @endif --}}
                             </div>
                             <div class="col-md-3 col-lg-2">
                                 <strong>Remaining:</strong><br>
@@ -283,7 +283,11 @@
                                                                         data-bs-target="#refundModal{{ $payment->id }}">
                                                                         <i class="mdi mdi-cash-refund me-1"></i> Refund
                                                                     </button>
+                                                                @else
+                                                                    <span class="badge bg-secondary">Refunded</span>
                                                                 @endif
+                                                            @elseif ($payment->type === 'refund')
+                                                                <span class="badge bg-danger">Refunded</span>
                                                             @endif
                                                         </td>
                                                     </tr>

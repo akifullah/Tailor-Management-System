@@ -3,345 +3,380 @@
 @section('content')
     <div class="container-fluid">
         <div class="py-3">
-            <h4 class="fs-18 fw-semibold mb-0">Sewing Order Details</h4>
+            <div class="d-flex justify-content-between align-items-center">
 
-            <div class="my-3">
-                <form action="{{ route('sewing-orders.update-status', $sewingOrder->id) }}" method="POST"
-                    class="d-flex align-items-center gap-2">
-                    @csrf
-                    @method('PATCH')
-                    <label for="order_status" class="form-label mb-0 fw-semibold me-2">Update Status:</label>
-                    <select name="order_status" id="order_status" class="form-select form-select-sm w-auto" required>
-                        <option value="pending" {{ $sewingOrder->order_status == 'pending' ? 'selected' : '' }}>Pending
-                        </option>
-                        <option value="completed" {{ $sewingOrder->order_status == 'completed' ? 'selected' : '' }}>
-                            Completed</option>
-                        <option value="delivered" {{ $sewingOrder->order_status == 'delivered' ? 'selected' : '' }}>
-                            Delivered</option>
-                        <option value="cancelled" {{ $sewingOrder->order_status == 'cancelled' ? 'selected' : '' }}>
-                            Cancelled</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                </form>
+                <h4 class="fs-18 fw-semibold mb-0">Sewing Order Details</h4>
+
+                @if (!in_array($sewingOrder->order_status, ['cancelled', 'delivered']))
+                    <div class="my-3">
+                        <label for="order_status" class="form-label mb-0 fw-semibold me-2">Update Status:</label>
+                        <form id="orderStatusForm" action="{{ route('sewing-orders.update-status', $sewingOrder->id) }}"
+                            method="POST" class="d-flex align-items-center gap-2">
+                            @csrf
+                            @method('PATCH')
+                            <select name="order_status" id="order_status" class="form-select form-select-sm w-auto"
+                                required>
+                                <option value="pending" {{ $sewingOrder->order_status == 'pending' ? 'selected' : '' }}>
+                                    Pending
+                                </option>
+                                <option value="completed" {{ $sewingOrder->order_status == 'completed' ? 'selected' : '' }}>
+                                    Completed</option>
+                                <option value="delivered" {{ $sewingOrder->order_status == 'delivered' ? 'selected' : '' }}>
+                                    Delivered</option>
+                                <option value="cancelled" {{ $sewingOrder->order_status == 'cancelled' ? 'selected' : '' }}>
+                                    Cancelled</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                        </form>
+                    </div>
+                @endif
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const form = document.getElementById('orderStatusForm');
+                        const select = document.getElementById('order_status');
+                        let lastStatus = "{{ $sewingOrder->order_status }}";
+
+                        form.addEventListener('submit', function(e) {
+                            const newStatus = select.value;
+                            if (newStatus === 'delivered') {
+                                if (!confirm('Are you sure you want to mark this order as Delivered?')) {
+                                    select.value = lastStatus;
+                                    e.preventDefault();
+                                    return false;
+                                }
+                            }
+                            if (newStatus === 'cancelled') {
+                                if (!confirm('Are you sure you want to cancel this order?.')) {
+                                    select.value = lastStatus;
+                                    e.preventDefault();
+                                    return false;
+                                }
+                            }
+                        });
+                    });
+                </script>
             </div>
         </div>
 
-        <!-- Alert Container -->
-        <div id="alertContainer" style="position: fixed; top: 80px; right: 20px; z-index: 9999; min-width: 300px;"></div>
+    </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <strong>Sewing Order Number:</strong> {{ $sewingOrder->sewing_order_number ?? 'N/A' }}
-                            </div>
-                            <div class="col-md-6">
-                                <strong>Order Date:</strong>
-                                {{ $sewingOrder->order_date ? $sewingOrder->order_date->format('Y-m-d') : 'N/A' }}
-                            </div>
+    <!-- Alert Container -->
+    <div id="alertContainer" style="position: fixed; top: 80px; right: 20px; z-index: 9999; min-width: 300px;"></div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Sewing Order Number:</strong> {{ $sewingOrder->sewing_order_number ?? 'N/A' }}
                         </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <strong>Customer:</strong> {{ $sewingOrder->customer->name ?? 'N/A' }}
-                            </div>
-                            <div class="col-md-6">
-                                <strong>Phone:</strong> {{ $sewingOrder->customer->phone ?? 'N/A' }}
-                            </div>
+                        <div class="col-md-6">
+                            <strong>Order Date:</strong>
+                            {{ $sewingOrder->order_date ? $sewingOrder->order_date->format('Y-m-d') : 'N/A' }}
                         </div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <strong>Delivery Date:</strong>
-                                {{ $sewingOrder->delivery_date ? $sewingOrder->delivery_date->format('Y-m-d') : 'N/A' }}
-                            </div>
-                            <div class="col-md-6">
-                                <strong>Order Status:</strong>
-                                <span
-                                    class="badge bg-{{ in_array($sewingOrder->order_status, ['completed', 'delivered']) ? 'success' : ($sewingOrder->order_status == 'in_progress' ? 'warning' : 'warning') }}">
-                                    {{ ucfirst(str_replace('_', ' ', $sewingOrder->order_status)) }}
-                                </span>
-                            </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Customer:</strong> {{ $sewingOrder->customer->name ?? 'N/A' }}
                         </div>
+                        <div class="col-md-6">
+                            <strong>Phone:</strong> {{ $sewingOrder->customer->phone ?? 'N/A' }}
+                        </div>
+                    </div>
 
-                        <hr>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Delivery Date:</strong>
+                            {{ $sewingOrder->delivery_date ? $sewingOrder->delivery_date->format('Y-m-d') : 'N/A' }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Order Status:</strong>
+                            <span
+                                class="badge bg-{{ in_array($sewingOrder->order_status, ['completed', 'delivered']) ? 'success' : ($sewingOrder->order_status == 'cancelled' ? 'danger' : 'warning') }}">
+                                {{ ucfirst(str_replace('_', ' ', $sewingOrder->order_status)) }}
+                            </span>
+                        </div>
+                    </div>
 
-                        <h5>Sewing Order Items</h5>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Product Name</th>
-                                        <th>Sewing Price</th>
-                                        <th>Qty</th>
-                                        <th>Total</th>
-                                        <th>Assigned To</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($sewingOrder->items as $item)
-                                        <tr
-                                            style="background-color: {{ $item->status == 'cancelled' ? 'rgba(255, 0, 0, 0.1)' : '' }} ;">
-                                            <td>{{ $item->product_name }}</td>
-                                            <td>Rs {{ number_format($item->sewing_price, 2) }}</td>
-                                            <td>{{ $item->qty }}</td>
-                                            <td>Rs {{ number_format($item->total_price, 2) }}</td>
-                                            <td>
-                                                {{ $item->worker->name ?? 'Not Assigned' }}
-                                                @if ($item->assign_note)
-                                                    <p class="text-muted mb-0" style="font-size: 14px;">Notes:
-                                                        {{ $item->assign_note }}</p>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <span
-                                                    class="badge bg-{{ ['pending' => 'warning', 'on_hold' => 'warning', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', 'delivered' => 'success'][$item->status] ?? 'warning' }}">
-                                                    {{ ucfirst(str_replace('_', ' ', $item->status)) }}
-                                                </span>
+                    <hr>
+
+                    <h5>Sewing Order Items</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Sewing Price</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                    <th>Assigned To</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($sewingOrder->items as $item)
+                                    <tr
+                                        style="background-color: {{ $item->status == 'cancelled' ? 'rgba(255, 0, 0, 0.1)' : '' }} ;">
+                                        <td>{{ $item->product_name }}</td>
+                                        <td>Rs {{ number_format($item->sewing_price, 2) }}</td>
+                                        <td>{{ $item->qty }}</td>
+                                        <td>Rs {{ number_format($item->total_price, 2) }}</td>
+                                        <td>
+                                            {{ $item->worker->name ?? 'Not Assigned' }}
+                                            @if ($item->assign_note)
+                                                <p class="text-muted mb-0" style="font-size: 14px;">Notes:
+                                                    {{ $item->assign_note }}</p>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="badge bg-{{ ['pending' => 'warning', 'on_hold' => 'warning', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', 'delivered' => 'success'][$item->status] ?? 'warning' }}">
+                                                {{ ucfirst(str_replace('_', ' ', $item->status)) }}
+                                            </span>
 
 
-                                                @if (!in_array($item->status, ['cancelled', 'delivered']))
-                                                    <select class="form-select form-select-sm status-select"
-                                                        data-item-id="{{ $item->id }}"
-                                                        style="width: auto; display: inline-block;">
-                                                        <option value="pending"
-                                                            {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
-                                                        </option>
-                                                        {{-- <option value="on_hold"
+                                            @if (!in_array($item->status, ['cancelled', 'delivered']))
+                                                <select class="form-select form-select-sm status-select"
+                                                    data-item-id="{{ $item->id }}"
+                                                    style="width: auto; display: inline-block;">
+                                                    <option value="pending"
+                                                        {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
+                                                    </option>
+                                                    {{-- <option value="on_hold"
                                                             {{ $item->status == 'on_hold' ? 'selected' : '' }}>On Hold
                                                         </option> --}}
-                                                        <option value="in_progress"
-                                                            {{ $item->status == 'in_progress' ? 'selected' : '' }}>In
-                                                            Progress
-                                                        </option>
-                                                        <option value="completed"
-                                                            {{ $item->status == 'completed' ? 'selected' : '' }}>
-                                                            Completed</option>
-                                                        <option value="cancelled"
-                                                            {{ $item->status == 'cancelled' ? 'selected' : '' }}>
-                                                            Cancelled</option>
-                                                        <option value="delivered"
-                                                            {{ $item->status == 'delivered' ? 'selected' : '' }}>
-                                                            Delivered</option>
-                                                    </select>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($item->customer_measurement)
-                                                    <button type="button" class="btn btn-sm btn-primary"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#measurementModal{{ $item->id }}">
-                                                        View Measurement
-                                                    </button>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                    <tr>
-                                        <td colspan="3" class="text-end"><strong>Grand Total:</strong></td>
-                                        <td><strong>Rs {{ number_format($sewingOrder->total_amount, 2) }}</strong></td>
-                                        <td colspan="3"></td>
+                                                    <option value="in_progress"
+                                                        {{ $item->status == 'in_progress' ? 'selected' : '' }}>In
+                                                        Progress
+                                                    </option>
+                                                    <option value="completed"
+                                                        {{ $item->status == 'completed' ? 'selected' : '' }}>
+                                                        Completed</option>
+                                                    <option value="cancelled"
+                                                        {{ $item->status == 'cancelled' ? 'selected' : '' }}>
+                                                        Cancelled</option>
+                                                    <option value="delivered"
+                                                        {{ $item->status == 'delivered' ? 'selected' : '' }}>
+                                                        Delivered</option>
+                                                </select>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($item->customer_measurement)
+                                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#measurementModal{{ $item->id }}">
+                                                    View Measurement
+                                                </button>
+                                            @endif
+                                        </td>
                                     </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                                @endforeach
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Grand Total:</strong></td>
+                                    <td><strong>Rs {{ number_format($sewingOrder->total_amount, 2) }}</strong></td>
+                                    <td colspan="3"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <hr>
-                        {{-- Payment & Refund Calculations with Safe Null Checks --}}
-                        @php
-                            // Safe-get collections, fallback to empty if null
-                            $payments = $sewingOrder->payments ?? collect([]);
-                            $refunds = $sewingOrder->refunds ?? collect([]);
-                            $totalPaid = $payments ? $payments->where('type', 'payment')->sum('amount') : 0;
-                            $totalRefunded = $payments ? $payments->where('type', 'refund')->sum('amount') : 0;
-                            $remaining = $sewingOrder->total_amount - $totalPaid + $totalRefunded;
-                        @endphp
-                        <div class="row mt-3">
-                            <div class="col-md-12 d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">Payment Information</h5>
-                                <div>
-                                    @if ($remaining > 0)
-                                        <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
-                                            data-bs-target="#addPaymentModal">
-                                            <i class="mdi mdi-plus"></i> Add Payment
-                                        </button>
-                                    @endif
-                                    {{-- <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                    <hr>
+                    {{-- Payment & Refund Calculations with Safe Null Checks --}}
+                    @php
+                        // Safe-get collections, fallback to empty if null
+                        $payments = $sewingOrder->payments ?? collect([]);
+                        $refunds = $sewingOrder->refunds ?? collect([]);
+                        $totalPaid = $payments ? $payments->where('type', 'payment')->sum('amount') : 0;
+                        $totalRefunded = $payments ? $payments->where('type', 'refund')->sum('amount') : 0;
+                        $remaining = $sewingOrder->total_amount - $totalPaid + $totalRefunded;
+                    @endphp
+                    <div class="row mt-3">
+                        <div class="col-md-12 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Payment Information</h5>
+                            <div>
+                                @if ($remaining > 0)
+                                    <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
+                                        data-bs-target="#addPaymentModal">
+                                        <i class="mdi mdi-plus"></i> Add Payment
+                                    </button>
+                                @endif
+                                {{-- <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
                                         data-bs-target="#addRefundModal">
                                         <i class="mdi mdi-minus"></i> Add Refund
                                     </button> --}}
-                                </div>
                             </div>
                         </div>
+                    </div>
 
 
-                        <div class="row mt-3">
-                            <div class="col-md-3">
-                                <strong>Total Amount:</strong><br>
-                                <span class="fs-16 fw-semibold">Rs
-                                    {{ number_format($sewingOrder->total_amount, 2) }}</span>
-                            </div>
-                            <div class="col-md-3">
-                                <strong>Total Paid:</strong><br>
-                                {{-- <span class="fs-16 fw-semibold text-success">Rs {{ number_format($totalPaid, 2) }}</span> --}}
-                                <span class="fs-16 fw-semibold text-success">Rs {{ number_format(($totalPaid ?? 0) - ($totalRefunded ?? 0), 2) }}</span>
-                            </div>
-                            <div class="col-md-3">
-                                <strong>Total Refunded:</strong><br>
-                                <span class="fs-16 fw-semibold text-danger">Rs
-                                    {{ number_format($totalRefunded, 2) }}</span>
-                            </div>
-                            <div class="col-md-3">
-                                <strong>Remaining:</strong><br>
-                                <span class="fs-16 fw-semibold text-{{ $remaining > 0 ? 'warning' : 'success' }}">
-                                    Rs {{ number_format($remaining, 2) }}
-                                </span>
-                            </div>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <strong>Total Amount:</strong><br>
+                            <span class="fs-16 fw-semibold">Rs
+                                {{ number_format($sewingOrder->total_amount, 2) }}</span>
                         </div>
-                        <div class="row mt-2">
-                            <div class="col-md-3 offset-md-9">
-                                <strong>Payment Status:</strong><br>
-                                <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
-                                    {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
-                                </span>
-                            </div>
+                        <div class="col-md-3">
+                            <strong>Total Paid:</strong><br>
+                            {{-- <span class="fs-16 fw-semibold text-success">Rs {{ number_format($totalPaid, 2) }}</span> --}}
+                            <span class="fs-16 fw-semibold text-success">Rs
+                                {{ number_format(($totalPaid ?? 0) - ($totalRefunded ?? 0), 2) }}</span>
                         </div>
+                        <div class="col-md-3">
+                            <strong>Total Refunded:</strong><br>
+                            <span class="fs-16 fw-semibold text-danger">Rs
+                                {{ number_format($totalRefunded, 2) }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Remaining:</strong><br>
+                            <span class="fs-16 fw-semibold text-{{ $remaining > 0 ? 'warning' : 'success' }}">
+                                Rs {{ number_format($remaining, 2) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-3 offset-md-9">
+                            <strong>Payment Status:</strong><br>
+                            <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
+                                {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
+                            </span>
+                        </div>
+                    </div>
 
-                        @if (!empty($payments) && $payments->count() > 0)
-                            <div class="row mt-4">
-                                <div class="col-md-12">
-                                    <h6>Payment History</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
+                    @if (!empty($payments) && $payments->count() > 0)
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h6>Payment History</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date & Time</th>
+                                                <th>Amount</th>
+                                                <th>Method</th>
+                                                <th>Person / Reference</th>
+                                                <th>Notes / Reason</th>
+                                                <th>Status / Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($payments as $payment)
                                                 <tr>
-                                                    <th>Date & Time</th>
-                                                    <th>Amount</th>
-                                                    <th>Method</th>
-                                                    <th>Person / Reference</th>
-                                                    <th>Notes / Reason</th>
-                                                    <th>Status / Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($payments as $payment)
-                                                    <tr>
-                                                        <td>
-                                                            @if ($payment->type === 'refund')
-                                                                {{ optional($payment->payment_date ?? $payment->refund_date)->format('Y-m-d h:i A') }}
-                                                            @else
-                                                                {{ optional($payment->payment_date)->format('Y-m-d h:i A') }}
-                                                            @endif
-                                                        </td>
-                                                        <td>
-                                                            @if ($payment->type === 'refund')
-                                                                <span class="text-danger">
-                                                                    - Rs {{ number_format($payment->amount, 2) }}
-                                                                </span>
-                                                            @else
-                                                                <strong>Rs {{ number_format($payment->amount, 2) }}</strong>
-                                                            @endif
-                                                        </td>
-                                                        <td>
-                                                            <span
-                                                                class="badge {{ $payment->type === 'refund' ? 'bg-danger' : 'bg-info' }}">
-                                                                {{ ucfirst(str_replace('_', ' ', $payment->payment_method ?? $payment->refund_method ?? 'cash')) }}
-                                                                @if ($payment->type === 'refund')
-                                                                    (Refund)
-                                                                @else
-                                                                    (Payment)
-                                                                @endif
+                                                    <td>
+                                                        @if ($payment->type === 'refund')
+                                                            {{ optional($payment->payment_date ?? $payment->refund_date)->format('Y-m-d h:i A') }}
+                                                        @else
+                                                            {{ optional($payment->payment_date)->format('Y-m-d h:i A') }}
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if ($payment->type === 'refund')
+                                                            <span class="text-danger">
+                                                                - Rs {{ number_format($payment->amount, 2) }}
                                                             </span>
-                                                        </td>
-                                                        <td>{{ $payment->person_reference ?? 'N/A' }}</td>
-                                                        <td>
+                                                        @else
+                                                            <strong>Rs
+                                                                {{ number_format($payment->amount, 2) }}</strong>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            class="badge {{ $payment->type === 'refund' ? 'bg-danger' : 'bg-success' }}">
+                                                            {{ ucfirst(str_replace('_', ' ', $payment->payment_method ?? ($payment->refund_method ?? 'cash'))) }}
                                                             @if ($payment->type === 'refund')
-                                                                {!! nl2br(e($payment->refund_reason ?? $payment->notes ?? 'N/A')) !!}
+                                                                (Refund)
                                                             @else
-                                                                {{ $payment->notes ?? 'N/A' }}
+                                                                (Payment)
                                                             @endif
-                                                        </td>
-                                                        <td>
-                                                            @if ($payment->type === 'payment')
-                                                                @php
-                                                                    $alreadyRefunded = \App\Models\Payment::where(
-                                                                        'refund_for_payment_id',
-                                                                        $payment->id,
-                                                                    )
-                                                                        ->where('type', 'refund')
-                                                                        ->sum('amount');
-                                                                    $availableToRefund =
-                                                                        $payment->amount - $alreadyRefunded;
-                                                                @endphp
-                                                                @if ($availableToRefund > 0)
-                                                                    <button type="button" class="btn btn-sm"
-                                                                        style="background-color:#16A34A; color:#fff;"
-                                                                        data-bs-toggle="modal"
-                                                                        data-bs-target="#refundModal{{ $payment->id }}">
-                                                                        <i class="mdi mdi-cash-refund me-1"></i> Refund
-                                                                    </button>
-                                                                @else
-                                                                    <span class="badge bg-secondary">Refunded</span>
-                                                                @endif
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ $payment->person_reference ?? 'N/A' }}</td>
+                                                    <td>
+                                                        @if ($payment->type === 'refund')
+                                                            {!! nl2br(e($payment->refund_reason ?? ($payment->notes ?? 'N/A'))) !!}
+                                                        @else
+                                                            {{ $payment->notes ?? 'N/A' }}
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if ($payment->type === 'payment')
+                                                            @php
+                                                                $alreadyRefunded = \App\Models\Payment::where(
+                                                                    'refund_for_payment_id',
+                                                                    $payment->id,
+                                                                )
+                                                                    ->where('type', 'refund')
+                                                                    ->sum('amount');
+                                                                $availableToRefund =
+                                                                    $payment->amount - $alreadyRefunded;
+                                                            @endphp
+                                                            @if ($availableToRefund > 0)
+                                                                <button type="button" class="btn btn-sm"
+                                                                    style="background-color:#16A34A; color:#fff;"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#refundModal{{ $payment->id }}">
+                                                                    <i class="mdi mdi-cash-refund me-1"></i> Refund
+                                                                </button>
                                                             @else
-                                                                <span class="badge bg-danger">Refunded</span>
+                                                                <span class="badge bg-secondary">Refunded</span>
                                                             @endif
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-
-                                                <tr>
-                                                    <th colspan="1" class="text-end">
-                                                        Total Paid:
-                                                    </th>
-                                                    <th colspan="5">
-                                                        <h5 class="text-success fw-bold mb-0">
-                                                            Rs {{ number_format($totalPaid ?? 0, 2) }}
-                                                        </h5>
-                                                    </th>
+                                                        @else
+                                                            <span class="badge bg-danger">Refunded</span>
+                                                        @endif
+                                                    </td>
                                                 </tr>
+                                            @endforeach
 
-                                                <tr>
-                                                    <th colspan="1" class="text-end">
-                                                        Total Refunded:
-                                                    </th>
-                                                    <th colspan="5">
-                                                        <h5 class="text-danger fw-bold mb-0">
-                                                            -{{ number_format($totalRefunded ?? 0, 2) }}
-                                                        </h5>
-                                                    </th>
-                                                </tr>
-                                                <tr>
-                                                    <th colspan="1" class="text-end">
-                                                        Total Net Paid:
-                                                    </th>
-                                                    <th colspan="5">
-                                                        <h5 class="text-success fw-bold mb-0">
-                                                            {{ number_format(($totalPaid ?? 0) - ($totalRefunded ?? 0), 2) }}
-                                                        </h5>
-                                                    </th>
-                                                </tr>
+                                            <tr>
+                                                <th colspan="1" class="text-end">
+                                                    Total Paid:
+                                                </th>
+                                                <th colspan="5">
+                                                    <h5 class="text-success fw-bold mb-0">
+                                                        Rs {{ number_format($totalPaid ?? 0, 2) }}
+                                                    </h5>
+                                                </th>
+                                            </tr>
 
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            <tr>
+                                                <th colspan="1" class="text-end">
+                                                    Total Refunded:
+                                                </th>
+                                                <th colspan="5">
+                                                    <h5 class="text-danger fw-bold mb-0">
+                                                        -{{ number_format($totalRefunded ?? 0, 2) }}
+                                                    </h5>
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="1" class="text-end">
+                                                    Total Net Paid:
+                                                </th>
+                                                <th colspan="5">
+                                                    <h5 class="text-success fw-bold mb-0">
+                                                        {{ number_format(($totalPaid ?? 0) - ($totalRefunded ?? 0), 2) }}
+                                                    </h5>
+                                                </th>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        @endif
-
-                        <div class="mt-4">
-                            <a href="{{ route('sewing-orders.index') }}" class="btn btn-secondary">Back to Sewing
-                                Orders</a>
-                            <button onclick="window.print()" class="btn btn-primary">Print</button>
                         </div>
+                    @endif
+
+                    <div class="mt-4">
+                        <a href="{{ route('sewing-orders.index') }}" class="btn btn-secondary">Back to Sewing
+                            Orders</a>
+                        <button onclick="window.print()" class="btn btn-primary">Print</button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Add Payment Modal -->
@@ -514,7 +549,7 @@
                                 <input type="hidden" name="refundable_type" value="sewing_order">
                                 <input type="hidden" name="refundable_id" value="{{ $sewingOrder->id }}">
                                 <div class="modal-body">
-                                    <div class="mb-3">
+                                    {{-- <div class="mb-3">
                                         <label class="form-label">Payment Amount</label>
                                         <input type="text" class="form-control"
                                             value="Rs {{ number_format($payment->amount, 2) }}" readonly>
@@ -530,7 +565,7 @@
                                         <input type="text" class="form-control"
                                             id="availableRefund{{ $payment->id }}"
                                             value="Rs {{ number_format($availableToRefund, 2) }}" readonly>
-                                    </div>
+                                    </div> --}}
                                     <div class="mb-3">
                                         <label class="form-label">Refund Amount (Rs) <span
                                                 class="text-danger">*</span></label>
@@ -577,12 +612,12 @@
                 }
 
                 // Parse the nested data field if it's a JSON string
-                $measurementData = [];
-                if (isset($measurement['data'])) {
-                    if (is_string($measurement['data'])) {
-                        $measurementData = json_decode($measurement['data'], true) ?? [];
-                    } elseif (is_array($measurement['data'])) {
-                        $measurementData = $measurement['data'];
+$measurementData = [];
+if (isset($measurement['data'])) {
+    if (is_string($measurement['data'])) {
+        $measurementData = json_decode($measurement['data'], true) ?? [];
+    } elseif (is_array($measurement['data'])) {
+        $measurementData = $measurement['data'];
                     }
                 }
             @endphp
@@ -830,66 +865,65 @@
 
         // Add Ajax for per-payment refund forms
         @foreach ($sewingOrder->payments as $payment)
-        @if ($payment->type === 'payment')
-        @php
-            $alreadyRefunded = \App\Models\Payment::where('refund_for_payment_id', $payment->id)
-                ->where('type', 'refund')
-                ->sum('amount');
-            $availableToRefund = $payment->amount - $alreadyRefunded;
-        @endphp
-        @if ($availableToRefund > 0)
-        document.getElementById('refundForm{{ $payment->id }}').addEventListener('submit', function(e) {
-            e.preventDefault();
+            @if ($payment->type === 'payment')
+                @php
+                    $alreadyRefunded = \App\Models\Payment::where('refund_for_payment_id', $payment->id)->where('type', 'refund')->sum('amount');
+                    $availableToRefund = $payment->amount - $alreadyRefunded;
+                @endphp
+                @if ($availableToRefund > 0)
+                    document.getElementById('refundForm{{ $payment->id }}').addEventListener('submit', function(e) {
+                        e.preventDefault();
 
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Processing...';
+                        const formData = new FormData(this);
+                        const submitButton = this.querySelector('button[type="submit"]');
+                        submitButton.disabled = true;
+                        submitButton.textContent = 'Processing...';
 
-            // Use the payments.refund route for per-payment refund forms
-            fetch('{{ route('payments.refund', ['payment' => $payment->id]) }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('refundModal{{ $payment->id }}'));
-                        modal.hide();
-                        window.location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                        submitButton.disabled = false;
-                        submitButton.textContent = 'Create Refund';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Create Refund';
-                });
-        });
+                        // Use the payments.refund route for per-payment refund forms
+                        fetch('{{ route('payments.refund', ['payment' => $payment->id]) }}', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const modal = bootstrap.Modal.getInstance(document.getElementById(
+                                        'refundModal{{ $payment->id }}'));
+                                    modal.hide();
+                                    window.location.reload();
+                                } else {
+                                    alert('Error: ' + data.message);
+                                    submitButton.disabled = false;
+                                    submitButton.textContent = 'Create Refund';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred. Please try again.');
+                                submitButton.disabled = false;
+                                submitButton.textContent = 'Create Refund';
+                            });
+                    });
 
-        document.getElementById('refundAmount{{ $payment->id }}').addEventListener('input', function() {
-            const refundable = parseFloat(document.getElementById('availableRefund{{ $payment->id }}').value.replace(
-                /[^0-9.-]+/g, ''));
-            const entered = parseFloat(this.value) || 0;
+                    document.getElementById('refundAmount{{ $payment->id }}').addEventListener('input', function() {
+                        const refundable = parseFloat(document.getElementById('availableRefund{{ $payment->id }}')
+                            .value.replace(
+                                /[^0-9.-]+/g, ''));
+                        const entered = parseFloat(this.value) || 0;
 
-            if (entered > refundable) {
-                this.setCustomValidity('Amount cannot exceed available to refund');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-        @endif
-        @endif
+                        if (entered > refundable) {
+                            this.setCustomValidity('Amount cannot exceed available to refund');
+                        } else {
+                            this.setCustomValidity('');
+                        }
+                    });
+                @endif
+            @endif
         @endforeach
-
     </script>
 
     <script>

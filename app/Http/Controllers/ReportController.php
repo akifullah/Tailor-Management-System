@@ -541,7 +541,7 @@ class ReportController extends Controller
                 ->get();
 
             // Combine all payments
-            $customerPayments = $orderPayments->concat($sewingOrderPayments)->sortByDesc('payment_date');
+            $customerPayments = $orderPayments->concat($sewingOrderPayments)->sortBy('payment_date');
             if ($refundFilter === 'refund' || $refundFilter === 'payment') {
                 $customerPayments = $customerPayments->filter(fn($p) => $p->type === $refundFilter);
             }

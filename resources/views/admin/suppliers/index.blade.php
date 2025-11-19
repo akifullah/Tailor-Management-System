@@ -68,7 +68,7 @@
                                 </div>
                             </form>
                         </div>
-                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap">
+                        <table id="datatable-buttons" class="table data-table table-striped table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
                                     <th>#ID</th>
