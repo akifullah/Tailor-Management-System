@@ -110,8 +110,11 @@
                                             <option value="">All Statuses</option>
                                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
                                                 Pending</option>
-                                            <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                            <option value="in_progress"
+                                                {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress
+                                            </option>
+                                            <option value="completed"
+                                                {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                                         </select>
                                     </div>
                                     <div class="col-md-1 align-self-end">
@@ -138,7 +141,8 @@
                             <tbody>
                                 @if ($items->isNotEmpty())
                                     @foreach ($items as $item)
-                                        <tr @if($item->status == 'cancelled') style="background-color: rgba(255,0,0,0.1);" @endif >
+                                        <tr
+                                            @if ($item->status == 'cancelled') style="background-color: rgba(255,0,0,0.1);" @endif>
                                             <td>{{ $item->id }}</td>
                                             <td>
                                                 <a href="{{ route('sewing-orders.show', $item->sewingOrder->id) }}">
@@ -153,29 +157,36 @@
                                             <td>Rs {{ number_format($item->total_price, 2) }}</td>
                                             <td>
                                                 <span
-                                                    class="badge bg-{{ ['pending' => 'secondary', "on_hold" => 'secondary', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', "delivered" => 'success'][$item->status] ?? 'secondary' }}">
+                                                    class="badge bg-{{ ['pending' => 'secondary', 'on_hold' => 'secondary', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', 'delivered' => 'success'][$item->status] ?? 'secondary' }}">
                                                     {{ ucfirst(str_replace('_', ' ', $item->status)) }}
                                                 </span>
                                             </td>
                                             <td>
-                                                @if(!in_array($item->status, ['cancelled', 'delivered']))
-                                                <select class="form-select form-select-sm status-select"
-                                                    data-item-id="{{ $item->id }}" style="width: auto; display: inline-block;">
-                                                    <option value="pending" {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
-                                                    </option>
-                                                    <option value="on_hold" {{ $item->status == 'on_hold' ? 'selected' : '' }}>On Hold
-                                                    </option>
-                                                    <option value="in_progress" {{ $item->status == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                                    <option value="completed" {{ $item->status == 'completed' ? 'selected' : '' }}>
-                                                        Completed</option>
-                                                    {{-- <option value="cancelled" {{ $item->status == 'cancelled' ? 'selected' : '' }}>
+                                                @if (!in_array($item->status, ['cancelled', 'delivered']))
+                                                    <select class="form-select form-select-sm status-select"
+                                                        data-item-id="{{ $item->id }}"
+                                                        style="width: auto; display: inline-block;">
+                                                        <option value="pending"
+                                                            {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
+                                                        </option>
+                                                        <option value="on_hold"
+                                                            {{ $item->status == 'on_hold' ? 'selected' : '' }}>On Hold
+                                                        </option>
+                                                        <option value="in_progress"
+                                                            {{ $item->status == 'in_progress' ? 'selected' : '' }}>In
+                                                            Progress</option>
+                                                        <option value="completed"
+                                                            {{ $item->status == 'completed' ? 'selected' : '' }}>
+                                                            Completed</option>
+                                                        {{-- <option value="cancelled" {{ $item->status == 'cancelled' ? 'selected' : '' }}>
                                                         Cancelled</option>
                                                     <option value="delivered" {{ $item->status == 'delivered' ? 'selected' : '' }}>
                                                         Delivered</option> --}}
-                                                </select>
+                                                    </select>
                                                 @endif
                                                 @if ($item->customer_measurement)
-                                                    <button type="button" class="btn btn-sm btn-primary mt-1" data-bs-toggle="modal"
+                                                    <button type="button" class="btn btn-sm btn-primary mt-1"
+                                                        data-bs-toggle="modal"
                                                         data-bs-target="#measurementModal{{ $item->id }}">
                                                         View Measurement
                                                     </button>
@@ -209,12 +220,12 @@
                 }
 
                 // Parse the nested data field if it's a JSON string
-                $measurementData = [];
-                if (isset($measurement['data'])) {
-                    if (is_string($measurement['data'])) {
-                        $measurementData = json_decode($measurement['data'], true) ?? [];
-                    } elseif (is_array($measurement['data'])) {
-                        $measurementData = $measurement['data'];
+$measurementData = [];
+if (isset($measurement['data'])) {
+    if (is_string($measurement['data'])) {
+        $measurementData = json_decode($measurement['data'], true) ?? [];
+    } elseif (is_array($measurement['data'])) {
+        $measurementData = $measurement['data'];
                     }
                 }
             @endphp
@@ -229,57 +240,106 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
+
                             @php
                                 // $measurement['data'] is now a nested keyed array like ['kameez' => [...], 'shalwar' => [...]]
                                 $dataGroups = [];
                                 // $measurement['data'] is an object of objects: ['kameez' => [...], 'shalwar' => [...]]
                                 // If it's a JSON string, decode it. If already array/object, use directly.
-                                if (isset($measurement['data'])) {
-                                    // Handle if $measurement['data'] is still JSON string (sometimes double-encoded)
-                                    if (is_string($measurement['data'])) {
-                                        $decoded = json_decode($measurement['data'], true);
-                                        if (is_array($decoded)) {
-                                            $dataGroups = $decoded;
-                                        }
-                                    } elseif (is_array($measurement['data'])) {
-                                        $dataGroups = $measurement['data'];
-                                    } elseif (is_object($measurement['data'])) {
-                                        $dataGroups = (array) $measurement['data'];
+if (isset($measurement['data'])) {
+    // Handle if $measurement['data'] is still JSON string (sometimes double-encoded)
+    if (is_string($measurement['data'])) {
+        $decoded = json_decode($measurement['data'], true);
+        if (is_array($decoded)) {
+            $dataGroups = $decoded;
+        }
+    } elseif (is_array($measurement['data'])) {
+        $dataGroups = $measurement['data'];
+    } elseif (is_object($measurement['data'])) {
+        $dataGroups = (array) $measurement['data'];
                                     }
                                 }
                             @endphp
 
-                            @if (!empty($dataGroups))
-                                <div class="table-responsive">
-                                    @foreach ($dataGroups as $groupLabel => $groupFields)
-                                        <h4 class="mt-3 text-center" style="font-weight: 700;">
-                                            {{ ucfirst($groupLabel) }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @if (!empty($dataGroups))
+                                        <div class="table-responsive">
+                                            @foreach ($dataGroups as $groupLabel => $groupFields)
+                                                <h4 class="mt-3 text-center" style="font-weight: 700;">
+                                                    {{ ucfirst($groupLabel) }}
+                                                </h4>
+                                                <table class="table table-bordered table-striped mb-2">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 50%">Field</th>
+                                                            <th style="width: 50%">Value</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($groupFields as $fieldKey => $fieldValue)
+                                                            <tr>
+                                                                <td class="text-capitalize">
+                                                                    <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
+                                                                </td>
+                                                                <td>{{ $fieldValue ?? 'N/A' }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="alert alert-info">
+                                            No measurement data available.
+                                        </div>
+                                    @endif
+
+                                </div>
+
+                                <div class="col-md-6">
+                                    @php
+                                        $styleData = [];
+                                        if (isset($measurement['style'])) {
+                                            if (is_string($measurement['style'])) {
+                                                $decodedStyle = json_decode($measurement['style'], true);
+                                                if (is_array($decodedStyle)) {
+                                                    $styleData = $decodedStyle;
+                                                }
+                                            } elseif (
+                                                is_array($measurement['style']) ||
+                                                is_object($measurement['style'])
+                                            ) {
+                                                $styleData = (array) $measurement['style'];
+                                            }
+                                        }
+                                    @endphp
+                                    @if (!empty($styleData))
+                                        <h4 class="mt-3 mb-1 text-capitalize" style="font-weight: 700;">Style Details
                                         </h4>
                                         <table class="table table-bordered table-striped mb-2">
                                             <thead>
                                                 <tr>
-                                                    <th style="width: 50%">Field</th>
-                                                    <th style="width: 50%">Value</th>
+                                                    <th>Attribute</th>
+                                                    <th>Value</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($groupFields as $fieldKey => $fieldValue)
+                                                @foreach ($styleData as $key => $value)
                                                     <tr>
                                                         <td class="text-capitalize">
-                                                            <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
+                                                            {{ Str::title(str_replace(['style_', '_'], ['', ' '], $key)) }}
                                                         </td>
-                                                        <td>{{ $fieldValue ?? 'N/A' }}</td>
+                                                        <td>{{ $value }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
                                         </table>
-                                    @endforeach
+                                    @endif
                                 </div>
-                            @else
-                                <div class="alert alert-info">
-                                    No measurement data available.
-                                </div>
-                            @endif
+
+                            </div>
+
 
                             @if (!empty($measurement['notes']))
                                 <div class="mt-3">
@@ -300,8 +360,8 @@
 
 @section('js')
     <script>
-        $(document).ready(function () {
-            $('.status-select').on('change', function () {
+        $(document).ready(function() {
+            $('.status-select').on('change', function() {
                 const itemId = $(this).data('item-id');
                 const status = $(this).val();
                 if (status == "cancelled" && !confirm("Are you sure you want to cancel this item?")) {
@@ -320,14 +380,14 @@
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             location.reload();
                         } else {
                             alert('Failed to update status');
                         }
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         console.error('Error:', xhr);
                         alert('Failed to update status. Please try again.');
                     }

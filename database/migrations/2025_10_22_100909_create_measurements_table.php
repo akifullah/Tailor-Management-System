@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained()->onDelete('restrict');
             $table->string('type'); // pant, shirt, etc.
             $table->json('data')->nullable(); // all measurement fields stored as JSON
+            $table->json('style')->nullable(); // all style fields stored as JSON
             $table->text('notes')->nullable();
             $table->softDeletes();
 

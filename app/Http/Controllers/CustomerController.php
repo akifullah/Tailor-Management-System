@@ -55,9 +55,9 @@ class CustomerController extends Controller
             "name" => "required",
             "email" => "nullable|email",
             "phone" => "required",
-            "customer_id"=> "nullable"
+            "customer_id" => "nullable"
         ]);
-        
+
         if ($validate->fails()) {
             return response()->json([
                 "success" => false,
@@ -131,10 +131,10 @@ class CustomerController extends Controller
         if ($customer && $customer->measurements) {
             $customer->measurements->transform(function ($measurement) {
                 $measurement->data = json_decode($measurement->data, true);
+                $measurement->style = json_decode($measurement->style, true);
                 return $measurement;
             });
         }
-        // return $customer;
         $data["customer"] = $customer;
         return view("admin.customers.customer_measurement", $data);
     }

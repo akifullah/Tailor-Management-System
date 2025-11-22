@@ -34,9 +34,14 @@
                                         <label for="search_type" class="form-label">Search By</label>
                                         <select name="type" id="search_type" class="form-select" required>
                                             <option value="">-- Select Type --</option>
-                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>ID</option>
-                                            <option value="customer_id" {{ request('type') == 'customer_id' ? 'selected' : '' }}>Customer ID</option>
-                                            <option value="sewing_order_number" {{ request('type') == 'sewing_order_number' ? 'selected' : '' }}>Order Number</option>
+                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>ID
+                                            </option>
+                                            <option value="customer_id"
+                                                {{ request('type') == 'customer_id' ? 'selected' : '' }}>Customer ID
+                                            </option>
+                                            <option value="sewing_order_number"
+                                                {{ request('type') == 'sewing_order_number' ? 'selected' : '' }}>Order
+                                                Number</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
@@ -54,7 +59,8 @@
                                 </div>
                             </form>
                         </div>
-                        <table id="datatable-buttons" class="table data-table table-striped table-bordered dt-responsive nowrap">
+                        <table id="datatable-buttons"
+                            class="table data-table table-striped table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
                                     <th>#ID</th>
@@ -86,14 +92,17 @@
                                                 $isDeliveryClose = $daysDiff >= 0 && $daysDiff <= 1;
                                             }
                                         @endphp
-                                        <tr @if($isDeliveryClose) style="background-color:rgba(255,87,34,0.1);" @endif>
+                                        <tr
+                                            @if ($isDeliveryClose) style="background-color:rgba(255,87,34,0.1);" @endif>
                                             <td>{{ $order->id }}</td>
-                                            <td><a href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a></td>
+                                            <td><a
+                                                    href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a>
+                                            </td>
                                             <td>{{ $order->customer->name ?? 'N/A' }}</td>
 
                                             <td>{{ $order->order_date ? $order->order_date->format('Y-m-d') : 'N/A' }}</td>
                                             <td>
-                                                {{ $order->delivery_date->format('Y-m-d') }}
+                                                {{ $order?->delivery_date?->format('Y-m-d') }}
                                             </td>
                                             <td>Rs {{ number_format($order->total_amount, 2) }}</td>
                                             <td>
@@ -105,7 +114,8 @@
                                                     {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
                                                 </span> --}}
 
-                                                <span class="badge bg-{{ $order->order_status == 'completed' ? 'success' : ($order->order_status == 'in_progress' ? 'warning' : 'warning') }}">
+                                                <span
+                                                    class="badge bg-{{ $order->order_status == 'completed' ? 'success' : ($order->order_status == 'in_progress' ? 'warning' : 'warning') }}">
                                                     {{ ucfirst(str_replace('_', ' ', $order->order_status)) }}
                                                 </span>
                                                 @if ($remaining > 0)
@@ -122,11 +132,11 @@
                                         </tr>
                                     @endforeach
                                 @else
-                                <tr>
-                                    <td colspan="11" class="text-center text-muted">
-                                        No orders found.
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="11" class="text-center text-muted">
+                                            No orders found.
+                                        </td>
+                                    </tr>
                                 @endif
                             </tbody>
                         </table>

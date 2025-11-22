@@ -66,8 +66,47 @@ class MeasurementController extends Controller
             'type' => 'required|string',
         ]);
 
+        $styleKeys = [
+            "style_patty",
+            "style_collar",
+            "style_front_pocket",
+            "style_side_pocket",
+            "style_cuff",
+            "style_sleeve",
+            "style_chak_patti",
+            "style_daman",
+            "style_shalwar",
+            "style_shalwar_jeeb",
+            "style_pancha_design",
+            "style_stitching_detail",
+            "style_button_detail",
+            "style_cloth_type"
+        ];
+        $style = array_filter($request->only($styleKeys), fn($value) => $value !== null);
+        if (empty($style)) {
+            $style = null;
+        }
         // Get all fields except the system ones
-        $data = collect($request->except(['_token', 'customer_id', 'type', 'notes']))
+        $data = collect($request->except([
+            '_token',
+            'customer_id',
+            'type',
+            'notes',
+            "style_patty",
+            "style_collar",
+            "style_front_pocket",
+            "style_side_pocket",
+            "style_cuff",
+            "style_sleeve",
+            "style_chak_patti",
+            "style_daman",
+            "style_shalwar",
+            "style_shalwar_jeeb",
+            "style_pancha_design",
+            "style_stitching_detail",
+            "style_button_detail",
+            "style_cloth_type"
+        ]))
             ->filter(fn($v) => $v !== null && $v !== '');
 
         // Group by prefix before underscore (e.g. "kameez_length" → "kameez" → ["length" => "1200"])
@@ -86,7 +125,8 @@ class MeasurementController extends Controller
         Measurement::create([
             'customer_id' => $request->customer_id,
             'type' => $request->type,
-            'data' => json_encode($grouped, JSON_PRETTY_PRINT),
+            'data' => json_encode($grouped + ['style' => $style], JSON_PRETTY_PRINT),
+            "style" => json_encode($style),
             'notes' => $request->notes,
         ]);
 
@@ -126,8 +166,50 @@ class MeasurementController extends Controller
             'type' => 'required|string',
         ]);
 
+        $styleKeys = [
+            "style_patty",
+            "style_collar",
+            "style_front_pocket",
+            "style_side_pocket",
+            "style_cuff",
+            "style_sleeve",
+            "style_chak_patti",
+            "style_daman",
+            "style_shalwar",
+            "style_shalwar_jeeb",
+            "style_pancha_design",
+            "style_stitching_detail",
+            "style_button_detail",
+            "style_cloth_type"
+        ];
+        $style = array_filter($request->only($styleKeys), fn($value) => $value !== null);
+        if (empty($style)) {
+            $style = null;
+        }
+
+
         // Get all fields except the system ones
-        $data = collect($request->except(['_token', '_method', 'customer_id', 'type', 'notes']))
+        $data = collect($request->except([
+            '_token',
+            '_method',
+            'customer_id',
+            'type',
+            'notes',
+            "style_patty",
+            "style_collar",
+            "style_front_pocket",
+            "style_side_pocket",
+            "style_cuff",
+            "style_sleeve",
+            "style_chak_patti",
+            "style_daman",
+            "style_shalwar",
+            "style_shalwar_jeeb",
+            "style_pancha_design",
+            "style_stitching_detail",
+            "style_button_detail",
+            "style_cloth_type"
+        ]))
             ->filter(fn($v) => $v !== null && $v !== '');
 
         // Group by prefix before underscore (e.g. "kameez_length" → "kameez" → ["length" => "1200"])
@@ -145,6 +227,7 @@ class MeasurementController extends Controller
             'customer_id' => $request->customer_id,
             'type' => $request->type,
             'data' => json_encode($grouped, JSON_PRETTY_PRINT),
+            'style' => json_encode($style),
             'notes' => $request->notes,
         ]);
 

@@ -371,7 +371,8 @@
                     <div class="mt-4">
                         <a href="{{ route('sewing-orders.index') }}" class="btn btn-secondary">Back to Sewing
                             Orders</a>
-                        <a href="{{ route('sewing-orders.print', $sewingOrder) }}" target="_blank" class="btn btn-primary">Print</a>
+                        <a href="{{ route('sewing-orders.print', $sewingOrder) }}" target="_blank"
+                            class="btn btn-primary">Print</a>
                     </div>
                 </div>
             </div>
@@ -650,38 +651,85 @@ if (isset($measurement['data'])) {
                                     }
                                 }
                             @endphp
+                            <div class="row">
+                                <div class="col-md-6">
 
-                            @if (!empty($dataGroups))
-                                <div class="table-responsive">
-                                    @foreach ($dataGroups as $groupLabel => $groupFields)
-                                        <h4 class="mt-3 text-center" style="font-weight: 700;">
-                                            {{ ucfirst($groupLabel) }}
+
+                                    @if (!empty($dataGroups))
+                                        <div class="table-responsive">
+                                            @foreach ($dataGroups as $groupLabel => $groupFields)
+                                                <h4 class="mt-3 text-center" style="font-weight: 700;">
+                                                    {{ ucfirst($groupLabel) }}
+                                                </h4>
+                                                <table class="table table-bordered table-striped mb-2">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 50%">Field</th>
+                                                            <th style="width: 50%">Value</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($groupFields as $fieldKey => $fieldValue)
+                                                            <tr>
+                                                                <td class="text-capitalize">
+                                                                    <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
+                                                                </td>
+                                                                <td>{{ $fieldValue ?? 'N/A' }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="alert alert-info">
+                                            No measurement data available.
+                                        </div>
+                                    @endif
+
+                                </div>
+                                <div class="col-md-6">
+                                    @php
+                                        $styleData = [];
+                                        if (isset($measurement['style'])) {
+                                            if (is_string($measurement['style'])) {
+                                                $decodedStyle = json_decode($measurement['style'], true);
+                                                if (is_array($decodedStyle)) {
+                                                    $styleData = $decodedStyle;
+                                                }
+                                            } elseif (
+                                                is_array($measurement['style']) ||
+                                                is_object($measurement['style'])
+                                            ) {
+                                                $styleData = (array) $measurement['style'];
+                                            }
+                                        }
+                                    @endphp
+                                    @if (!empty($styleData))
+                                        <h4 class="mt-3 mb-1 text-capitalize" style="font-weight: 700;">Style Details
                                         </h4>
                                         <table class="table table-bordered table-striped mb-2">
                                             <thead>
                                                 <tr>
-                                                    <th style="width: 50%">Field</th>
-                                                    <th style="width: 50%">Value</th>
+                                                    <th>Attribute</th>
+                                                    <th>Value</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($groupFields as $fieldKey => $fieldValue)
+                                                @foreach ($styleData as $key => $value)
                                                     <tr>
                                                         <td class="text-capitalize">
-                                                            <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
+                                                            {{ Str::title(str_replace(['style_', '_'], ['', ' '], $key)) }}
                                                         </td>
-                                                        <td>{{ $fieldValue ?? 'N/A' }}</td>
+                                                        <td>{{ $value }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
                                         </table>
-                                    @endforeach
+                                    @endif
                                 </div>
-                            @else
-                                <div class="alert alert-info">
-                                    No measurement data available.
-                                </div>
-                            @endif
+
+                            </div>
 
                             @if (!empty($measurement['notes']))
                                 <div class="mt-3">

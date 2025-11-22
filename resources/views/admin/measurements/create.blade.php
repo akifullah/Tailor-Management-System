@@ -561,11 +561,11 @@
                             name: 'shalwar_pancha',
                             input_type: 'input'
                         },
-                        {
-                            label: "Asin Width",
-                            name: 'shalwar_asin_width',
-                            input_type: 'input'
-                        },
+                        // {
+                        //     label: "Asin Width",
+                        //     name: 'shalwar_asin_width',
+                        //     input_type: 'input'
+                        // },
                     ]
                 }
             },

@@ -266,13 +266,13 @@ class SewingOrderController extends Controller
     {
         // Get all payments for this order
         $payments = $sewingOrder->payments()->where('type', 'payment')->get();
-        
+
         foreach ($payments as $payment) {
             // Check if already refunded
             $existingRefund = Payment::where('refund_for_payment_id', $payment->id)
                 ->where('type', 'refund')
                 ->first();
-            
+
             if (!$existingRefund) {
                 // Create full refund
                 Payment::create([
@@ -331,7 +331,7 @@ class SewingOrderController extends Controller
                 }
                 $sewingOrder->save();
             }
-            
+
             // if ($validated['status'] === 'cancelled' && $item->status !== 'cancelled') {
             //     // Cancel item with refund processing
             //     $this->cancelSewingOrderItem($item, $validated['cancellation_reason'] ?? null);
@@ -392,20 +392,20 @@ class SewingOrderController extends Controller
     {
         // Use original order total if provided, otherwise use current
         $orderTotal = $originalOrderTotal ?? $sewingOrder->total_amount;
-        
+
         // Calculate proportional refund amount
         if ($orderTotal > 0) {
             $itemProportion = $item->total_price / $orderTotal;
         } else {
             $itemProportion = 0;
         }
-        
+
         // Get all payments for this order
         $payments = $sewingOrder->payments()->where('type', 'payment')->orderBy('payment_date', 'asc')->get();
-        
+
         foreach ($payments as $payment) {
             $proportionalAmount = $payment->amount * $itemProportion;
-            
+
             // Only create refund if amount > 0
             if ($proportionalAmount > 0) {
                 // Create refund record
@@ -454,9 +454,9 @@ class SewingOrderController extends Controller
     public function workerDashboard(Request $request)
     {
         $userId = Auth::id();
-        
+
         // Base query builder for all assigned items
-        $baseQuery = function() use ($userId) {
+        $baseQuery = function () use ($userId) {
             return SewingOrderItem::where('assign_to', $userId);
         };
 
@@ -510,6 +510,4 @@ class SewingOrderController extends Controller
         return redirect()->route('sewing-orders.show', $sewing_order->id)
             ->with('success', 'Order status updated successfully.');
     }
-    
-    
 }

@@ -51,7 +51,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Delivery Date</label>
-                                    <input type="date" name="delivery_date" class="form-control">
+                                    <input type="date" name="delivery_date" class="form-control" required>
                                 </div>
                             </div>
                             <hr>
@@ -165,7 +165,7 @@
             } catch (err) {
                 measurements = measurementData;
             }
-            
+
             let ms = document.createElement("select");
             ms.className = "form-select";
             ms.required = true;
@@ -350,7 +350,8 @@
                 return false;
             }
 
-            if ($('#payment_status').val() === 'partial' && ($('#partial_amount_div').is(':hidden') || !$('#partial_amount')[0].checkValidity())) {
+            if ($('#payment_status').val() === 'partial' && ($('#partial_amount_div').is(':hidden') || !$(
+                    '#partial_amount')[0].checkValidity())) {
                 $('#partial_amount_div').show();
                 setTimeout(function() {
                     $('#partial_amount').focus();
