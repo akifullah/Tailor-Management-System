@@ -182,6 +182,9 @@ Route::middleware(["auth"])->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
     });
+
+    // Expenses
+    Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
 });
 // Route::get("/types/get/{name}", [TypeController::class, "getType"])->name('type.get');
 

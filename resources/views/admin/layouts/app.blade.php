@@ -208,7 +208,7 @@
                                 </a>
                             </li>
                         @endcan
-                      
+
                         @can('manage-customers')
                             <li>
                                 <a href="{{ route('customers.index') }}"
@@ -287,6 +287,13 @@
                                 </a>
                             </li>
                         @endcan
+                        <li>
+                            <a href="{{ route('expenses.index') }}"
+                                class="{{ request()->routeIs('expenses.*') ? 'tp-link active' : '' }}">
+                                <i data-feather="dollar-sign"></i>
+                                <span> Expenses </span>
+                            </a>
+                        </li>
                         @can('manage-orders')
                             <li>
                                 <a href="{{ route('orders.index') }}"

@@ -10,6 +10,7 @@ use App\Models\OrderItem;
 use App\Models\Supplier;
 use App\Models\Payment;
 use App\Models\SewingOrder;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -61,6 +62,11 @@ class ReportController extends Controller
             ->groupBy('payment_method')
             ->get();
 
+        // Expense Statistics
+        $totalExpenses = Expense::sum('amount');
+        $todayExpenses = Expense::whereDate('date', today())->sum('amount');
+        $recentExpenses = Expense::with('user')->latest('date')->take(10)->get();
+
         // Recent Transactions
         $recentPayments = Payment::with(['payable'])->latest()->take(10)->get();
 
@@ -82,12 +88,14 @@ class ReportController extends Controller
             'total_purchase_amount' => $totalPurchaseAmount,
             'total_purchase_paid' => $totalPurchasePaid,
             'total_purchase_pending' => $totalPurchasePending,
+            'total_expenses' => $totalExpenses,
+            'today_expenses' => $todayExpenses,
         ];
 
         $lowStockProducts = Product::where('available_meters', '<', 10)->with(['brand', 'category'])->get();
         $recentOrders = Order::with(['customer', 'items'])->latest()->take(10)->get();
 
-        return view('admin.reports.dashboard', compact('stats', 'lowStockProducts', 'recentOrders', 'paymentMethods', 'recentPayments'));
+        return view('admin.reports.dashboard', compact('stats', 'lowStockProducts', 'recentOrders', 'paymentMethods', 'recentPayments', 'recentExpenses'));
     }
 
     public function salesReport(Request $request)
@@ -519,11 +527,11 @@ class ReportController extends Controller
 
             // Filter by order_status (pending, completed, returned, cancelled, or blank)
             if ($orderStatus) {
-                $customerOrders = $customerOrders->filter(function($order) use ($orderStatus) {
+                $customerOrders = $customerOrders->filter(function ($order) use ($orderStatus) {
                     if ($orderStatus == 'returned') return $order->is_return;
                     return $order->order_status == $orderStatus;
                 });
-                $customerSewingOrders = $customerSewingOrders->filter(function($order) use ($orderStatus) {
+                $customerSewingOrders = $customerSewingOrders->filter(function ($order) use ($orderStatus) {
                     if ($orderStatus == 'returned') return $order->is_return;
                     return $order->order_status == $orderStatus;
                 });
@@ -563,14 +571,14 @@ class ReportController extends Controller
             });
             $netPaid = $totalPaid - $totalRefunded;
             // Compute remaining ONLY for non-cancelled/non-returned orders
-            $totalRemaining = $customerOrders->filter(function($o){
+            $totalRemaining = $customerOrders->filter(function ($o) {
                 return $o->order_status !== 'cancelled' && !$o->is_return;
             })->sum(function ($order) {
                 $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');
                 $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
                 $netPaid = $totalPaid - $totalRefunded;
                 return $order->total_amount - $netPaid;
-            }) + $customerSewingOrders->filter(function($o){
+            }) + $customerSewingOrders->filter(function ($o) {
                 return $o->order_status !== 'cancelled' && !$o->is_return;
             })->sum(function ($order) {
                 $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');

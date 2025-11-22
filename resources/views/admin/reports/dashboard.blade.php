@@ -6,7 +6,7 @@
             <h4 class="fs-18 fw-semibold mb-0">Inventory Dashboard</h4>
         </div>
 
-       
+
 
         <!-- Stats Cards -->
         <div class="row align-items-stretch mb-3">
@@ -40,6 +40,19 @@
                     <div class="card-body">
                         <h5>Total Revenue</h5>
                         <h2 class="text-warning">Rs {{ number_format($stats['total_revenue'], 2) }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Statistics -->
+        <div class="row align-items-stretch mb-3">
+            <div class="col-md-3">
+                <div class="card h-100 border-danger">
+                    <div class="card-body">
+                        <h5>Total Expenses</h5>
+                        <h2 class="text-danger">Rs {{ number_format($stats['total_expenses'], 2) }}</h2>
+                        <small class="text-muted">Today: Rs {{ number_format($stats['today_expenses'], 2) }}</small>
                     </div>
                 </div>
             </div>
@@ -245,31 +258,72 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if($recentOrders->count() > 0)
-                                    @foreach ($recentOrders as $order)
-                                        @php
-                                            $totalPaid = $order->payments->sum('amount');
-                                            $remaining = $order->total_amount - $totalPaid;
-                                        @endphp
-                                        <tr>
-                                            <td>{{ $order->order_number }}</td>
-                                            <td>{{ $order?->customer?->name }}</td>
-                                            <td>{{ $order->order_date }}</td>
-                                            <td>Rs {{ number_format($order->total_amount, 2) }}</td>
-                                            <td>
-                                                @if ($remaining <= 0)
-                                                    <span class="badge bg-success">Paid</span>
-                                                @else
-                                                    <span class="badge bg-warning">Pending</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                    @if ($recentOrders->count() > 0)
+                                        @foreach ($recentOrders as $order)
+                                            @php
+                                                $totalPaid = $order->payments->sum('amount');
+                                                $remaining = $order->total_amount - $totalPaid;
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $order->order_number }}</td>
+                                                <td>{{ $order?->customer?->name }}</td>
+                                                <td>{{ $order->order_date }}</td>
+                                                <td>Rs {{ number_format($order->total_amount, 2) }}</td>
+                                                <td>
+                                                    @if ($remaining <= 0)
+                                                        <span class="badge bg-success">Paid</span>
+                                                    @else
+                                                        <span class="badge bg-warning">Pending</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     @else
                                         <tr>
                                             <td colspan="5" class="text-center text-muted">No recent orders</td>
                                         </tr>
                                     @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Expenses -->
+        <div class="row align-items-stretch mb-3">
+            <div class="col-12">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Expenses</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Added By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($recentExpenses as $expense)
+                                        <tr>
+                                            <td>{{ \Carbon\Carbon::parse($expense->date)->format('Y-m-d') }}</td>
+                                            <td>{{ $expense->title }}</td>
+                                            <td>{{ $expense->category ?? '-' }}</td>
+                                            <td><strong>Rs {{ number_format($expense->amount, 2) }}</strong></td>
+                                            <td>{{ $expense->user->name ?? 'Unknown' }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">No recent expenses</td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
