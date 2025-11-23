@@ -231,7 +231,7 @@ class MeasurementController extends Controller
             'notes' => $request->notes,
         ]);
 
-        return redirect()->route('measurements.index')->with('success', 'Measurement updated successfully!');
+        return redirect()->route('measurements.create')->with('success', 'Measurement updated successfully!');
     }
 
     // public function update(Request $request, Measurement $measurement)
