@@ -116,6 +116,7 @@ Route::middleware(["auth"])->group(function () {
 
         // Route to update the status of a sewing order (PATCH)
         Route::patch('sewing-orders/{sewing_order}/update-status', [SewingOrderController::class, 'updateStatus'])->name('sewing-orders.update-status');
+        Route::get('sewing-order-items/{item}/print-measurement', [SewingOrderController::class, 'printMeasurement'])->name('sewing-order-items.print-measurement');
     });
 
     Route::middleware(['permission:worker-dashboard'])->group(function () {
@@ -184,7 +185,9 @@ Route::middleware(["auth"])->group(function () {
     });
 
     // Expenses
-    Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
+    Route::middleware(['permission:manage-expenses'])->group(function () {
+        Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
+    });
 });
 // Route::get("/types/get/{name}", [TypeController::class, "getType"])->name('type.get');
 

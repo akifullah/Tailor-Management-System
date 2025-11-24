@@ -170,6 +170,11 @@
                                                     data-bs-target="#measurementModal{{ $item->id }}">
                                                     View Measurement
                                                 </button>
+                                                <a href="{{ route('sewing-order-items.print-measurement', $item->id) }}"
+                                                    target="_blank" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
+                                                    title="Print Measurement">
+                                                    <i class="mdi mdi-printer"></i>
+                                                </a>
                                             @endif
                                         </td>
                                     </tr>

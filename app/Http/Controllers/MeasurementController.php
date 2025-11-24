@@ -13,11 +13,21 @@ class MeasurementController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $measurements = Measurement::with('customer')->get();
+        $query = Measurement::with('customer');
 
-        // Convert the JSON 'data' column to an object, and eager customer is fine (already done)
+        if ($request->filled('customer_id')) {
+            $query->where('customer_id', $request->customer_id);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        $measurements = $query->latest()->get();
+
+        // Convert the JSON 'data' column to an object
         $measurements->transform(function ($measurement) {
             if (is_string($measurement->data)) {
                 $measurement->data = json_decode($measurement->data);
@@ -25,7 +35,20 @@ class MeasurementController extends Controller
             return $measurement;
         });
 
-        return view('admin.measurements.index', compact('measurements'));
+        $customers = Customer::select('id', 'name', "phone")->orderBy('name')->get();
+
+        // All possible types
+        $types = [
+            'pant',
+            'shirt',
+            'kameez',
+            'shalwar',
+            'kameez_shalwar',
+            'coat',
+            'waistcoat'
+        ];
+
+        return view('admin.measurements.index', compact('measurements', 'customers', 'types'));
     }
 
     /**
@@ -125,7 +148,7 @@ class MeasurementController extends Controller
         Measurement::create([
             'customer_id' => $request->customer_id,
             'type' => $request->type,
-            'data' => json_encode($grouped + ['style' => $style], JSON_PRETTY_PRINT),
+            'data' => json_encode($grouped),
             "style" => json_encode($style),
             'notes' => $request->notes,
         ]);

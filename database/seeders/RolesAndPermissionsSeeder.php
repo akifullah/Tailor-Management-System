@@ -37,6 +37,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage-roles-permissions',
             "manage-sewing-orders",
             "worker-dashboard",
+            "manage-expenses",
 
             // Report dashboard & sub-permissions from routes/web.php
             'view-reports-dashboard',
@@ -82,7 +83,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage-orders',
             'view-reports',
         ];
-        
+
         $managerPermissionModels = Permission::whereIn('name', $managerPermissions)
             ->where('guard_name', 'web')
             ->get();
@@ -93,7 +94,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $userPermissions = [
             'view-reports',
         ];
-        
+
         $userPermissionModels = Permission::whereIn('name', $userPermissions)
             ->where('guard_name', 'web')
             ->get();
@@ -102,9 +103,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Assign admin role to admin user(s)
         // Find all users with admin email or admin role in the old 'role' column
-        $adminUsers = User::where(function($query) {
+        $adminUsers = User::where(function ($query) {
             $query->where('email', 'admin@gmail.com')
-                  ->orWhere('role', 'admin');
+                ->orWhere('role', 'admin');
         })->get();
 
         foreach ($adminUsers as $adminUser) {
@@ -119,8 +120,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Clear cache again to ensure fresh data
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        
+
         $this->command->info('Roles and Permissions seeded successfully!');
     }
 }
-

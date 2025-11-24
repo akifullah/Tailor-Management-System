@@ -221,7 +221,7 @@
 
                         @can('manage-measurements')
                             <li>
-                                <a href="{{ route('measurements.create') }}"
+                                <a href="{{ route('measurements.index') }}"
                                     class="{{ request()->routeIs('measurements.*') ? 'tp-link active' : '' }}">
                                     <i data-feather="user"></i>
                                     <span> Measurements </span>
@@ -266,7 +266,7 @@
                             </li>
                         @endcan
 
-                        @canany(['manage-purchases', 'manage-products', 'manage-orders'])
+                        @canany(['manage-purchases', 'manage-products', 'manage-orders', 'manage-expenses'])
                             <li class="menu-title mt-2">Inventory</li>
                         @endcan
                         @can('manage-products')
@@ -287,13 +287,15 @@
                                 </a>
                             </li>
                         @endcan
-                        <li>
-                            <a href="{{ route('expenses.index') }}"
-                                class="{{ request()->routeIs('expenses.*') ? 'tp-link active' : '' }}">
-                                <i data-feather="dollar-sign"></i>
-                                <span> Expenses </span>
-                            </a>
-                        </li>
+                        @can('manage-expenses')
+                            <li>
+                                <a href="{{ route('expenses.index') }}"
+                                    class="{{ request()->routeIs('expenses.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="dollar-sign"></i>
+                                    <span> Expenses </span>
+                                </a>
+                            </li>
+                        @endcan
                         @can('manage-orders')
                             <li>
                                 <a href="{{ route('orders.index') }}"

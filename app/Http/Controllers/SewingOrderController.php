@@ -190,6 +190,27 @@ class SewingOrderController extends Controller
         return view('admin.sewing_orders.receipt', compact('sewingOrder'));
     }
 
+    public function printMeasurement(SewingOrderItem $item)
+    {
+        $item->load(['sewingOrder.customer']);
+
+        // Decode measurement data if string
+        $measurement = $item->customer_measurement;
+        if (is_string($measurement)) {
+            $measurement = json_decode($measurement, true);
+        }
+
+        // Ensure data and style are arrays
+        if (isset($measurement['data']) && is_string($measurement['data'])) {
+            $measurement['data'] = json_decode($measurement['data'], true);
+        }
+        if (isset($measurement['style']) && is_string($measurement['style'])) {
+            $measurement['style'] = json_decode($measurement['style'], true);
+        }
+
+        return view('admin.sewing_orders.print_measurement', compact('item', 'measurement'));
+    }
+
     /**
      * Show the form for editing the specified resource.
      */

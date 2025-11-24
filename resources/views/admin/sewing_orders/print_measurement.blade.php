@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Details - {{ $item->sewingOrder->sewing_order_number }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            color: #1f2937;
+            -webkit-print-color-adjust: exact;
+            font-size: 10px;
+            /* Reduced base font size */
+        }
+
+        .print-container {
+            background-color: #fff;
+            padding: 15px;
+            /* Reduced padding */
+            margin: 10px auto;
+            max-width: 700px;
+            /* Reduced max-width */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+        }
+
+        .header-section {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-name {
+            font-size: 14px;
+            /* Reduced font size */
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.5px;
+        }
+
+        .document-title {
+            font-size: 12px;
+            /* Reduced font size */
+            font-weight: 600;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            /* Reduced gap */
+            margin-bottom: 15px;
+        }
+
+        .info-card {
+            background-color: #f9fafb;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 12px;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 14px;
+            /* background-color: #3b82f6; */
+            background-color: transparent;
+            margin-right: 6px;
+            border-radius: 2px;
+        }
+
+        .measurement-table {
+            width: 100%;
+            border-collapse: collapse;
+            /* Changed to collapse for compactness */
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .measurement-table th,
+        .measurement-table td {
+            padding: 4px 8px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 11px;
+        }
+
+        .measurement-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            text-align: left;
+            width: 40%;
+        }
+
+        .measurement-table tr:last-child td,
+        .measurement-table tr:last-child th {
+            border-bottom: none;
+        }
+
+        .notes-box {
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            padding: 8px;
+            border-radius: 6px;
+            color: #92400e;
+            margin-top: 10px;
+            font-size: 11px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 11px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
+        }
+
+        .btn-print-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-custom {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 0.8rem;
+        }
+
+        .btn-primary-custom {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-secondary-custom {
+            background-color: #fff;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: #f3f4f6;
+        }
+
+        @media print {
+            body {
+                background-color: #fff;
+                font-size: 9pt;
+                padding: 15px
+                    /* Even smaller for print */
+            }
+
+            .print-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                max-width: none;
+                border: none;
+            }
+
+            .btn-print-container {
+                display: none;
+            }
+
+            .info-card {
+                border: 1px solid #e5e7eb;
+                padding: 5px;
+            }
+
+            .measurement-table th,
+            .measurement-table td {
+                padding: 4px 5px;
+            }
+
+            .header-section {
+                margin-bottom: 5px;
+                padding-bottom: 5px;
+            }
+
+            .info-grid {
+                gap: 5px;
+                margin-bottom: 10px;
+            }
+
+            h5 {
+                margin-top: 5px !important;
+                margin-bottom: 2px !important;
+                font-size: 0.85rem !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="btn-print-container">
+        <button onclick="window.print()" class="btn-custom btn-primary-custom">
+            Print Measurement
+        </button>
+        <button onclick="window.close()" class="btn-custom btn-secondary-custom">
+            Close
+        </button>
+    </div>
+
+    <div class="print-container">
+        <div class="header-section">
+            <div class="brand-name">Tailor Management System</div>
+            <div class="document-title">Measurement Sheet</div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-label">Customer Details</div>
+                <div class="info-value">{{ $item->sewingOrder->customer->name }}</div>
+                <div style="margin-top: 5px; color: #4b5563;">{{ $item->sewingOrder->customer->phone }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Order Details</div>
+                <div class="info-value">Order #: {{ $item->sewingOrder->sewing_order_number }}</div>
+                <div style="margin-top: 5px; color: #4b5563;">Item: {{ $item->product_name }} (Qty: {{ $item->qty }})
+                </div>
+                <div style="margin-top: 5px; color: #4b5563;">Date: {{ $item->created_at->format('d M, Y') }}</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div
+                class="col-{{ isset($measurement['style']) && (is_array($measurement['style']) || is_object($measurement['style'])) ? '6' : '12' }}">
+                <div class="section-title">
+                    {{ ucfirst(str_replace('_', ' ', $measurement['type'] ?? 'Standard')) }} Measurements
+                </div>
+
+                @if (isset($measurement['data']) && (is_array($measurement['data']) || is_object($measurement['data'])))
+                    @foreach ($measurement['data'] as $groupKey => $fields)
+                        @if (is_array($fields) || is_object($fields))
+                            <h5 class="text-capitalize fw-bold text-secondary ps-2"
+                                style="font-size: 0.95rem; color: #6b7280;">
+                                {{ str_replace('_', ' ', $groupKey) }}
+                            </h5>
+                            <table class="measurement-table">
+                                <tbody>
+                                    @foreach ($fields as $key => $itemVal)
+                                        <tr>
+                                            <th class="text-capitalize">{{ Str::title(str_replace('_', ' ', $key)) }}
+                                            </th>
+                                            <td>{{ $itemVal }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <table class="measurement-table">
+                                <tbody>
+                                    <tr>
+                                        <th class="text-capitalize">{{ Str::title(str_replace('_', ' ', $groupKey)) }}
+                                        </th>
+                                        <td>{{ $fields }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        @endif
+                    @endforeach
+                @else
+                    <div class="alert alert-info">No structured measurement data available.</div>
+                @endif
+            </div>
+            <div class="col-6">
+                @if (isset($measurement['style']) && (is_array($measurement['style']) || is_object($measurement['style'])))
+                    <div class="section-title" style="margin-top: 30px;">
+                        Style Details
+                    </div>
+                    <table class="measurement-table">
+                        <tbody>
+                            @foreach ($measurement['style'] as $key => $value)
+                                <tr>
+                                    <th class="text-capitalize">
+                                        {{ Str::title(str_replace(['style_', '_'], ['', ' '], $key)) }}
+                                    </th>
+                                    <td>{{ $value }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+        </div>
+
+
+
+        @if (isset($measurement['notes']) && $measurement['notes'])
+            <div class="section-title" style="margin-top: 30px;">
+                Notes
+            </div>
+            <div class="notes-box">
+                <strong>Note:</strong> {{ $measurement['notes'] }}
+            </div>
+        @endif
+
+        <div class="footer">
+            <p>Generated by Tailor Management System on {{ now()->format('d M, Y h:i A') }}</p>
+        </div>
+    </div>
+    <script>
+        window.print()
+    </script>
+</body>
+
+</html>
