@@ -7,7 +7,7 @@
                 <h4 class="fs-18 fw-semibold m-0">Expenses</h4>
             </div>
             <div class="text-end">
-                <a href="{{ route('expenses.create') }}" class="btn btn-primary">
+                <a href="{{ route('expenses.create') }}" class="btn btn-sm btn-primary">
                     <i class="mdi mdi-plus me-1"></i> Add Expense
                 </a>
             </div>
@@ -39,14 +39,14 @@
                                             <td>{{ $expense->user->name ?? 'Unknown' }}</td>
                                             <td>
                                                 <a href="{{ route('expenses.edit', $expense->id) }}"
-                                                    class="btn btn-sm btn-info">
+                                                    class="btn btn-sm bg-info-subtle">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </a>
                                                 <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST"
                                                     class="d-inline" onsubmit="return confirm('Are you sure?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                    <button type="submit" class="btn btn-sm bg-danger-subtle">
                                                         <i class="mdi mdi-delete"></i>
                                                     </button>
                                                 </form>

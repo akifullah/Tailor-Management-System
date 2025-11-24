@@ -178,7 +178,8 @@ class SewingOrderController extends Controller
      */
     public function show(SewingOrder $sewingOrder)
     {
-        $sewingOrder->load(['customer', 'items.worker', 'payments']);
+        $sewingOrder->load(['customer.measurements', 'items.worker', 'payments']);
+
 
         return view('admin.sewing_orders.show', compact('sewingOrder'));
     }
@@ -530,5 +531,43 @@ class SewingOrderController extends Controller
 
         return redirect()->route('sewing-orders.show', $sewing_order->id)
             ->with('success', 'Order status updated successfully.');
+    }
+
+    /**
+     * Assign a measurement to a sewing order item
+     */
+    public function assignMeasurement(Request $request, SewingOrderItem $item)
+    {
+        $validated = $request->validate([
+            'measurement_id' => 'required|exists:measurements,id',
+        ]);
+
+        $measurement = \App\Models\Measurement::find($validated['measurement_id']);
+
+        // Decode data if it's a string (though cast should handle it, good to be safe given previous code)
+        $measurementData = $measurement->data;
+        if (is_string($measurementData)) {
+            $measurementData = json_decode($measurementData, true);
+        }
+
+        $measurementStyle = $measurement->style;
+        if (is_string($measurementStyle)) {
+            $measurementStyle = json_decode($measurementStyle, true);
+        }
+
+        // Construct the measurement array structure expected by SewingOrderItem
+        $newMeasurement = [
+            'id' => $measurement->id,
+            'type' => $measurement->type,
+            'name' => $measurement->name,
+            'data' => $measurementData,
+            'style' => $measurementStyle,
+            'notes' => $measurement->notes,
+        ];
+
+        $item->customer_measurement = $newMeasurement;
+        $item->save();
+
+        return back()->with('success', 'Measurement assigned successfully.');
     }
 }

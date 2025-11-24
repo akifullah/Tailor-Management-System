@@ -117,6 +117,7 @@ Route::middleware(["auth"])->group(function () {
         // Route to update the status of a sewing order (PATCH)
         Route::patch('sewing-orders/{sewing_order}/update-status', [SewingOrderController::class, 'updateStatus'])->name('sewing-orders.update-status');
         Route::get('sewing-order-items/{item}/print-measurement', [SewingOrderController::class, 'printMeasurement'])->name('sewing-order-items.print-measurement');
+        Route::put('sewing-order-items/{item}/assign-measurement', [SewingOrderController::class, 'assignMeasurement'])->name('sewing-order-items.assign-measurement');
     });
 
     Route::middleware(['permission:worker-dashboard'])->group(function () {

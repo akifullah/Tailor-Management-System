@@ -53,6 +53,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-reports-user-transactions',
             'view-reports-customer-transactions',
             'view-reports-supplier-transactions',
+            "can_edit_order_measurements",
         ];
 
         $createdPermissions = [];

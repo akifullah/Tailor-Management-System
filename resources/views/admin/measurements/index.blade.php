@@ -31,7 +31,7 @@
 
                         <form action="{{ route('measurements.index') }}" method="GET"
                             class="row g-2 align-items-end mb-3">
-                            <div class="col-md-2">
+                            <div class="col-sm-3 col-lg-2">
                                 <label for="customer_id" class="form-label">Filter by Customer</label>
                                 <select name="customer_id" id="customer_id" class="form-select select2">
                                     <option value="">All Customers</option>
@@ -43,7 +43,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-sm-3 col-lg-2">
                                 <label for="type" class="form-label">Filter by Type</label>
                                 <select name="type" id="type" class="form-select">
                                     <option value="">All Types</option>

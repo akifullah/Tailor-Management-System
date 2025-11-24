@@ -16,8 +16,8 @@
             <div class="card-body">
                 <div class="mb-3">
                     <form id="productSearchForm" method="GET" action="">
-                        <div class="row g-2 justify-content-end align-items-end">
-                            <div class="col-md-2">
+                        <div class="row g-2  align-items-end">
+                            <div class="col-sm-3 col-lg-2">
                                 <label for="search_type" class="form-label">Search Type</label>
                                 <select name="type" id="search_type" class="form-select" required>
                                     <option value="">-- Select Type --</option>
@@ -28,7 +28,7 @@
                                     {{-- <option value="barcode" {{ request('type') == 'barcode' ? 'selected' : '' }}>Barcode</option> --}}
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-sm-3 col-lg-2">
                                 <label for="search_value" class="form-label">Input Value</label>
                                 <input type="text" required name="value" id="search_value" class="form-control"
                                     value="{{ request('value') }}" placeholder="Enter value">
@@ -86,9 +86,9 @@
                                     </tr>
                                 @endforeach
                             @else
-                            <tr>
-                                <td colspan="10" class="text-center">No products found.</td>
-                            </tr>
+                                <tr>
+                                    <td colspan="10" class="text-center">No products found.</td>
+                                </tr>
                             @endif
                         </tbody>
                     </table>

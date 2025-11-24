@@ -39,7 +39,6 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet" />
 
-
 </head>
 
 <!-- body start -->
@@ -97,7 +96,7 @@
                             <div class="dropdown-menu dropdown-menu-end profile-dropdown">
                                 <!-- item-->
                                 <div class="dropdown-header noti-title">
-                                    <h6 class="text-overflow m-0">Welcome !</h6>
+                                    <h6 class="text-overflow m-0">Welcome {{ Auth::user()->name }}!</h6>
                                 </div>
 
                                 <!-- item-->
@@ -114,12 +113,12 @@
                                 @can('manage-roles-permissions')
                                     <a class="dropdown-item notify-item" href="{{ route('roles.index') }}">
                                         <i class="mdi mdi-shield fs-16 align-middle"></i>
-                                        <span>Roles</span>
+                                        <span>Roles/Permissions</span>
                                     </a>
-                                    <a class="dropdown-item notify-item" href="{{ route('permissions.index') }}">
+                                    {{-- <a class="dropdown-item notify-item" href="{{ route('permissions.index') }}">
                                         <i class="mdi mdi-key fs-16 align-middle"></i>
                                         <span>Permissions</span>
-                                    </a>
+                                    </a> --}}
                                 @endcan
 
                                 <div class="dropdown-divider"></div>
@@ -430,7 +429,8 @@
                         <div class="col fs-13 text-muted text-center">
                             &copy;
                             {{ date('Y') }} - Made with <span class="mdi mdi-heart text-danger"></span> by <a
-                                href="#" class="text-reset fw-semibold">Webspires</a>
+                                href="https://webspires.com.pk" target="_blank"
+                                class="text-reset fw-semibold">Webspires</a>
                         </div>
                     </div>
                 </div>

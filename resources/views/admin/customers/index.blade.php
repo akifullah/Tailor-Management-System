@@ -34,32 +34,41 @@
                         <div class="mb-3">
                             <form id="customerSearchForm" method="GET" action="">
                                 <div class="row g-2  align-items-end">
-                                    <div class="col-md-2">
+                                    <div class="col-sm-3 col-lg-2">
                                         <label for="search_type" class="form-label">Search Type</label>
                                         <select name="type" id="search_type" class="form-select" required>
                                             <option value="">-- Select Type --</option>
-                                            <option value="name" {{ request('type') == 'name' ? 'selected' : '' }}>User Name</option>
-                                            <option value="customer_id" {{ request('type') == 'customer_id' ? 'selected' : '' }}>User Old ID</option>
-                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>User New ID</option>
-                                            <option value="phone" {{ request('type') == 'phone' ? 'selected' : '' }}>User Phone</option>
-                                            <option value="email" {{ request('type') == 'email' ? 'selected' : '' }}>User Email</option>
+                                            <option value="name" {{ request('type') == 'name' ? 'selected' : '' }}>User
+                                                Name</option>
+                                            <option value="customer_id"
+                                                {{ request('type') == 'customer_id' ? 'selected' : '' }}>User Old ID
+                                            </option>
+                                            <option value="id" {{ request('type') == 'id' ? 'selected' : '' }}>User New
+                                                ID</option>
+                                            <option value="phone" {{ request('type') == 'phone' ? 'selected' : '' }}>User
+                                                Phone</option>
+                                            <option value="email" {{ request('type') == 'email' ? 'selected' : '' }}>User
+                                                Email</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-sm-3 col-lg-2">
                                         <label for="search_value" class="form-label">Input Value</label>
-                                        <input type="text" required name="value" id="search_value" class="form-control" value="{{ request('value') }}" placeholder="Enter value">
+                                        <input type="text" required name="value" id="search_value" class="form-control"
+                                            value="{{ request('value') }}" placeholder="Enter value">
                                     </div>
                                     <div class="col-md-1 align-self-end">
                                         <div class="d-flex gap-1">
-                                            <button   type="submit" class="btn px-2 btn-primary">Search</button>
-                                            <a href="{{ route(Route::currentRouteName()) }}" class="btn px-2 btn-secondary">Reset</a>
+                                            <button type="submit" class="btn px-2 btn-primary">Search</button>
+                                            <a href="{{ route(Route::currentRouteName()) }}"
+                                                class="btn px-2 btn-secondary">Reset</a>
                                         </div>
                                     </div>
-                                
+
                                 </div>
                             </form>
                         </div>
-                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap data-table">
+                        <table id="datatable-buttons"
+                            class="table table-striped table-bordered dt-responsive nowrap data-table">
                             <thead>
                                 <tr>
                                     <th>ID #</th>
@@ -72,78 +81,79 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if($customers->isNotEmpty())
-                                @foreach ($customers as $customer)
-                                    <tr>
-                                        <td>{{ $customer->id }}</td>
-                                        <td>{{ $customer->customer_id }}</td>
-                                        <td>
-                                            <p class="d-inline-block align-middle mb-0">
-                                                <span>{{ $customer->name }}</span>
-                                            </p>
-                                        </td>
-                                        <td>{{ $customer->email }}</td>
-                                        <td>{{ $customer->phone }}</td>
-                                        <td>{{ $customer->address }}</td>
-                                        <td class="d-flex gap-2 ">
+                                @if ($customers->isNotEmpty())
+                                    @foreach ($customers as $customer)
+                                        <tr>
+                                            <td>{{ $customer->id }}</td>
+                                            <td>{{ $customer->customer_id }}</td>
+                                            <td>
+                                                <p class="d-inline-block align-middle mb-0">
+                                                    <span>{{ $customer->name }}</span>
+                                                </p>
+                                            </td>
+                                            <td>{{ $customer->email }}</td>
+                                            <td>{{ $customer->phone }}</td>
+                                            <td>{{ $customer->address }}</td>
+                                            <td class="d-flex gap-2 ">
 
-                                            <div class="dropdown ">
+                                                <div class="dropdown ">
 
-                                                <button
-                                                    class="btn btn-sm btn-outline-dark border-0 p-0 px-1 dropdown-toggle me-0"
-                                                    style="font-size: 22px" data-bs-toggle="dropdown" href="#"
-                                                    role="button" aria-haspopup="false" aria-expanded="false">
-                                                    <span class="mdi mdi-dots-vertical"></span>
-                                                </button>
-                                                <div class="dropdown-menu dropdown-menu-end profile-dropdown">
+                                                    <button
+                                                        class="btn btn-sm btn-outline-dark border-0 p-0 px-1 dropdown-toggle me-0"
+                                                        style="font-size: 22px" data-bs-toggle="dropdown" href="#"
+                                                        role="button" aria-haspopup="false" aria-expanded="false">
+                                                        <span class="mdi mdi-dots-vertical"></span>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-end profile-dropdown">
 
-                                                    <a class="dropdown-item "
-                                                        href="{{ route('customers.measurements', ['id' => $customer->id]) }}">
-                                                        <span>View Detail</span>
-                                                    </a>
+                                                        <a class="dropdown-item "
+                                                            href="{{ route('customers.measurements', ['id' => $customer->id]) }}">
+                                                            <span>View Detail</span>
+                                                        </a>
 
-                                                    <a class="dropdown-item "
-                                                        href="{{ route('measurements.create.withCustomer', ['customer' => $customer->id]) }}">Create
-                                                        Measurements</a>
+                                                        <a class="dropdown-item "
+                                                            href="{{ route('measurements.create.withCustomer', ['customer' => $customer->id]) }}">Create
+                                                            Measurements</a>
 
-                                                    <a class="dropdown-item "
-                                                        href="{{ route('orders.create.withCustomer', ['customer' => $customer->id]) }}">Create
-                                                        Order</a>
+                                                        <a class="dropdown-item "
+                                                            href="{{ route('orders.create.withCustomer', ['customer' => $customer->id]) }}">Create
+                                                            Order</a>
 
-                                                    <a class="dropdown-item" href="{{ route('reports.customer-transactions', ['customer_id' => $customer->id]) }}">
-                                                        <span>Customer Ledger</span>
-                                                    </a>
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('reports.customer-transactions', ['customer_id' => $customer->id]) }}">
+                                                            <span>Customer Ledger</span>
+                                                        </a>
 
+                                                    </div>
                                                 </div>
+                                                <div class="">
+
+
+                                                    <button onclick="handleEdit({{ $customer }})"
+                                                        class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
+                                                        data-bs-original-title="Edit">
+                                                        <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                                    </button>
+                                                    <button onclick="handleDelete({{ $customer->id }})"
+                                                        class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                        data-bs-original-title="Delete">
+                                                        <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                                    </button>
+                                                </div>
+
+
+
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4">
+                                            <div class="text-muted">
+                                                No customers found.
                                             </div>
-                                            <div class="">
-
-
-                                                <button onclick="handleEdit({{ $customer }})"
-                                                    class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
-                                                    data-bs-original-title="Edit">
-                                                    <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
-                                                </button>
-                                                <button onclick="handleDelete({{ $customer->id }})"
-                                                    class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
-                                                    data-bs-original-title="Delete">
-                                                    <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                                </button>
-                                            </div>
-
-
-
                                         </td>
                                     </tr>
-                                @endforeach
-                                @else
-                                <tr>
-                                    <td colspan="7" class="text-center py-4">
-                                        <div class="text-muted">
-                                            No customers found.
-                                        </div>
-                                    </td>
-                                </tr>
                                 @endif
                             </tbody>
                         </table>
@@ -168,7 +178,7 @@
                                     <div>
                                         <label for="customer_id" class="form-label">Customer Old ID</label>
                                         <input type="number" name="customer_id" class="form-control" id="customer_id"
-                                            placeholder="Customer Old ID" >
+                                            placeholder="Customer Old ID">
                                     </div>
                                 </div><!--end col-->
                                 <div class="col-xxl-6">

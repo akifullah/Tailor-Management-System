@@ -29,8 +29,8 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <form id="orderSearchForm" method="GET" action="">
-                                <div class="row g-2 justify-content-end align-items-end">
-                                    <div class="col-md-2">
+                                <div class="row g-2  align-items-end">
+                                    <div class="col-sm-3 col-lg-2">
                                         <label for="search_type" class="form-label">Search By</label>
                                         <select name="type" id="search_type" class="form-select" required>
                                             <option value="">-- Select Type --</option>
@@ -44,7 +44,7 @@
                                                 Number</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-sm-3 col-lg-2">
                                         <label for="search_value" class="form-label">Input Value</label>
                                         <input type="text" required name="value" id="search_value" class="form-control"
                                             value="{{ request('value') }}" placeholder="Enter value">

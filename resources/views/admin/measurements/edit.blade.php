@@ -27,7 +27,7 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <label>Customer</label>
-                                    <select name="customer_id" class="form-select" required>
+                                    <select name="customer_id" class="form-select" disabled required>
                                         <option value="">Select Customer</option>
                                         @foreach ($customers as $customer)
                                             <option value="{{ $customer->id }}"
@@ -35,6 +35,13 @@
                                                 {{ $customer->name }}
                                             </option>
                                         @endforeach
+                                        <input type="hidden" name="customer_id" value="{{ $measurement->customer_id }}">
+
+
+                                        <input type="hidden" name="sewing_order_id"
+                                            value="{{ request('sewing_order_id') }}">
+                                        <input type="hidden" name="item_id" value="{{ request('item_id') }}">
+
                                     </select>
                                 </div>
 

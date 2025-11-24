@@ -70,12 +70,18 @@ class ReportController extends Controller
         // Recent Transactions
         $recentPayments = Payment::with(['payable'])->latest()->take(10)->get();
 
+        // Sewing Order Statistics
+        $totalSewingOrders = SewingOrder::count();
+        $todaySewingOrders = SewingOrder::whereDate('order_date', today())->count();
+
         $stats = [
             'total_products' => Product::count(),
             'total_customers' => Customer::count(),
             'total_orders' => $totalOrders,
+            'total_sewing_orders' => $totalSewingOrders,
             'total_revenue' => $totalOrderAmount,
             'today_orders' => $todayOrders,
+            'today_sewing_orders' => $todaySewingOrders,
             'today_revenue' => $todayOrderRevenue,
             'total_paid' => $totalPaid,
             'total_pending' => $totalPending,
@@ -94,8 +100,9 @@ class ReportController extends Controller
 
         $lowStockProducts = Product::where('available_meters', '<', 10)->with(['brand', 'category'])->get();
         $recentOrders = Order::with(['customer', 'items'])->latest()->take(10)->get();
+        $nearestSewingOrders = SewingOrder::with(['customer'])->whereDate('delivery_date', '>=', today())->orderBy('delivery_date', 'asc')->take(10)->get();
 
-        return view('admin.reports.dashboard', compact('stats', 'lowStockProducts', 'recentOrders', 'paymentMethods', 'recentPayments', 'recentExpenses'));
+        return view('admin.reports.dashboard', compact('stats', 'lowStockProducts', 'recentOrders', 'paymentMethods', 'recentPayments', 'recentExpenses', 'nearestSewingOrders'));
     }
 
     public function salesReport(Request $request)

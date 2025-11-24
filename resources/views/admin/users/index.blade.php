@@ -32,12 +32,13 @@
 
                         <div class="mb-3">
                             <form id="searchForm" method="GET" action="">
-                                <div class="row g-2 justify-content-end align-items-end">
-                                    <div class="col-md-2">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-sm-3 col-lg-2 ">
                                         <label for="search_type" class="form-label">Search By</label>
                                         <select name="type" id="search_type" class="form-select" required>
                                             <option value="">-- Select Type --</option>
-                                            <option value="name" {{ request('type') == 'name' ? 'selected' : '' }}> Name</option>
+                                            <option value="name" {{ request('type') == 'name' ? 'selected' : '' }}> Name
+                                            </option>
                                             {{-- <option value="id"
                                                 {{ request('type') == 'id' ? 'selected' : '' }}>User Old ID
                                             </option> --}}
@@ -49,7 +50,7 @@
                                                 Email</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-sm-3 col-lg-2">
                                         <label for="search_value" class="form-label">Input Value</label>
                                         <input type="text" required name="value" id="search_value" class="form-control"
                                             value="{{ request('value') }}" placeholder="Enter value">
@@ -66,7 +67,8 @@
                             </form>
                         </div>
 
-                        <table id="datatable-buttons" class="table data-table table-striped table-bordered dt-responsive nowrap">
+                        <table id="datatable-buttons"
+                            class="table data-table table-striped table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
                                     <th>#ID</th>
@@ -79,68 +81,73 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if($users->isNotEmpty())
-                                @foreach ($users as $user)
-                                <tr>
-                                        <td>{{ $user->id }}</td>
-                                        <td>
-                                            <p class="d-inline-block align-middle mb-0 text-capitalize">
-                                                <span>{{ $user->name }}</span>
-                                            </p>
-                                        </td>
-                                        <td >{{ $user->email }}</td>
-                                        <td class="text-capitalize">{{ $user->phone }}</td>
-                                        <td class="text-capitalize">{{ $user->worker_type }}</td>
-                                        <td>
-                                            <div class="mb-2">
-                                                <strong>Roles:</strong>
-                                                @if($user->roles->count() > 0)
-                                                    <div class="d-flex flex-wrap gap-1 mt-1">
-                                                        @foreach($user->roles as $role)
-                                                            <span class="badge bg-info-subtle text-info">{{ $role->name }}</span>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted">No roles</span>
-                                                @endif
-                                            </div>
-                                            <div>
-                                                <strong>Permissions:</strong>
-                                                @if($user->permissions->count() > 0)
-                                                    <div class="d-flex flex-wrap gap-1 mt-1">
-                                                        @foreach($user->permissions as $permission)
-                                                            <span class="badge bg-success-subtle text-success">{{ $permission->name }}</span>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted">No permissions</span>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <button onclick="handleEdit({{ $user }})"
-                                                class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Edit">
-                                                <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
-                                            </button>
-                                            <button onclick="handleAssignRolesPermissions({{ $user->id }}, {{ json_encode(['roles' => $user->roles->pluck('id')->toArray(), 'permissions' => $user->permissions->pluck('id')->toArray()]) }})"
-                                                class="btn btn-sm bg-warning-subtle me-1" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Assign Roles & Permissions">
-                                                <i class="mdi mdi-shield-account fs-14 text-warning"></i>
-                                            </button>
-                                            <button onclick="handleDelete({{ $user->id }})"
-                                                class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
-                                                data-bs-original-title="Delete">
-                                                <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                @if ($users->isNotEmpty())
+                                    @foreach ($users as $user)
+                                        <tr>
+                                            <td>{{ $user->id }}</td>
+                                            <td>
+                                                <p class="d-inline-block align-middle mb-0 text-capitalize">
+                                                    <span>{{ $user->name }}</span>
+                                                </p>
+                                            </td>
+                                            <td>{{ $user->email }}</td>
+                                            <td class="text-capitalize">{{ $user->phone }}</td>
+                                            <td class="text-capitalize">{{ $user->worker_type }}</td>
+                                            <td>
+                                                <div class="mb-2">
+                                                    <strong>Roles:</strong>
+                                                    @if ($user->roles->count() > 0)
+                                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                                            @foreach ($user->roles as $role)
+                                                                <span
+                                                                    class="badge bg-info-subtle text-info">{{ $role->name }}</span>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <span class="text-muted">No roles</span>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <strong>Permissions:</strong>
+                                                    @if ($user->permissions->count() > 0)
+                                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                                            @foreach ($user->permissions as $permission)
+                                                                <span
+                                                                    class="badge bg-success-subtle text-success">{{ $permission->name }}</span>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <span class="text-muted">No permissions</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button onclick="handleEdit({{ $user }})"
+                                                    class="btn btn-sm bg-primary-subtle me-1" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Edit">
+                                                    <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                                </button>
+                                                @can('manage-roles-permissions')
+                                                    <button
+                                                        onclick="handleAssignRolesPermissions({{ $user->id }}, {{ json_encode(['roles' => $user->roles->pluck('id')->toArray(), 'permissions' => $user->permissions->pluck('id')->toArray()]) }})"
+                                                        class="btn btn-sm bg-warning-subtle me-1" data-bs-toggle="tooltip"
+                                                        data-bs-original-title="Assign Roles & Permissions">
+                                                        <i class="mdi mdi-shield-account fs-14 text-warning"></i>
+                                                    </button>
+                                                @endcan
 
+                                                <button onclick="handleDelete({{ $user->id }})"
+                                                    class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Delete">
+                                                    <i class="mdi mdi-delete fs-14 text-danger"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 @else
-                                <tr>
-                                    <td colspan="7" class="text-center text-muted">No user found.</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">No user found.</td>
+                                    </tr>
                                 @endif
                             </tbody>
                         </table>
@@ -165,10 +172,10 @@
                                 <div class="col-12">
                                     <label class="form-label">Roles</label>
                                     <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                                        @if($roles->count() > 0)
-                                            @foreach($roles as $role)
+                                        @if ($roles->count() > 0)
+                                            @foreach ($roles as $role)
                                                 <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" name="roles[]" 
+                                                    <input class="form-check-input" type="checkbox" name="roles[]"
                                                         value="{{ $role->id }}" id="role_{{ $role->id }}">
                                                     <label class="form-check-label" for="role_{{ $role->id }}">
                                                         {{ $role->name }}
@@ -176,25 +183,30 @@
                                                 </div>
                                             @endforeach
                                         @else
-                                            <p class="text-muted mb-0">No roles available. <a href="{{ route('roles.index') }}">Create roles first</a></p>
+                                            <p class="text-muted mb-0">No roles available. <a
+                                                    href="{{ route('roles.index') }}">Create roles first</a></p>
                                         @endif
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">Permissions</label>
                                     <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                                        @if($permissions->count() > 0)
-                                            @foreach($permissions as $permission)
+                                        @if ($permissions->count() > 0)
+                                            @foreach ($permissions as $permission)
                                                 <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" name="permissions[]" 
-                                                        value="{{ $permission->id }}" id="user_permission_{{ $permission->id }}">
-                                                    <label class="form-check-label" for="user_permission_{{ $permission->id }}">
+                                                    <input class="form-check-input" type="checkbox" name="permissions[]"
+                                                        value="{{ $permission->id }}"
+                                                        id="user_permission_{{ $permission->id }}">
+                                                    <label class="form-check-label"
+                                                        for="user_permission_{{ $permission->id }}">
                                                         {{ $permission->name }}
                                                     </label>
                                                 </div>
                                             @endforeach
                                         @else
-                                            <p class="text-muted mb-0">No permissions available. <a href="{{ route('permissions.index') }}">Create permissions first</a></p>
+                                            <p class="text-muted mb-0">No permissions available. <a
+                                                    href="{{ route('permissions.index') }}">Create permissions first</a>
+                                            </p>
                                         @endif
                                     </div>
                                 </div>
@@ -252,8 +264,8 @@
                                         <option value="coat maker">Coat Maker</option>
                                     </select>
                                 </div>
-                                
-                                
+
+
                                 <div class="col-xxl-6">
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" class="form-control" id="password" name="password"
@@ -330,18 +342,18 @@
         function handleAssignRolesPermissions(userId, userData) {
             $('#assignRolesPermissionsModal').modal('show');
             setValById("user_id", userId);
-            
+
             // Uncheck all roles and permissions first
             $('input[name="roles[]"]').prop('checked', false);
             $('input[name="permissions[]"]').prop('checked', false);
-            
+
             // Check the user's current roles
             if (userData && userData.roles) {
                 userData.roles.forEach(function(roleId) {
                     $(`input[name="roles[]"][value="${roleId}"]`).prop('checked', true);
                 });
             }
-            
+
             // Check the user's current permissions
             if (userData && userData.permissions) {
                 userData.permissions.forEach(function(permissionId) {
@@ -422,11 +434,12 @@
                 let $form = $("#assignRolesPermissionsForm");
                 var $btn = $form.find("button[type=submit]");
                 $btn.prop("disabled", true);
-                
+
                 const userId = $("#user_id").val();
-                
+
                 $.ajax({
-                    url: "{{ route('users.assign-roles-permissions', ':id') }}".replace(':id', userId),
+                    url: "{{ route('users.assign-roles-permissions', ':id') }}".replace(':id',
+                        userId),
                     type: "POST",
                     data: $form.serialize(),
                     headers: {

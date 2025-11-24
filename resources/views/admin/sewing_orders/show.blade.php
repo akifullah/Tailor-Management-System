@@ -63,6 +63,13 @@
     <!-- Alert Container -->
     <div id="alertContainer" style="position: fixed; top: 80px; right: 20px; z-index: 9999; min-width: 300px;"></div>
 
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-check-all me-2"></i>
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -170,6 +177,10 @@
                                                     data-bs-target="#measurementModal{{ $item->id }}">
                                                     View Measurement
                                                 </button>
+                                                {{-- <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                                    data-bs-target="#changeMeasurementModal{{ $item->id }}">
+                                                    Change Measurement
+                                                </button> --}}
                                                 <a href="{{ route('sewing-order-items.print-measurement', $item->id) }}"
                                                     target="_blank" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
                                                     title="Print Measurement">
@@ -634,6 +645,22 @@ if (isset($measurement['data'])) {
                         <div class="modal-header">
                             <h5 class="modal-title" id="measurementModalLabel{{ $item->id }}">
                                 Measurement Details: {{ ucfirst(str_replace('_', ' ', $measurement['type'] ?? 'N/A')) }}
+                                @can('can_edit_order_measurements')
+                                    @if (isset($measurement['id']))
+                                        <a href="{{ route('measurements.edit', $measurement['id']) }}?sewing_order_id={{ $item->sewing_order_id }}&item_id={{ $item->id }}"
+                                            target="_blank" class="btn btn-sm bg-primary-subtle ms-2"
+                                            data-bs-toggle="tooltip" data-bs-original-title="Edit">
+                                            <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
+                                        </a>
+                                    @endif
+                                    <span data-bs-toggle="tooltip" data-bs-original-title="Select / Change Measurement">
+                                        <button type="button" class="btn btn-sm bg-warning-subtle ms-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#changeMeasurementModal{{ $item->id }}">
+                                            <i class="mdi mdi-swap-horizontal fs-14 text-warning"></i>
+                                        </button>
+                                    </span>
+                                @endcan
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
@@ -750,6 +777,50 @@ if (isset($measurement['data'])) {
                 </div>
             </div>
         @endif
+
+        <div class="modal fade" id="changeMeasurementModal{{ $item->id }}" tabindex="-1"
+            aria-labelledby="changeMeasurementModalLabel{{ $item->id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changeMeasurementModalLabel{{ $item->id }}">
+                            Change Measurement
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('sewing-order-items.assign-measurement', $item->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Select Measurement</label>
+                                <select class="form-select" name="measurement_id" required>
+                                    <option value="">Select Measurement</option>
+                                    @foreach ($sewingOrder->customer->measurements as $measurement)
+                                        <option value="{{ $measurement->id }}">
+                                            {{ ucfirst(str_replace('_', ' ', $measurement->type)) }} -
+                                            {{ $measurement->name }}
+                                            ({{ $measurement->created_at->format('Y-m-d') }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="alert alert-info">
+                                Need to edit or add a new measurement?
+                                <a href="{{ route('customers.measurements', $sewingOrder->customer_id) }}"
+                                    target="_blank" class="alert-link">
+                                    Manage / Edit Measurements
+                                </a>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Update Measurement</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         @if ($item->assign_note)
             <div class="modal fade" id="noteModal{{ $item->id }}" tabindex="-1"
@@ -963,7 +1034,8 @@ if (isset($measurement['data'])) {
                     });
 
                     document.getElementById('refundAmount{{ $payment->id }}').addEventListener('input', function() {
-                        const refundable = parseFloat(document.getElementById('availableRefund{{ $payment->id }}')
+                        const refundable = parseFloat(document.getElementById(
+                                'availableRefund{{ $payment->id }}')
                             .value.replace(
                                 /[^0-9.-]+/g, ''));
                         const entered = parseFloat(this.value) || 0;

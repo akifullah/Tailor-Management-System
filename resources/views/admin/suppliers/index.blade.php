@@ -34,8 +34,8 @@
 
                         <div class="mb-3">
                             <form id="searchForm" method="GET" action="">
-                                <div class="row g-2 justify-content-end align-items-end">
-                                    <div class="col-md-2">
+                                <div class="row g-2  align-items-end">
+                                    <div class="col-sm-3 col-lg-2">
                                         <label for="search_type" class="form-label">Search By</label>
                                         <select name="type" id="search_type" class="form-select" required>
                                             <option value="">-- Select Type --</option>
@@ -52,7 +52,7 @@
                                                 Email</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-sm-3 col-lg-2">
                                         <label for="search_value" class="form-label">Input Value</label>
                                         <input type="text" required name="value" id="search_value" class="form-control"
                                             value="{{ request('value') }}" placeholder="Enter value">
@@ -68,7 +68,8 @@
                                 </div>
                             </form>
                         </div>
-                        <table id="datatable-buttons" class="table data-table table-striped table-bordered dt-responsive nowrap">
+                        <table id="datatable-buttons"
+                            class="table data-table table-striped table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
                                     <th>#ID</th>
@@ -107,9 +108,9 @@
                                         </tr>
                                     @endforeach
                                 @else
-                                <tr>
-                                    <td colspan="6" class="text-center">No suppliers found.</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="6" class="text-center">No suppliers found.</td>
+                                    </tr>
                                 @endif
                             </tbody>
                         </table>

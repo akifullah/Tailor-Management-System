@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Measurement;
+use App\Models\SewingOrderItem;
 use App\Models\Type;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -231,7 +232,9 @@ class MeasurementController extends Controller
             "style_pancha_design",
             "style_stitching_detail",
             "style_button_detail",
-            "style_cloth_type"
+            "style_cloth_type",
+            "sewing_order_id",
+            "item_id"
         ]))
             ->filter(fn($v) => $v !== null && $v !== '');
 
@@ -253,6 +256,16 @@ class MeasurementController extends Controller
             'style' => json_encode($style),
             'notes' => $request->notes,
         ]);
+
+        $sewingItem = null;
+        if ($request->filled('sewing_order_id') && $request->filled('item_id')) {
+            $sewingItem = SewingOrderItem::where('sewing_order_id', $request->sewing_order_id)
+                ->where('id', $request->item_id)
+                ->first();
+            $sewingItem->customer_measurement = json_encode($measurement);
+            $sewingItem->save();
+            return redirect()->route('sewing-orders.show', $request->sewing_order_id)->with('success', 'Measurement updated successfully!');
+        }
 
         return redirect()->route('measurements.create')->with('success', 'Measurement updated successfully!');
     }
