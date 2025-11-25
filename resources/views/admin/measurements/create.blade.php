@@ -111,6 +111,23 @@
 
                                     <div class="col-md-2 mb-3">
                                         <div class="form-group">
+                                            <label for="style_patty_width">: چھوڑائی پٹی </label>
+                                            <input type="text" class="form-control" name="style_patty_width"
+                                                id="style_patty_width" placeholder="Enter Patty Width">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="style_patty_length">: لمبائی پٹی</label>
+                                            <input type="text" class="form-control" name="style_patty_length"
+                                                id="style_patty_length" placeholder="Enter Patty Length">
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
                                             <label for="">: کالر/بین کی تفصیل</label>
                                             <select class="form-select" name="style_collar" id="">
                                                 <option value="">Select from list</option>
@@ -123,6 +140,14 @@
                                                 <option value="گلہ سادہ گول">گلہ سادہ گول</option>
                                                 <option value="مغزی والا گلہ">مغزی والا گلہ</option>
                                             </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="">: کالر/بین کی چھوڑائی</label>
+                                            <input type="text" class="form-control" name="style_collar_width"
+                                                id="style_collar_width" placeholder="Enter collar Width">
                                         </div>
                                     </div>
 
@@ -142,6 +167,21 @@
                                                 <option value="تاش والا سنگل جیب">تاش والا سنگل جیب</option>
                                                 <option value="تاش والا ڈبل جیب">تاش والا ڈبل جیب</option>
                                             </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="style_front_pocket_width">: سامنے جیب چھوڑائی </label>
+                                            <input type="text" class="form-control" name="style_front_pocket_width"
+                                                id="style_front_pocket_width" placeholder="Enter front pocket Width">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="style_front_pocket_length">: سامنے جیب لمبائی </label>
+                                            <input type="text" class="form-control" name="style_front_pocket_length"
+                                                id="style_front_pocket_length" placeholder="Enter front pocket Length">
                                         </div>
                                     </div>
 
@@ -453,7 +493,16 @@
                     fields: [{
                             label: "Length",
                             name: 'kameez_Length',
-                            input_type: 'input'
+                            input_type: 'input',
+                            extra_fields: [{
+                                    label: "Extra 1",
+                                    name: "kameez_Length_extra1"
+                                },
+                                {
+                                    label: "Extra 2",
+                                    name: "kameez_Length_extra2"
+                                }
+                            ]
                         },
                         {
                             label: "Shoulder",
@@ -490,61 +539,7 @@
                             name: 'kameez_width',
                             input_type: 'input',
                         },
-                        // {
-                        //     label: "Bann",
-                        //     name: 'kameez_Bann',
-                        //     input_type: 'select',
-                        //     options: ['Full Ban Cut', 'Full Ban Gool', 'Half Ban Cut', 'Half Ban Gool',
-                        //         'Kabali Ban', 'Design Ban'
-                        //     ]
-                        // },
-                        // {
-                        //     label: "Cuff",
-                        //     name: 'kameez_Cuff',
-                        //     input_type: 'select',
-                        //     options: ['Sada', 'Gool', 'Sada Cut', 'Studd Kaag Gool', 'Studd Kaag Sada',
-                        //         'Studd Double', 'Cuff 2 Kaag', 'Chk Patae Kaag', 'Bagair Chk Patae',
-                        //         'Chk Patae 2 Kaag'
-                        //     ]
-                        // },
-                        // {
-                        //     label: "Stitching",
-                        //     name: 'kameez_Stitching',
-                        //     input_type: 'select',
-                        //     options: ['Simple', 'Chamak', 'Double Chamak', 'Double Simple', 'Conquer Stitch']
-                        // },
-                        // {
-                        //     label: "Pocket",
-                        //     name: 'kameez_Pocket',
-                        //     input_type: 'select',
-                        //     options: ['Side 1 Pocket', 'Side 2 Pocket', 'Front 1 Pocket', 'Front 2 Pocket',
-                        //         'Front 2 Pocket Tash'
-                        //     ]
-                        // },
-                        // {
-                        //     label: "Daman",
-                        //     name: 'kameez_Daman',
-                        //     input_type: 'select',
-                        //     options: ['Sada', 'Gool']
-                        // },
-                        // {
-                        //     label: "Asteen",
-                        //     name: 'kameez_Asteen',
-                        //     input_type: 'select',
-                        //     options: ['No Palet', 'One Palet', 'Two Palet']
-                        // },
-                        // {
-                        //     label: "Buttons",
-                        //     name: 'kameez_Buttons',
-                        //     input_type: 'select',
-                        //     options: ['1', '2', '3', '4', '5']
-                        // },
-                        // {
-                        //     label: "Button Style",
-                        //     name: 'kameez_Button_Style',
-                        //     input_type: 'select',
-                        //     options: ['Simple', 'Design']
-                        // }
+
                     ]
                 }
             },
@@ -736,13 +731,25 @@
                             `<input type="text" name="${safeName(field.name)}" class="form-control text-capitalize" placeholder="${field.label}" />`;
                     }
 
-                    const fieldHTML = `
-                <div class="col-md-3 col-xl-2 mb-2">
-                    <label class="form-label text-capitalize">${field.label}</label>
-                    ${inputHTML}
-                </div>
-            `;
+                    const fieldHTML = `<div class="col-md-3 col-xl-2 mb-2">
+                                            <label class="form-label text-capitalize">${field.label}</label>
+                                            ${inputHTML}
+                                        </div>`;
                     formContainer.insertAdjacentHTML('beforeend', fieldHTML);
+
+                    // extra fields
+                    if (field.extra_fields && Array.isArray(field.extra_fields)) {
+                        field.extra_fields.forEach(extra => {
+                            const extraHTML = `<div class="col-md-3 col-xl-2 mb-2">
+                                                    <label class="form-label text-capitalize">${extra.label}</label>
+                                                    <input type="text"
+                                                        name="${safeName(extra.name)}"
+                                                        class="form-control text-capitalize"
+                                                        placeholder="${extra.label}" />
+                                                </div>`;
+                            formContainer.insertAdjacentHTML("beforeend", extraHTML);
+                        });
+                    }
                 });
             });
         }

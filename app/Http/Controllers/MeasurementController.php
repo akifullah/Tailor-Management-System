@@ -104,7 +104,12 @@ class MeasurementController extends Controller
             "style_pancha_design",
             "style_stitching_detail",
             "style_button_detail",
-            "style_cloth_type"
+            "style_cloth_type",
+            "style_patty_width",
+            "style_patty_length",
+            "style_collar_width",
+            "style_front_pocket_width",
+            "style_front_pocket_length"
         ];
         $style = array_filter($request->only($styleKeys), fn($value) => $value !== null);
         if (empty($style)) {
@@ -129,22 +134,75 @@ class MeasurementController extends Controller
             "style_pancha_design",
             "style_stitching_detail",
             "style_button_detail",
-            "style_cloth_type"
+            "style_cloth_type",
+            "style_patty_width",
+            "style_patty_length",
+            "style_collar_width",
+            "style_front_pocket_width",
+            "style_front_pocket_length"
         ]))
             ->filter(fn($v) => $v !== null && $v !== '');
 
         // Group by prefix before underscore (e.g. "kameez_length" → "kameez" → ["length" => "1200"])
         $grouped = [];
 
+        // foreach ($data as $key => $value) {
+        //     if (strpos($key, '_') !== false) {
+        //         [$prefix, $field] = explode('_', $key, 2);
+        //         $grouped[$prefix][$field] = $value;
+        //     } else {
+        //         // fallback for keys without underscore
+        //         $grouped[$key] = $value;
+        //     }
+        // }
+
+
+        // Step 1: Group by prefix
         foreach ($data as $key => $value) {
             if (strpos($key, '_') !== false) {
                 [$prefix, $field] = explode('_', $key, 2);
                 $grouped[$prefix][$field] = $value;
             } else {
-                // fallback for keys without underscore
                 $grouped[$key] = $value;
             }
         }
+
+        // Step 2: Merge main + extra fields with keys
+        // $final = [];
+
+        // foreach ($grouped as $prefix => $fields) {
+
+        //     $final[$prefix] = [];
+
+        //     foreach ($fields as $field => $value) {
+
+        //         if (str_contains($field, '_extra')) {
+
+        //             // extract main field (before _extra)
+        //             [$main] = explode('_extra', $field);
+
+        //             // ensure main exists
+        //             if (!isset($final[$prefix][$main])) {
+        //                 $final[$prefix][$main] = [
+        //                     'value' => $fields[$main] ?? null,
+        //                     'extra' => []
+        //                 ];
+        //             }
+
+        //             // store extra as key-value pair
+        //             $final[$prefix][$main]['extra'][$field] = $value;
+        //         } else {
+
+        //             // normal field, only add if not already handled
+        //             if (!isset($final[$prefix][$field])) {
+        //                 $final[$prefix][$field] = [
+        //                     'value' => $value
+        //                 ];
+        //             }
+        //         }
+        //     }
+        // }
+
 
         Measurement::create([
             'customer_id' => $request->customer_id,
@@ -174,7 +232,7 @@ class MeasurementController extends Controller
         if (is_string($measurement->data)) {
             $measurement->data = json_decode($measurement->data, true);
         }
-
+        // return $measurement;
         return view('admin.measurements.edit', compact('measurement', 'customers'));
     }
 
@@ -204,7 +262,12 @@ class MeasurementController extends Controller
             "style_pancha_design",
             "style_stitching_detail",
             "style_button_detail",
-            "style_cloth_type"
+            "style_cloth_type",
+            "style_patty_width",
+            "style_patty_length",
+            "style_collar_width",
+            "style_front_pocket_width",
+            "style_front_pocket_length"
         ];
         $style = array_filter($request->only($styleKeys), fn($value) => $value !== null);
         if (empty($style)) {
@@ -234,6 +297,11 @@ class MeasurementController extends Controller
             "style_button_detail",
             "style_cloth_type",
             "sewing_order_id",
+            "style_patty_width",
+            "style_patty_length",
+            "style_collar_width",
+            "style_front_pocket_width",
+            "style_front_pocket_length",
             "item_id"
         ]))
             ->filter(fn($v) => $v !== null && $v !== '');

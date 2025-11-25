@@ -68,7 +68,7 @@
                                 }
 
                             @endphp
-
+                            {{-- {{ dd($style['style_patty_width']) }} --}}
 
                             <div class="my-3">
                                 <h5>Style</h5>
@@ -91,6 +91,23 @@
 
                                     <div class="col-md-2 mb-3">
                                         <div class="form-group">
+                                            <label for="style_patty_width">: چھوڑائی پٹی </label>
+                                            <input type="text" class="form-control" name="style_patty_width"
+                                                id="style_patty_width" placeholder="Enter Patty Width"
+                                                value="{{ isset($style['style_patty_width']) ? $style['style_patty_width'] : '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="style_patty_length">: لمبائی پٹی</label>
+                                            <input type="text" class="form-control" name="style_patty_length"
+                                                id="style_patty_length" placeholder="Enter Patty Length"
+                                                value="{{ isset($style['style_patty_length']) ? $style['style_patty_length'] : '' }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
                                             <label for="">: کالر/بین کی تفصیل</label>
                                             <select class="form-select" name="style_collar" id="">
                                                 <option value="">Select from list</option>
@@ -106,6 +123,15 @@
 
                                     <div class="col-md-2 mb-3">
                                         <div class="form-group">
+                                            <label for="">: کالر/بین کی چھوڑائی</label>
+                                            <input type="text" class="form-control" name="style_collar_width"
+                                                id="style_collar_width" placeholder="Enter collar Width"
+                                                value="{{ isset($style['style_collar_width']) ? $style['style_collar_width'] : '' }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
                                             <label for="">: سامنے جیب تفصیل</label>
                                             <select class="form-select" name="style_front_pocket" id="">
                                                 <option value="">Select from list</option>
@@ -116,6 +142,23 @@
                                                     </option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="style_front_pocket_width">: سامنے جیب چھوڑائی </label>
+                                            <input type="text" class="form-control" name="style_front_pocket_width"
+                                                id="style_front_pocket_width" placeholder="Enter front pocket Width"
+                                                value="{{ isset($style['style_front_pocket_width']) ? $style['style_front_pocket_width'] : '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="style_front_pocket_length">: سامنے جیب لمبائی </label>
+                                            <input type="text" class="form-control" name="style_front_pocket_length"
+                                                id="style_front_pocket_length" placeholder="Enter front pocket Length"
+                                                value="{{ isset($style['style_front_pocket_length']) ? $style['style_front_pocket_length'] : '' }}">
                                         </div>
                                     </div>
 
@@ -432,7 +475,16 @@
                     fields: [{
                             label: "Length",
                             name: 'kameez_Length',
-                            input_type: 'input'
+                            input_type: 'input',
+                            extra_fields: [{
+                                    label: "Extra 1",
+                                    name: "kameez_Length_extra1"
+                                },
+                                {
+                                    label: "Extra 2",
+                                    name: "kameez_Length_extra2"
+                                }
+                            ]
                         },
                         {
                             label: "Shoulder",
@@ -469,61 +521,7 @@
                             name: 'kameez_width',
                             input_type: 'input',
                         },
-                        // {
-                        //     label: "Bann",
-                        //     name: 'kameez_Bann',
-                        //     input_type: 'select',
-                        //     options: ['Full Ban Cut', 'Full Ban Gool', 'Half Ban Cut', 'Half Ban Gool',
-                        //         'Kabali Ban', 'Design Ban'
-                        //     ]
-                        // },
-                        // {
-                        //     label: "Cuff",
-                        //     name: 'kameez_Cuff',
-                        //     input_type: 'select',
-                        //     options: ['Sada', 'Gool', 'Sada Cut', 'Studd Kaag Gool', 'Studd Kaag Sada',
-                        //         'Studd Double', 'Cuff 2 Kaag', 'Chk Patae Kaag', 'Bagair Chk Patae',
-                        //         'Chk Patae 2 Kaag'
-                        //     ]
-                        // },
-                        // {
-                        //     label: "Stitching",
-                        //     name: 'kameez_Stitching',
-                        //     input_type: 'select',
-                        //     options: ['Simple', 'Chamak', 'Double Chamak', 'Double Simple', 'Conquer Stitch']
-                        // },
-                        // {
-                        //     label: "Pocket",
-                        //     name: 'kameez_Pocket',
-                        //     input_type: 'select',
-                        //     options: ['Side 1 Pocket', 'Side 2 Pocket', 'Front 1 Pocket', 'Front 2 Pocket',
-                        //         'Front 2 Pocket Tash'
-                        //     ]
-                        // },
-                        // {
-                        //     label: "Daman",
-                        //     name: 'kameez_Daman',
-                        //     input_type: 'select',
-                        //     options: ['Sada', 'Gool']
-                        // },
-                        // {
-                        //     label: "Asteen",
-                        //     name: 'kameez_Asteen',
-                        //     input_type: 'select',
-                        //     options: ['No Palet', 'One Palet', 'Two Palet']
-                        // },
-                        // {
-                        //     label: "Buttons",
-                        //     name: 'kameez_Buttons',
-                        //     input_type: 'select',
-                        //     options: ['1', '2', '3', '4', '5']
-                        // },
-                        // {
-                        //     label: "Button Style",
-                        //     name: 'kameez_Button_Style',
-                        //     input_type: 'select',
-                        //     options: ['Simple', 'Design']
-                        // }
+
                     ]
                 }
             },
@@ -540,11 +538,11 @@
                             name: 'shalwar_pancha',
                             input_type: 'input'
                         },
-                        {
-                            label: "Asin Width",
-                            name: 'shalwar_asin_width',
-                            input_type: 'input'
-                        },
+                        // {
+                        //     label: "Asin Width",
+                        //     name: 'shalwar_asin_width',
+                        //     input_type: 'input'
+                        // },
                     ]
                 }
             },
@@ -665,6 +663,7 @@
                 ...options?.shalwar?.shalwar
             },
         }
+
         const typeSelect = document.getElementById('type');
         const formContainer = document.getElementById('form-fields');
         const oldValues =
@@ -717,6 +716,35 @@
                     ${inputHTML}
                 </div>`;
                     formContainer.insertAdjacentHTML('beforeend', fieldHTML);
+
+
+                    // extra fields
+                    if (field.extra_fields && Array.isArray(field.extra_fields)) {
+                        field.extra_fields.forEach(extra => {
+
+                            const prefix = field.name.split('_')[
+                                0]; // Get the prefix from the main field's name
+                            const nestedValue = oldValues[prefix] || {};
+                            console.log(prefix)
+                            console.log(nestedValue) // Access the nested object for the prefix
+                            let adjustedKey = (extra.name.includes('_') ? extra.name.substring(extra
+                                .name.indexOf('_') + 1) : extra.name)?.toLowerCase();
+
+                            const value = nestedValue[adjustedKey] || '';
+                            console.log(adjustedKey)
+                            const extraHTML = `<div class="col-md-3 col-xl-2 mb-2">
+                                                    <label class="form-label text-capitalize">${extra.label}</label>
+                                                    <input type="text"
+                                                     value="${value}"
+                                                        name="${safeName(extra.name)}"
+                                                        class="form-control text-capitalize"
+                                                        placeholder="${extra.label}" />
+                                                </div>`;
+                            formContainer.insertAdjacentHTML("beforeend", extraHTML);
+                        });
+                    }
+
+
                 });
             });
         }

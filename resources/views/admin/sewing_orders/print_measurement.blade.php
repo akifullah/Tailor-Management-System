@@ -283,7 +283,7 @@
 
         <div class="row">
             <div
-                class="col-{{ isset($measurement['style']) && (is_array($measurement['style']) || is_object($measurement['style'])) ? '6' : '12' }}">
+                class="col-{{ isset($measurement['style']) && (is_array($measurement['style']) || is_object($measurement['style'])) ? '5' : '12' }}">
                 <div class="section-title">
                     {{ ucfirst(str_replace('_', ' ', $measurement['type'] ?? 'Standard')) }} Measurements
                 </div>
@@ -322,19 +322,87 @@
                     <div class="alert alert-info">No structured measurement data available.</div>
                 @endif
             </div>
-            <div class="col-6">
-                @if (isset($measurement['style']) && (is_array($measurement['style']) || is_object($measurement['style'])))
+            <div class="col-7">
+                @if (isset($measurement['style']))
+                    @php
+                        // Handle both JSON string and array formats
+                        if (is_string($measurement['style'])) {
+                            $styleData = json_decode($measurement['style'], true);
+                        } else {
+                            $styleData = (array) $measurement['style'];
+                        }
+                        $rows = [];
+                        $grouped = [];
+
+                        // Allowed keys for extra values
+                        $allowedExtraKeys = [
+                            'style_patty_width',
+                            'style_patty_length',
+                            'style_collar_width',
+                            'style_front_pocket_width',
+                            'style_front_pocket_length',
+                            'style_shalwar_jeeb',
+                        ];
+
+                        // Group keys by prefix
+                        foreach ($styleData as $key => $value) {
+                            $parts = explode('_', $key);
+                            $prefix = $parts[0] . '_' . $parts[1];
+
+                            // special case: style_front_pocket
+                            if ($parts[1] === 'front') {
+                                $prefix = $parts[0] . '_' . $parts[1] . '_' . $parts[2];
+                            }
+
+                            $grouped[$prefix][$key] = $value;
+                        }
+
+                        // Build rows
+                        foreach ($grouped as $prefix => $items) {
+                            // If prefix main key does NOT exist, show items as normal rows
+                            if (!isset($items[$prefix])) {
+                                foreach ($items as $key => $value) {
+                                    $rows[] = [
+                                        'attribute' => str_replace('style_', '', $key),
+                                        'value' => $value,
+                                    ];
+                                }
+                                continue;
+                            }
+
+                            // Otherwise: normal processing
+                            $mainKey = $prefix;
+                            $mainValue = $items[$mainKey] ?? '';
+
+                            $extraValues = [];
+
+                            foreach ($items as $k => $v) {
+                                if ($k !== $mainKey && in_array($k, $allowedExtraKeys)) {
+                                    $label = str_replace($mainKey . '_', '', $k);
+                                    $extraValues[] = ucfirst($label) . ': ' . $v;
+                                }
+                            }
+
+                            $rows[] = [
+                                'attribute' => str_replace('style_', '', $mainKey),
+                                'value' =>
+                                    $mainValue .
+                                    (count($extraValues) ? '   | (' . implode(', ', $extraValues) . ')' : ''),
+                            ];
+                        }
+                    @endphp
+
                     <div class="section-title" style="margin-top: 30px;">
                         Style Details
                     </div>
                     <table class="measurement-table">
                         <tbody>
-                            @foreach ($measurement['style'] as $key => $value)
+                            @foreach ($rows as $row)
                                 <tr>
                                     <th class="text-capitalize">
-                                        {{ Str::title(str_replace(['style_', '_'], ['', ' '], $key)) }}
+                                        {{ Str::title(str_replace(['style_', '_'], ['', ' '], $row['attribute'])) }}
                                     </th>
-                                    <td>{{ $value }}</td>
+                                    <td>{{ $row['value'] }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

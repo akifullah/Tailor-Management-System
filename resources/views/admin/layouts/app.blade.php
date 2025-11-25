@@ -38,7 +38,9 @@
         rel="stylesheet" />
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet" />
-
+    {{-- <link href="
+https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
+" rel="stylesheet"> --}}
 </head>
 
 <!-- body start -->
