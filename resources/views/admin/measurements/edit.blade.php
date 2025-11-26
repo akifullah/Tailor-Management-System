@@ -91,7 +91,7 @@
 
                                     <div class="col-md-2 mb-3">
                                         <div class="form-group">
-                                            <label for="style_patty_width">: چھوڑائی پٹی </label>
+                                            <label for="style_patty_width">: پٹی چھوڑائی </label>
                                             <input type="text" class="form-control" name="style_patty_width"
                                                 id="style_patty_width" placeholder="Enter Patty Width"
                                                 value="{{ isset($style['style_patty_width']) ? $style['style_patty_width'] : '' }}">
@@ -99,7 +99,7 @@
                                     </div>
                                     <div class="col-md-2 mb-3">
                                         <div class="form-group">
-                                            <label for="style_patty_length">: لمبائی پٹی</label>
+                                            <label for="style_patty_length">: پٹی لمبائی</label>
                                             <input type="text" class="form-control" name="style_patty_length"
                                                 id="style_patty_length" placeholder="Enter Patty Length"
                                                 value="{{ isset($style['style_patty_length']) ? $style['style_patty_length'] : '' }}">
@@ -476,15 +476,15 @@
                             label: "Length",
                             name: 'kameez_Length',
                             input_type: 'input',
-                            extra_fields: [{
-                                    label: "Extra 1",
-                                    name: "kameez_Length_extra1"
-                                },
-                                {
-                                    label: "Extra 2",
-                                    name: "kameez_Length_extra2"
-                                }
-                            ]
+                            // extra_fields: [{
+                            //         label: "Extra 1",
+                            //         name: "kameez_Length_extra1"
+                            //     },
+                            //     {
+                            //         label: "Extra 2",
+                            //         name: "kameez_Length_extra2"
+                            //     }
+                            // ]
                         },
                         {
                             label: "Shoulder",
