@@ -30,7 +30,7 @@
 
         .header-section {
             border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 10px;
+            padding-bottom: 5px;
             margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
@@ -87,23 +87,23 @@
             font-size: 12px;
             font-weight: 700;
             color: #374151;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             padding-bottom: 4px;
             border-bottom: 1px solid #e5e7eb;
             display: flex;
             align-items: center;
         }
 
-        .section-title::before {
+        /* .section-title::before {
             content: '';
             display: inline-block;
             width: 3px;
             height: 14px;
-            /* background-color: #3b82f6; */
+            background-color: #3b82f6;
             background-color: transparent;
             margin-right: 6px;
             border-radius: 2px;
-        }
+        } */
 
         .measurement-table {
             width: 100%;
@@ -193,12 +193,23 @@
             background-color: #f3f4f6;
         }
 
+        .detail-list-item {
+            line-height: 2;
+        }
+
         @media print {
+            @page {
+                size: 4.5in 7in;
+                margin: 0 auto;
+            }
+
             body {
                 background-color: #fff;
-                font-size: 9pt;
-                padding: 15px
-                    /* Even smaller for print */
+                font-size: 7pt;
+                padding: 10px;
+                width: 4.5in;
+                margin: 0 auto;
+                /* height: 7in; */
             }
 
             .print-container {
@@ -221,12 +232,13 @@
 
             .measurement-table th,
             .measurement-table td {
-                padding: 4px 5px;
+                padding: 3px 4px;
+                font-size: 7pt;
             }
 
             .header-section {
                 margin-bottom: 5px;
-                padding-bottom: 5px;
+                padding-bottom: 0px;
             }
 
             .info-grid {
@@ -237,7 +249,32 @@
             h5 {
                 margin-top: 5px !important;
                 margin-bottom: 2px !important;
-                font-size: 0.85rem !important;
+                font-size: 8pt !important;
+            }
+
+            .brand-name {
+                font-size: 10pt !important;
+            }
+
+            .document-title {
+                font-size: 8pt !important;
+            }
+
+            .info-label {
+                font-size: 7pt !important;
+            }
+
+            .info-value {
+                font-size: 8pt !important;
+            }
+
+            .section-title {
+                font-size: 8pt !important;
+                margin-bottom: 5px !important;
+            }
+
+            .footer {
+                font-size: 6pt !important;
             }
         }
     </style>
@@ -264,42 +301,46 @@
             <div class="info-card">
                 <div class="info-label">Customer Details</div>
                 <div class="info-value">Name: {{ $item->sewingOrder->customer->name }}</div>
-                <div style="margin-top: 5px; color: #4b5563;">Phone: {{ $item->sewingOrder->customer->phone }}</div>
-                <div style="margin-top: 5px; color: #4b5563;">Address: {{ $item->sewingOrder->customer->address }}</div>
+                <div style="detail-list-item">Phone: {{ $item->sewingOrder->customer->phone }}</div>
+                <div style="detail-list-item">Address: {{ $item->sewingOrder->customer->address }}</div>
             </div>
             <div class="info-card">
                 <div class="info-label">Order Details</div>
                 <div class="info-value">Order #: {{ $item->sewingOrder->sewing_order_number }}</div>
-                <div style="margin-top: 5px; color: #4b5563; font-weight: 600;">Item:
+                <div style="detail-list-item font-weight: 600;">Item:
                     {{ ucfirst($item?->product_name) }} |
                     @if ($item?->color)
                         {{ ucfirst($item?->color) }} |
                     @endif
                     (Qty: {{ $item?->qty }})
                 </div>
-                <div style="margin-top: 5px; color: #4b5563;">Date: {{ $item->created_at->format('d M, Y') }}</div>
+                <div style="detail-list-item">Order Date:
+                    {{ $item->sewingOrder->order_date->format('d M, Y') }}</div>
+                <div style="detail-list-item">Delivery Date:
+                    {{ $item->sewingOrder->delivery_date->format('d M, Y') }}</div>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row g-0">
             <div
-                class="col-{{ isset($measurement['style']) && (is_array($measurement['style']) || is_object($measurement['style'])) ? '5' : '12' }}">
-                <div class="section-title">
+                class="col-{{ isset($measurement['style']) && (is_array($measurement['style']) || is_object($measurement['style'])) ? '4' : '12' }}">
+                {{-- <div class="section-title">
                     {{ ucfirst(str_replace('_', ' ', $measurement['type'] ?? 'Standard')) }} Measurements
-                </div>
+                </div> --}}
 
                 @if (isset($measurement['data']) && (is_array($measurement['data']) || is_object($measurement['data'])))
                     @foreach ($measurement['data'] as $groupKey => $fields)
                         @if (is_array($fields) || is_object($fields))
-                            <h5 class="text-capitalize fw-bold text-secondary ps-2"
+                            <h5 class="section-title text-capitalize fw-bold text-secondary ps-1"
                                 style="font-size: 0.95rem; color: #6b7280;">
-                                {{ str_replace('_', ' ', $groupKey) }}
+                                {{ str_replace('_', ' ', $groupKey) }} Measurement
                             </h5>
                             <table class="measurement-table">
                                 <tbody>
                                     @foreach ($fields as $key => $itemVal)
                                         <tr>
-                                            <th class="text-capitalize">{{ Str::title(str_replace('_', ' ', $key)) }}
+                                            <th class="text-capitalize" style="width: 80px">
+                                                {{ Str::title(str_replace('_', ' ', $key)) }}
                                             </th>
                                             <td>{{ $itemVal }}</td>
                                         </tr>
@@ -322,7 +363,7 @@
                     <div class="alert alert-info">No structured measurement data available.</div>
                 @endif
             </div>
-            <div class="col-7">
+            <div class="col-8 px-2">
                 @if (isset($measurement['style']))
                     @php
                         // Handle both JSON string and array formats
@@ -392,14 +433,14 @@
                         }
                     @endphp
 
-                    <div class="section-title" style="margin-top: 30px;">
+                    <h5 class="section-title fw-bold text-secondary" style="font-size: 0.95rem; color: #6b7280;">
                         Style Details
-                    </div>
+                    </h5>
                     <table class="measurement-table">
                         <tbody>
                             @foreach ($rows as $row)
                                 <tr>
-                                    <th class="text-capitalize">
+                                    <th class="text-capitalize" style="width: 80px">
                                         {{ Str::title(str_replace(['style_', '_'], ['', ' '], $row['attribute'])) }}
                                     </th>
                                     <td>{{ $row['value'] }}</td>

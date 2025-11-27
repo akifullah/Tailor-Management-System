@@ -8,7 +8,7 @@
                 <h4 class="fs-18 fw-semibold mb-0">Sewing Order Details</h4>
 
                 @if (!in_array($sewingOrder->order_status, ['cancelled', 'delivered']))
-                    <div class="my-3">
+                    <div class="my-0">
                         <label for="order_status" class="form-label mb-0 fw-semibold me-2">Update Status:</label>
                         <form id="orderStatusForm" action="{{ route('sewing-orders.update-status', $sewingOrder->id) }}"
                             method="POST" class="d-flex align-items-center gap-2">
@@ -134,7 +134,8 @@
                                         <td>
                                             @if ($item->workers->count() > 0)
                                                 @foreach ($item->workers as $worker)
-                                                    <span class="badge bg-info">{{ $worker->name }}</span>
+                                                    <span
+                                                        class="badge text-capitalize bg-primary">{{ $worker->name }}</span>
                                                 @endforeach
                                             @else
                                                 Not Assigned
