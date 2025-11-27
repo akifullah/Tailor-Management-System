@@ -18,6 +18,7 @@
                             autocomplete="off">
                             @csrf
 
+
                             <div class="row mb-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Customer *</label>
@@ -27,7 +28,7 @@
                                                 <option value="{{ $customer->id }}"
                                                     {{ $selectedCustomer->id == $customer->id ? 'selected' : '' }}
                                                     data-measurement='@json($customer->measurements)'>
-                                                    {{ $customer->name }}
+                                                    {{ $customer->name }} | {{ $customer->phone }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -38,7 +39,7 @@
                                             @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}"
                                                     data-measurement='@json($customer->measurements)'>
-                                                    {{ $customer->name }}
+                                                    {{ $customer->name }} | {{ $customer->phone }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -46,8 +47,8 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Order Date *</label>
-                                    <input type="date" name="order_date" class="form-control" value="{{ date('Y-m-d') }}"
-                                        required>
+                                    <input type="date" name="order_date" class="form-control"
+                                        value="{{ date('Y-m-d') }}" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Delivery Date</label>
