@@ -200,6 +200,13 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                 <span> Worker Dashboard </span>
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('worker.ledger') }}"
+                                class="{{ request()->routeIs('worker.ledger') ? 'tp-link active' : '' }}">
+                                <i data-feather="file-text"></i>
+                                <span> My Ledger </span>
+                            </a>
+                        </li>
                         @can('manage-users')
                             <li>
                                 <a href="{{ route('users.index') }}"
@@ -263,6 +270,13 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                     class="{{ request()->routeIs('sewing-orders.*') ? 'tp-link active' : '' }}">
                                     <i data-feather="scissors"></i>
                                     <span> Sewing Orders </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.workers.ledger.index') }}"
+                                    class="{{ request()->routeIs('admin.workers.ledger.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="users"></i>
+                                    <span> Workers Ledger </span>
                                 </a>
                             </li>
                         @endcan

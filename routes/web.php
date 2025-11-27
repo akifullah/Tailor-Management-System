@@ -19,6 +19,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SewingOrderController;
+use App\Http\Controllers\WorkerLedgerController;
 
 Route::get("/", function () {
     if (Auth::check()) {
@@ -118,10 +119,15 @@ Route::middleware(["auth"])->group(function () {
         Route::patch('sewing-orders/{sewing_order}/update-status', [SewingOrderController::class, 'updateStatus'])->name('sewing-orders.update-status');
         Route::get('sewing-order-items/{item}/print-measurement', [SewingOrderController::class, 'printMeasurement'])->name('sewing-order-items.print-measurement');
         Route::put('sewing-order-items/{item}/assign-measurement', [SewingOrderController::class, 'assignMeasurement'])->name('sewing-order-items.assign-measurement');
+
+        Route::get('workers/ledger', [WorkerLedgerController::class, 'indexForAdmin'])->name('admin.workers.ledger.index');
+        Route::get('workers/{worker}/ledger', [WorkerLedgerController::class, 'showForAdmin'])->name('admin.workers.ledger.show');
+        Route::post('workers/{worker}/ledger/payments', [WorkerLedgerController::class, 'addPaymentForAdmin'])->name('admin.workers.ledger.payments.store');
     });
 
     Route::middleware(['permission:worker-dashboard'])->group(function () {
         Route::get('worker/dashboard', [SewingOrderController::class, 'workerDashboard'])->name('worker.dashboard');
+        Route::get('worker/ledger', [WorkerLedgerController::class, 'myLedger'])->name('worker.ledger');
     });
 
     // Reports - Require view-reports permission

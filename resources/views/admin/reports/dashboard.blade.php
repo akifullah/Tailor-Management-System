@@ -278,6 +278,8 @@
                                                 <td>
                                                     @if ($payment->payable_type === 'App\Models\Order')
                                                         <span class="badge bg-success">Order</span>
+                                                    @elseif($payment->payable_type === 'App\Models\User')
+                                                        <span class="badge bg-warning">Worker Payment</span>
                                                     @else
                                                         <span class="badge bg-info">Purchase</span>
                                                     @endif
