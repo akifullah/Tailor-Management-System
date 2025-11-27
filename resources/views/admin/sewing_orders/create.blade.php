@@ -315,8 +315,7 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Assign To Worker</label>
-                    <select name="items[${itemCount}][assign_to]" class="form-select" required>
-                        <option value="">Select Worker</option>
+                    <select name="items[${itemCount}][assign_to][]" class="form-select select2" multiple required>
                         @foreach ($workers as $worker)
                         <option value="{{ $worker->id }}">{{ $worker->name }}</option>
                         @endforeach
@@ -331,6 +330,7 @@
             </div>
         `;
             $('#sewingOrderItems').append(html);
+            $('#sewingOrderItems .select2').last().select2();
             itemCount++;
         }
 

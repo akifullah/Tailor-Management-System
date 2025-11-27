@@ -71,7 +71,8 @@ class SewingOrderController extends Controller
             'items.*.sewing_price' => 'required|numeric|min:0',
             'items.*.qty' => 'required|integer|min:1',
             'items.*.customer_measurement' => 'nullable',
-            'items.*.assign_to' => 'nullable|exists:users,id',
+            'items.*.assign_to' => 'nullable|array',
+            'items.*.assign_to.*' => 'exists:users,id',
             'items.*.assign_note' => 'nullable|string',
         ]);
 
@@ -150,17 +151,20 @@ class SewingOrderController extends Controller
                     $measurement = json_decode($measurement, true);
                 }
 
-                SewingOrderItem::create([
+                $sewingOrderItem = SewingOrderItem::create([
                     'sewing_order_id' => $sewingOrder->id,
                     'product_name' => $itemData['product_name'],
                     'sewing_price' => $itemData['sewing_price'],
                     'qty' => $itemData['qty'],
                     'customer_measurement' => $measurement,
-                    'assign_to' => $itemData['assign_to'] ?? null,
                     'assign_note' => $itemData['assign_note'] ?? null,
                     'status' => 'pending',
                     'total_price' => $itemData['sewing_price'] * $itemData['qty'],
                 ]);
+
+                if (isset($itemData['assign_to']) && is_array($itemData['assign_to'])) {
+                    $sewingOrderItem->workers()->attach($itemData['assign_to']);
+                }
             }
 
             DB::commit();
@@ -178,7 +182,7 @@ class SewingOrderController extends Controller
      */
     public function show(SewingOrder $sewingOrder)
     {
-        $sewingOrder->load(['customer.measurements', 'items.worker', 'payments']);
+        $sewingOrder->load(['customer.measurements', 'items.workers', 'payments']);
 
 
         return view('admin.sewing_orders.show', compact('sewingOrder'));
@@ -186,7 +190,7 @@ class SewingOrderController extends Controller
 
     public function print(SewingOrder $sewingOrder)
     {
-        $sewingOrder->load(['customer', 'items.worker', 'payments']);
+        $sewingOrder->load(['customer', 'items.workers', 'payments']);
 
         return view('admin.sewing_orders.receipt', compact('sewingOrder'));
     }
@@ -217,7 +221,7 @@ class SewingOrderController extends Controller
      */
     public function edit(SewingOrder $sewingOrder)
     {
-        $sewingOrder->load(['customer', 'items']);
+        $sewingOrder->load(['customer', 'items.workers']);
         $customers = Customer::with('measurements')->get();
         $workers = User::all();
 
@@ -479,7 +483,9 @@ class SewingOrderController extends Controller
 
         // Base query builder for all assigned items
         $baseQuery = function () use ($userId) {
-            return SewingOrderItem::where('assign_to', $userId);
+            return SewingOrderItem::whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            });
         };
 
         // Calculate statistics
@@ -497,8 +503,10 @@ class SewingOrderController extends Controller
         ];
 
         // Filtered query for table display
-        $query = SewingOrderItem::with(['sewingOrder.customer', 'worker'])
-            ->where('assign_to', $userId);
+        $query = SewingOrderItem::with(['sewingOrder.customer', 'workers'])
+            ->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            });
 
         // Filter by status if provided
         if ($request->has('status') && $request->status !== '') {

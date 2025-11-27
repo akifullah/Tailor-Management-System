@@ -132,7 +132,13 @@
                                         <td>{{ $item->qty }}</td>
                                         <td>Rs {{ number_format($item->total_price, 2) }}</td>
                                         <td>
-                                            {{ $item->worker->name ?? 'Not Assigned' }}
+                                            @if ($item->workers->count() > 0)
+                                                @foreach ($item->workers as $worker)
+                                                    <span class="badge bg-info">{{ $worker->name }}</span>
+                                                @endforeach
+                                            @else
+                                                Not Assigned
+                                            @endif
                                             @if ($item->assign_note)
                                                 <p class="text-muted mb-0" style="font-size: 14px;">Notes:
                                                     {{ $item->assign_note }}</p>

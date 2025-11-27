@@ -15,7 +15,6 @@ class SewingOrderItem extends Model
         'sewing_price',
         'qty',
         'customer_measurement',
-        'assign_to',
         'assign_note',
         'status',
         'total_price',
@@ -36,9 +35,9 @@ class SewingOrderItem extends Model
         return $this->belongsTo(SewingOrder::class);
     }
 
-    public function worker()
+    public function workers()
     {
-        return $this->belongsTo(User::class, 'assign_to');
+        return $this->belongsToMany(User::class, 'sewing_order_item_user');
     }
 
     public function cancelledBy()
