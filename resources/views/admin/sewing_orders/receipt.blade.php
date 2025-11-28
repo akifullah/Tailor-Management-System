@@ -11,6 +11,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Sewing Order Receipt - {{ $sewingOrder->sewing_order_number }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/ZEB-TAILORS-Icon.png') }}">
     <style>
         body {
             font-family: monospace;

@@ -10,6 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Order Receipt - {{ $order->order_number }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/ZEB-TAILORS-Icon.png') }}">
     <style>
         body {
             font-family: monospace;

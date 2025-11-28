@@ -4,13 +4,14 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>Dashboard</title>
+    <title>Dashboard | {{ config('app.name') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <!-- App favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/ZEB-TAILORS-Icon.png') }}">
 
     <!-- plugin css -->
     <link href="{{ asset('assets/libs/jsvectormap/css/jsvectormap.min.css') }}" rel="stylesheet" type="text/css" />
@@ -123,6 +124,12 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                     </a> --}}
                                 @endcan
 
+                                <a class="dropdown-item notify-item"
+                                 href="{{ route('worker.ledger') }}">
+                                <i data-feather="file-text" class="align-middle" style="width: 16px;"></i>
+                                <span> My Ledger </span>
+                            </a>
+
                                 <div class="dropdown-divider"></div>
 
                                 <!-- item-->
@@ -147,30 +154,22 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                     <div class="logo-box">
 
                         <a class='logo logo-light'>
-                            <h3 class="logo-text mt-3">TMS</h3>
+                            {{-- <h3 class="logo-text mt-3">TMS</h3> --}}
                             {{-- <span class="logo-sm">
                                 <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
-                            </span>
-                            <span class="logo-lg">
+                            </span> --}}
+                            {{-- <span class="logo-lg">
                                 <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="24">
                             </span> --}}
                         </a>
-                        {{-- <a class='logo logo-light' href='index.html'>
-                            <span class="logo-sm">
+                        <a class='logo ' >
+                            {{-- <span class="logo-sm">
                                 <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
-                            </span>
+                            </span> --}}
                             <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="24">
+                                <img src="{{ asset('assets/images/ZEB-TAILORS-FABRICS-logo.png') }}" alt="" height="40">
                             </span>
                         </a>
-                        <a class='logo logo-dark' href='index.html'>
-                            <span class="logo-sm">
-                                <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
-                            </span>
-                            <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" height="24">
-                            </span>
-                        </a> --}}
                     </div>
 
                     <ul id="side-menu">
@@ -200,13 +199,13 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                 <span> Worker Dashboard </span>
                             </a>
                         </li>
-                        <li>
+                        {{-- <li>
                             <a href="{{ route('worker.ledger') }}"
                                 class="{{ request()->routeIs('worker.ledger') ? 'tp-link active' : '' }}">
                                 <i data-feather="file-text"></i>
                                 <span> My Ledger </span>
                             </a>
-                        </li>
+                        </li> --}}
                         @can('manage-users')
                             <li>
                                 <a href="{{ route('users.index') }}"
@@ -275,7 +274,7 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                             <li>
                                 <a href="{{ route('admin.workers.ledger.index') }}"
                                     class="{{ request()->routeIs('admin.workers.ledger.*') ? 'tp-link active' : '' }}">
-                                    <i data-feather="users"></i>
+                                     <i data-feather="file-text"></i>
                                     <span> Workers Ledger </span>
                                 </a>
                             </li>

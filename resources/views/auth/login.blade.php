@@ -4,20 +4,17 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>Log In</title>
+    <title>Log In | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A fully featured admin theme which can be used to build CRM, CMS, etc." />
     <meta name="author" content="Zoyothemes" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/ZEB-TAILORS-Icon.png') }}">
 
     <!-- App css -->
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" id="app-style" />
-
-    <!-- Icons -->
-    <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
 
     <script src="{{ asset('assets/js/head.js') }}"></script>
 
@@ -37,26 +34,26 @@
                                 <div class="mb-0 border-0 p-md-4 p-lg-0 texc">
                                     <div class="mb-4 p-0  text-center">
                                         <div class="auth-brand">
-                                            <h3 class="logo-text mt-3">TMS</h3>
+                                            {{-- <h3 class="logo-text mt-3">TMS</h3> --}}
                                             {{-- <a class='logo logo-light' href='index.html'>
                                                 <span class="logo-lg">
-                                                    <img src="{{ asset('assets/images/logo-light-3.png') }}"
-                                                        alt="" height="24">
-                                                </span>
-                                            </a>
-                                            <a class='logo logo-dark' href='index.html'>
-                                                <span class="logo-lg">
-                                                    <img src="{{ asset('assets/images/logo-dark-3.png') }}"
-                                                        alt="" height="24">
+                                                    <img src="{{ asset('assets/images/logo-light-3.png') }}" alt=""
+                                                        height="24">
                                                 </span>
                                             </a> --}}
+                                            <a class='logo'>
+                                                <span class="logo-lg">
+                                                    <img src="{{ asset('assets/images/ZEB-TAILORS-FABRICS-logo.png') }}"
+                                                        alt="" height="40">
+                                                </span>
+                                            </a>
                                         </div>
                                     </div>
 
                                     <div class="auth-title-section mb-4 text-lg-start text-center">
-                                        <h3 class="text-dark text-center fw-semibold mb-3">Welcome back! Please Sign
+                                        <h5 class="text-dark text-center fw-semibold mb-3">Welcome back! Please Sign
                                             in to
-                                            continue.</h3>
+                                            continue.</h5>
                                     </div>
 
                                     <form id="login_form">
@@ -66,8 +63,8 @@
                                                 <div class="form-group mb-3">
                                                     <label for="emailaddress" class="form-label">Email
                                                         address</label>
-                                                    <input class="form-control" type="email" id="email"
-                                                        name="email" required="" placeholder="Enter your email">
+                                                    <input class="form-control" type="email" id="email" name="email"
+                                                        required="" placeholder="Enter your email">
                                                 </div>
 
                                                 <div class="form-group mb-3">
@@ -77,19 +74,20 @@
                                                 </div>
 
                                                 {{-- <div class="form-group d-flex mb-3">
-                                                <div class="col-sm-6">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input"
-                                                            id="checkbox-signin" checked>
-                                                        <label class="form-check-label" for="checkbox-signin">Remember
-                                                            me</label>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                id="checkbox-signin" checked>
+                                                            <label class="form-check-label"
+                                                                for="checkbox-signin">Remember
+                                                                me</label>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-sm-6 text-end">
-                                                    <a class='text-muted fs-14' href='auth-recoverpw.html'>Forgot
-                                                        password?</a>
-                                                </div>
-                                            </div> --}}
+                                                    <div class="col-sm-6 text-end">
+                                                        <a class='text-muted fs-14' href='auth-recoverpw.html'>Forgot
+                                                            password?</a>
+                                                    </div>
+                                                </div> --}}
 
                                                 <div class="form-group mb-0 row pt-3">
                                                     <div class="col-12">
@@ -135,8 +133,8 @@
 
 
     <script>
-        $(document).ready(function() {
-            $('#login_form').on('submit', function(e) {
+        $(document).ready(function () {
+            $('#login_form').on('submit', function (e) {
                 e.preventDefault();
 
                 var $form = $(this);
@@ -153,7 +151,7 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                     },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             // Redirect to the URL based on user permissions
                             if (response.redirect_url) {
@@ -167,12 +165,12 @@
                             $btn.prop("disabled", false);
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         $btn.prop("disabled", false);
                         if (xhr.responseJSON && xhr.responseJSON.error) {
                             var errors = xhr.responseJSON.error;
                             // Display field errors
-                            Object.keys(errors).forEach(function(key) {
+                            Object.keys(errors).forEach(function (key) {
                                 var input = $form.find('[id="' + key + '"]');
                                 if (input.length) {
                                     input.after(

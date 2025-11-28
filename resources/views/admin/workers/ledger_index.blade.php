@@ -9,7 +9,18 @@
         </div>
 
         <div class="card">
-            <div class="card-body table-responsive">
+            <div class="card-body">
+                <form method="GET" action="" class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Search by worker name or email" value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <a href="{{ url()->current() }}" class="btn btn-secondary ms-1">Reset</a>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
                 <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
@@ -38,6 +49,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>

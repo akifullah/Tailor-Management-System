@@ -10,9 +10,20 @@ use Illuminate\Support\Facades\Auth;
 
 class WorkerLedgerController extends Controller
 {
-    public function indexForAdmin()
+    public function indexForAdmin(Request $request)
     {
-        $workers = User::with(['sewingOrderItems', 'workerPayments'])->get();
+        $search = $request->input('search');
+
+        $workersQuery = User::with(['sewingOrderItems', 'workerPayments']);
+
+        if (!empty($search)) {
+            $workersQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%');
+            });
+        }
+
+        $workers = $workersQuery->get();
 
         $workers = $workers->map(function (User $worker) {
             $paid = $worker->workerPayments()
@@ -42,8 +53,8 @@ class WorkerLedgerController extends Controller
             'total'      => $workItems->count(),
             'pending'    => $workItems->where('status', 'pending')->count(),
             'in_progress'=> $workItems->where('status', 'in_progress')->count(),
-            'completed'  => $workItems->where('status', 'completed')->count(),
-            'delivered'  => $workItems->where('status', 'delivered')->count(),
+            'completed'  => $workItems->whereIn('status', ['completed', 'delivered'])->count(),
+            // 'delivered'  => $workItems->where('status', 'delivered')->count(),
             'on_hold'    => $workItems->where('status', 'on_hold')->count(),
             'cancelled'  => $workItems->where('status', 'cancelled')->count(),
         ];
@@ -106,8 +117,8 @@ class WorkerLedgerController extends Controller
             'total'      => $workItems->count(),
             'pending'    => $workItems->where('status', 'pending')->count(),
             'in_progress'=> $workItems->where('status', 'in_progress')->count(),
-            'completed'  => $workItems->where('status', 'completed')->count(),
-            'delivered'  => $workItems->where('status', 'delivered')->count(),
+            'completed'  => $workItems->whereIn('status', ['completed', 'delivered'])->count(),
+            // 'delivered'  => $workItems->where('status', 'delivered')->count(),
             'on_hold'    => $workItems->where('status', 'on_hold')->count(),
             'cancelled'  => $workItems->where('status', 'cancelled')->count(),
         ];

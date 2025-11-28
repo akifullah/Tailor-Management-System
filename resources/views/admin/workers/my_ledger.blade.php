@@ -47,16 +47,8 @@
             <div class="col-md-3">
                 <div class="card border-success h-100">
                     <div class="card-body">
-                        <h6 class="mb-1">Completed</h6>
+                        <h6 class="mb-1">Completed / Delivered</h6>
                         <h3 class="mb-0">{{ $workStats['completed'] ?? 0 }}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-success h-100">
-                    <div class="card-body">
-                        <h6 class="mb-1">Delivered</h6>
-                        <h3 class="mb-0">{{ $workStats['delivered'] ?? 0 }}</h3>
                     </div>
                 </div>
             </div>
@@ -127,6 +119,7 @@
                                     <th>Date</th>
                                     <th>Amount</th>
                                     <th>Method</th>
+                                    <th>Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -135,10 +128,11 @@
                                         <td>{{ optional($payment->payment_date)->format('Y-m-d H:i') }}</td>
                                         <td>Rs {{ number_format($payment->amount, 2) }}</td>
                                         <td>{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</td>
+                                        <td>{{ $payment->notes ?? '-' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center text-muted">No payments recorded.</td>
+                                        <td colspan="4" class="text-center text-muted">No payments recorded.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -149,3 +143,4 @@
         </div>
     </div>
 @endsection
+

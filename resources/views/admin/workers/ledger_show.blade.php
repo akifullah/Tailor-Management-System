@@ -57,19 +57,19 @@
             <div class="col-md-3">
                 <div class="card border-success h-100">
                     <div class="card-body">
-                        <h6 class="mb-1">Completed</h6>
+                        <h6 class="mb-1">Completed / Delivered</h6>
                         <h3 class="mb-0">{{ $workStats['completed'] ?? 0 }}</h3>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            {{-- <div class="col-md-3">
                 <div class="card border-success h-100">
                     <div class="card-body">
                         <h6 class="mb-1">Delivered</h6>
                         <h3 class="mb-0">{{ $workStats['delivered'] ?? 0 }}</h3>
                     </div>
                 </div>
-            </div>
+            </div> --}}
             <div class="col-md-3">
                 <div class="card border-danger h-100">
                     <div class="card-body">
@@ -89,7 +89,7 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-8">
+            <div class="col-lg-7">
                 <div class="card mb-3">
                     <div class="card-body table-responsive">
                         <h5 class="mb-3">Work Items</h5>
@@ -127,28 +127,32 @@
                 </div>
             </div>
 
-            <div class="col-lg-4">
+            <div class="col-lg-5">
                 <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="mb-3">Add Payment</h5>
                         <form method="POST" action="{{ route('admin.workers.ledger.payments.store', $worker->id) }}">
                             @csrf
-                            <div class="mb-2">
-                                <label class="form-label">Amount</label>
-                                <input type="number" step="0.01" name="amount" class="form-control" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Payment Method</label>
-                                <select name="payment_method" class="form-select" required>
-                                    <option value="cash">Cash</option>
-                                    <option value="online">Online</option>
-                                    <option value="bank_transfer">Bank Transfer</option>
-                                    <option value="cheque">Cheque</option>
-                                </select>
+                            <div class="row">
+
+                                <div class="mb-2 col-md-6">
+                                    <label class="form-label">Amount</label>
+                                    <input type="number" step="0.01" name="amount" class="form-control" required>
+                                </div>
+                                <div class="mb-2 col-md-6">
+                                    <label class="form-label">Payment Method</label>
+                                    <select name="payment_method" class="form-select" required>
+                                        <option value="cash">Cash</option>
+                                        <option value="online">Online</option>
+                                        <option value="bank_transfer">Bank Transfer</option>
+                                        <option value="cheque">Cheque</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="mb-2">
                                 <label class="form-label">Payment Date</label>
-                                <input type="datetime-local" name="payment_date" class="form-control">
+                                <input type="datetime-local" name="payment_date" class="form-control"
+                                    value="{{ date('Y-m-d\TH:i') }}">
                             </div>
                             <div class="mb-2">
                                 <label class="form-label">Notes</label>
@@ -162,24 +166,26 @@
                 <div class="card">
                     <div class="card-body table-responsive">
                         <h5 class="mb-3">Payment History</h5>
-                        <table class="table table-sm table-bordered">
+                        <table class="table table-sm table-bordered align-middle">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Amount</th>
                                     <th>Method</th>
+                                    <th>Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($payments as $payment)
                                     <tr>
-                                        <td>{{ optional($payment->payment_date)->format('Y-m-d H:i') }}</td>
+                                        <td>{{ optional($payment->payment_date)->format('Y-m-d h:i A') }}</td>
                                         <td>Rs {{ number_format($payment->amount, 2) }}</td>
                                         <td>{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</td>
+                                        <td style="max-width: 130px">{{ $payment->notes ?? '-' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center text-muted">No payments recorded.</td>
+                                        <td colspan="4" class="text-center text-muted">No payments recorded.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

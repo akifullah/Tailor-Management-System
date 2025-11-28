@@ -133,7 +133,7 @@
                         <tbody>
                             @forelse($transactions as $transaction)
                                 <tr>
-                                    <td>{{ $transaction->payment_date->format('Y-m-d H:i A') }}</td>
+                                    <td>{{ $transaction->payment_date->format('Y-m-d h:i A') }}</td>
                                     <td style="text-transform: capitalize">
                                         @if($transaction->payable_type === 'App\Models\Order')
                                             @if($transaction->type === 'refund')
