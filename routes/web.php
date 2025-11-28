@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\FieldController;
 use App\Http\Controllers\MeasurementController;
@@ -197,7 +196,3 @@ Route::middleware(["auth"])->group(function () {
     });
 });
 // Route::get("/types/get/{name}", [TypeController::class, "getType"])->name('type.get');
-
-
-Route::get('/checkout', [CheckoutController::class, 'index']);
-Route::post('/create-payment-intent', [CheckoutController::class, 'createPaymentIntent']);
