@@ -12,6 +12,7 @@ if (!function_exists('getFirstAccessibleRoute')) {
         // Define routes in priority order with their required permissions
         $routes = [
             'reports.dashboard' => 'view-reports-dashboard',
+            'worker.dashboard' => 'worker-dashboard',
             'users.index' => 'manage-users',
             'customers.index' => 'manage-customers',
             'products.index' => 'manage-products',
@@ -46,4 +47,3 @@ if (!function_exists('getFirstAccessibleRoute')) {
         return route('reports.dashboard');
     }
 }
-

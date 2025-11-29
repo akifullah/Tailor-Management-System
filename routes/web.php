@@ -118,7 +118,9 @@ Route::middleware(["auth"])->group(function () {
         Route::patch('sewing-orders/{sewing_order}/update-status', [SewingOrderController::class, 'updateStatus'])->name('sewing-orders.update-status');
         Route::get('sewing-order-items/{item}/print-measurement', [SewingOrderController::class, 'printMeasurement'])->name('sewing-order-items.print-measurement');
         Route::put('sewing-order-items/{item}/assign-measurement', [SewingOrderController::class, 'assignMeasurement'])->name('sewing-order-items.assign-measurement');
+    });
 
+    Route::middleware(['permission:manage-workers'])->group(function () {
         Route::get('workers/ledger', [WorkerLedgerController::class, 'indexForAdmin'])->name('admin.workers.ledger.index');
         Route::get('workers/{worker}/ledger', [WorkerLedgerController::class, 'showForAdmin'])->name('admin.workers.ledger.show');
         Route::post('workers/{worker}/ledger/payments', [WorkerLedgerController::class, 'addPaymentForAdmin'])->name('admin.workers.ledger.payments.store');

@@ -38,6 +38,7 @@ class RolesAndPermissionsSeeder extends Seeder
             "manage-sewing-orders",
             "worker-dashboard",
             "manage-expenses",
+            "manage-workers",
 
             // Report dashboard & sub-permissions from routes/web.php
             'view-reports-dashboard',

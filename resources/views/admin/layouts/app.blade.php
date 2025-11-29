@@ -271,6 +271,8 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                     <span> Sewing Orders </span>
                                 </a>
                             </li>
+                        @endcan
+                        @can("manage-workers")
                             <li>
                                 <a href="{{ route('admin.workers.ledger.index') }}"
                                     class="{{ request()->routeIs('admin.workers.ledger.*') ? 'tp-link active' : '' }}">
