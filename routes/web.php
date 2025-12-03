@@ -128,6 +128,7 @@ Route::middleware(["auth"])->group(function () {
 
     Route::middleware(['permission:worker-dashboard'])->group(function () {
         Route::get('worker/dashboard', [SewingOrderController::class, 'workerDashboard'])->name('worker.dashboard');
+        Route::put('worker/sewing-order-items/{item}/update-status', [SewingOrderController::class, 'updateWorkerStatus'])->name('worker.sewing-order-items.update-status');
         Route::get('worker/ledger', [WorkerLedgerController::class, 'myLedger'])->name('worker.ledger');
     });
 

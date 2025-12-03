@@ -110,9 +110,15 @@
                                             <option value="">All Statuses</option>
                                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
                                                 Pending</option>
+                                            <option value="on_hold" {{ request('status') == 'on_hold' ? 'selected' : '' }}>
+                                                On Hold</option>
                                             <option value="in_progress"
                                                 {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress
                                             </option>
+                                            <option value="cutter" {{ request('status') == 'cutter' ? 'selected' : '' }}>
+                                                Cutter</option>
+                                            <option value="sewing" {{ request('status') == 'sewing' ? 'selected' : '' }}>
+                                                Sewing</option>
                                             <option value="completed"
                                                 {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                                         </select>
@@ -156,34 +162,41 @@
                                             <td>{{ $item->qty }}</td>
                                             <td>Rs {{ number_format($item->total_price, 2) }}</td>
                                             <td>
+                                                @php
+                                                    // Get the worker's individual status from pivot table
+$workerStatus = $item->workers->first()->pivot->status ?? 'pending';
+                                                @endphp
                                                 <span
-                                                    class="badge bg-{{ ['pending' => 'secondary', 'on_hold' => 'secondary', 'in_progress' => 'warning', 'completed' => 'success', 'cancelled' => 'danger', 'delivered' => 'success'][$item->status] ?? 'secondary' }}">
-                                                    {{ ucfirst(str_replace('_', ' ', $item->status)) }}
+                                                    class="badge bg-{{ ['pending' => 'secondary', 'on_hold' => 'info', 'in_progress' => 'warning', 'cutter' => 'primary', 'sewing' => 'info', 'completed' => 'success'][$workerStatus] ?? 'secondary' }}">
+                                                    {{ ucfirst(str_replace('_', ' ', $workerStatus)) }}
                                                 </span>
                                             </td>
                                             <td>
-                                                @if (!in_array($item->status, ['cancelled', 'delivered']))
-                                                    <select class="form-select form-select-sm status-select"
-                                                        data-item-id="{{ $item->id }}"
-                                                        style="width: auto; display: inline-block;">
-                                                        <option value="pending"
-                                                            {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
-                                                        </option>
-                                                        <option value="on_hold"
-                                                            {{ $item->status == 'on_hold' ? 'selected' : '' }}>On Hold
-                                                        </option>
-                                                        <option value="in_progress"
-                                                            {{ $item->status == 'in_progress' ? 'selected' : '' }}>In
-                                                            Progress</option>
-                                                        <option value="completed"
-                                                            {{ $item->status == 'completed' ? 'selected' : '' }}>
-                                                            Completed</option>
-                                                        {{-- <option value="cancelled" {{ $item->status == 'cancelled' ? 'selected' : '' }}>
-                                                        Cancelled</option>
-                                                    <option value="delivered" {{ $item->status == 'delivered' ? 'selected' : '' }}>
-                                                        Delivered</option> --}}
-                                                    </select>
-                                                @endif
+                                                @php
+                                                    $workerStatus = $item->workers->first()->pivot->status ?? 'pending';
+                                                @endphp
+                                                <select class="form-select form-select-sm status-select"
+                                                    data-item-id="{{ $item->id }}"
+                                                    style="width: auto; display: inline-block;">
+                                                    <option value="pending"
+                                                        {{ $workerStatus == 'pending' ? 'selected' : '' }}>Pending
+                                                    </option>
+                                                    {{-- <option value="on_hold"
+                                                        {{ $workerStatus == 'on_hold' ? 'selected' : '' }}>On Hold
+                                                    </option> --}}
+                                                    <option value="in_progress"
+                                                        {{ $workerStatus == 'in_progress' ? 'selected' : '' }}>In
+                                                        Progress</option>
+                                                    <option value="cutter"
+                                                        {{ $workerStatus == 'cutter' ? 'selected' : '' }}>Cutter
+                                                    </option>
+                                                    <option value="sewing"
+                                                        {{ $workerStatus == 'sewing' ? 'selected' : '' }}>Sewing
+                                                    </option>
+                                                    <option value="completed"
+                                                        {{ $workerStatus == 'completed' ? 'selected' : '' }}>
+                                                        Completed</option>
+                                                </select>
                                                 @if ($item->customer_measurement)
                                                     <button type="button" class="btn btn-sm btn-primary mt-1"
                                                         data-bs-toggle="modal"
@@ -364,12 +377,8 @@ if (isset($measurement['data'])) {
             $('.status-select').on('change', function() {
                 const itemId = $(this).data('item-id');
                 const status = $(this).val();
-                if (status == "cancelled" && !confirm("Are you sure you want to cancel this item?")) {
-                    $(this).val("");
-                    return;
-                }
                 $.ajax({
-                    url: `/sewing-order-items/${itemId}/status`,
+                    url: `/worker/sewing-order-items/${itemId}/update-status`,
                     method: 'PUT',
                     data: {
                         _token: '{{ csrf_token() }}',

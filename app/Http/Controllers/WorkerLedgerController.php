@@ -18,8 +18,8 @@ class WorkerLedgerController extends Controller
 
         if (!empty($search)) {
             $workersQuery->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('email', 'like', '%'.$search.'%');
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
 
@@ -42,21 +42,25 @@ class WorkerLedgerController extends Controller
 
     public function showForAdmin(User $worker)
     {
-        $worker->load(['sewingOrderItems.sewingOrder.customer', 'workerPayments' => function ($q) {
+        $worker->load(['workerPayments' => function ($q) {
             $q->where('type', 'payment')->orderByDesc('payment_date');
         }]);
 
-        $workItems = $worker->sewingOrderItems()->with(['sewingOrder.customer'])->get();
+        // Load work items with pivot data for this specific worker
+        $workItems = $worker->sewingOrderItems()
+            ->with(['sewingOrder.customer'])
+            ->get();
 
-        // Work status stats for this worker (all assigned items)
+        // Work status stats based on worker's individual pivot status
         $workStats = [
-            'total'      => $workItems->count(),
-            'pending'    => $workItems->where('status', 'pending')->count(),
-            'in_progress'=> $workItems->where('status', 'in_progress')->count(),
-            'completed'  => $workItems->whereIn('status', ['completed', 'delivered'])->count(),
-            // 'delivered'  => $workItems->where('status', 'delivered')->count(),
-            'on_hold'    => $workItems->where('status', 'on_hold')->count(),
-            'cancelled'  => $workItems->where('status', 'cancelled')->count(),
+            'total'       => $workItems->count(),
+            'pending'     => $workItems->filter(fn($item) => $item->pivot->status === 'pending')->count(),
+            'in_progress' => $workItems->filter(fn($item) => $item->pivot->status === 'in_progress')->count(),
+            'cutter'      => $workItems->filter(fn($item) => $item->pivot->status === 'cutter')->count(),
+            'sewing'      => $workItems->filter(fn($item) => $item->pivot->status === 'sewing')->count(),
+            'completed'   => $workItems->filter(fn($item) => $item->pivot->status === 'completed')->count(),
+            'on_hold'     => $workItems->filter(fn($item) => $item->pivot->status === 'on_hold')->count(),
+            'cancelled'   => $workItems->where('status', 'cancelled')->count(),
         ];
 
         $paid = $worker->workerPayments()
@@ -106,21 +110,25 @@ class WorkerLedgerController extends Controller
     {
         $worker = Auth::user();
 
-        $worker->load(['sewingOrderItems.sewingOrder.customer', 'workerPayments' => function ($q) {
+        $worker->load(['workerPayments' => function ($q) {
             $q->where('type', 'payment')->orderByDesc('payment_date');
         }]);
 
-        $workItems = $worker->sewingOrderItems()->with(['sewingOrder.customer'])->get();
+        // Load work items with pivot data for this specific worker
+        $workItems = $worker->sewingOrderItems()
+            ->with(['sewingOrder.customer'])
+            ->get();
 
-        // Work status stats for this worker (all assigned items)
+        // Work status stats based on worker's individual pivot status
         $workStats = [
-            'total'      => $workItems->count(),
-            'pending'    => $workItems->where('status', 'pending')->count(),
-            'in_progress'=> $workItems->where('status', 'in_progress')->count(),
-            'completed'  => $workItems->whereIn('status', ['completed', 'delivered'])->count(),
-            // 'delivered'  => $workItems->where('status', 'delivered')->count(),
-            'on_hold'    => $workItems->where('status', 'on_hold')->count(),
-            'cancelled'  => $workItems->where('status', 'cancelled')->count(),
+            'total'       => $workItems->count(),
+            'pending'     => $workItems->filter(fn($item) => $item->pivot->status === 'pending')->count(),
+            'in_progress' => $workItems->filter(fn($item) => $item->pivot->status === 'in_progress')->count(),
+            'cutter'      => $workItems->filter(fn($item) => $item->pivot->status === 'cutter')->count(),
+            'sewing'      => $workItems->filter(fn($item) => $item->pivot->status === 'sewing')->count(),
+            'completed'   => $workItems->filter(fn($item) => $item->pivot->status === 'completed')->count(),
+            'on_hold'     => $workItems->filter(fn($item) => $item->pivot->status === 'on_hold')->count(),
+            'cancelled'   => $workItems->where('status', 'cancelled')->count(),
         ];
 
         $paid = $worker->workerPayments()

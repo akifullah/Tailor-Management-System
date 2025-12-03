@@ -134,8 +134,10 @@
                                         <td>
                                             @if ($item->workers->count() > 0)
                                                 @foreach ($item->workers as $worker)
-                                                    <span
-                                                        class="badge text-capitalize bg-primary">{{ $worker->name }}</span>
+                                                    <span class="badge fw-semibold text-capitalize bg-primary">
+                                                        <div class="mb-1">{{ $worker->name }}</div>
+                                                        <div>({{ $worker->pivot->status }})</div>
+                                                    </span>
                                                 @endforeach
                                             @else
                                                 Not Assigned

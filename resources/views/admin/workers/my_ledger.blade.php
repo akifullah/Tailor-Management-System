@@ -94,7 +94,7 @@
                                         <td>{{ $item->sewingOrder->sewing_order_number ?? '-' }}</td>
                                         <td>{{ $item->sewingOrder->customer->name ?? '-' }}</td>
                                         <td>{{ $item->product_name }}</td>
-                                        <td>{{ ucfirst(str_replace('_', ' ', $item->status)) }}</td>
+                                        <td>{{ ucfirst(str_replace('_', ' ', $item->pivot->status ?? 'pending')) }}</td>
                                         <td>{{ $item->qty }}</td>
                                         <td>Rs {{ number_format($item->total_price, 2) }}</td>
                                     </tr>
@@ -143,4 +143,3 @@
         </div>
     </div>
 @endsection
-

@@ -48,7 +48,9 @@ class User extends Authenticatable
 
     public function sewingOrderItems()
     {
-        return $this->belongsToMany(SewingOrderItem::class, 'sewing_order_item_user');
+        return $this->belongsToMany(SewingOrderItem::class, 'sewing_order_item_user')
+            ->withPivot('status')
+            ->withTimestamps();
     }
 
     public function workerPayments()

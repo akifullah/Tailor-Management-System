@@ -37,7 +37,9 @@ class SewingOrderItem extends Model
 
     public function workers()
     {
-        return $this->belongsToMany(User::class, 'sewing_order_item_user');
+        return $this->belongsToMany(User::class, 'sewing_order_item_user')
+            ->withPivot('status')
+            ->withTimestamps();
     }
 
     public function cancelledBy()

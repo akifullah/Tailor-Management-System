@@ -184,7 +184,7 @@ class SewingOrderController extends Controller
     {
         $sewingOrder->load(['customer.measurements', 'items.workers', 'payments']);
 
-
+        // return $sewingOrder;
         return view('admin.sewing_orders.show', compact('sewingOrder'));
     }
 
@@ -481,36 +481,56 @@ class SewingOrderController extends Controller
     {
         $userId = Auth::id();
 
-        // Base query builder for all assigned items
+        // Base query builder for all assigned items - using pivot status
         $baseQuery = function () use ($userId) {
             return SewingOrderItem::whereHas('workers', function ($q) use ($userId) {
                 $q->where('users.id', $userId);
             });
         };
 
-        // Calculate statistics
+        // Calculate statistics based on worker's individual status in pivot table
         $stats = [
             'total_assigned' => $baseQuery()->count(),
-            'pending' => $baseQuery()->where('status', 'pending')->count(),
-            'on_hold' => $baseQuery()->where('status', 'on_hold')->count(),
-            'in_progress' => $baseQuery()->where('status', 'in_progress')->count(),
-            'completed' => $baseQuery()->whereIn('status', ['completed', "delivered"])->count(),
-            'cancelled' => $baseQuery()->where('status', 'cancelled')->count(),
-            'delivered' => $baseQuery()->where('status', 'delivered')->count(),
+            'pending' => $baseQuery()->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'pending');
+            })->count(),
+            'on_hold' => $baseQuery()->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'on_hold');
+            })->count(),
+            'in_progress' => $baseQuery()->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'in_progress');
+            })->count(),
+            'cutter' => $baseQuery()->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'cutter');
+            })->count(),
+            'sewing' => $baseQuery()->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'sewing');
+            })->count(),
+            'completed' => $baseQuery()->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'completed');
+            })->count(),
             'total_value' => $baseQuery()->sum('total_price'),
-            'completed_value' => $baseQuery()->where('status', 'completed')->sum('total_price'),
-            'in_progress_value' => $baseQuery()->where('status', 'in_progress')->sum('total_price'),
+            'completed_value' => $baseQuery()->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'completed');
+            })->sum('total_price'),
+            'in_progress_value' => $baseQuery()->whereHas('workers', function ($q) use ($userId) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'in_progress');
+            })->sum('total_price'),
         ];
 
-        // Filtered query for table display
-        $query = SewingOrderItem::with(['sewingOrder.customer', 'workers'])
+        // Filtered query for table display - load workers with pivot data
+        $query = SewingOrderItem::with(['sewingOrder.customer', 'workers' => function ($q) use ($userId) {
+            $q->where('users.id', $userId);
+        }])
             ->whereHas('workers', function ($q) use ($userId) {
                 $q->where('users.id', $userId);
             });
 
-        // Filter by status if provided
+        // Filter by worker's status in pivot table if provided
         if ($request->has('status') && $request->status !== '') {
-            $query->where('status', $request->status);
+            $query->whereHas('workers', function ($q) use ($userId, $request) {
+                $q->where('users.id', $userId)->where('sewing_order_item_user.status', $request->status);
+            });
         }
 
         $items = $query->latest()->get();
@@ -518,6 +538,28 @@ class SewingOrderController extends Controller
         return view('admin.sewing_orders.worker_dashboard', compact('items', 'stats'));
     }
 
+    /**
+     * Update worker's individual status for a sewing order item
+     */
+    public function updateWorkerStatus(Request $request, SewingOrderItem $item)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:pending,on_hold,in_progress,cutter,sewing,completed',
+        ]);
+
+        $userId = Auth::id();
+
+        // Update only the current worker's status in pivot table
+        $item->workers()->updateExistingPivot($userId, [
+            'status' => $validated['status'],
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your status updated successfully'
+        ]);
+    }
 
     /**
      * Update the status of a sewing order (used by PATCH: sewing-orders/{sewing_order}/update-status)
