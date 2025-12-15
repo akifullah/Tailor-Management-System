@@ -181,21 +181,21 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if ($item->customer_measurement)
-                                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#measurementModal{{ $item->id }}">
-                                                    View Measurement
-                                                </button>
-                                                {{-- <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                            {{-- @if ($item->customer_measurement) --}}
+                                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#measurementModal{{ $item->id }}">
+                                                View Measurement
+                                            </button>
+                                            {{-- <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal"
                                                     data-bs-target="#changeMeasurementModal{{ $item->id }}">
                                                     Change Measurement
                                                 </button> --}}
-                                                <a href="{{ route('sewing-order-items.print-measurement', $item->id) }}"
-                                                    target="_blank" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
-                                                    title="Print Measurement">
-                                                    <i class="mdi mdi-printer"></i>
-                                                </a>
-                                            @endif
+                                            <a href="{{ route('sewing-order-items.print-measurement', $item->id) }}"
+                                                target="_blank" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
+                                                title="Print Measurement">
+                                                <i class="mdi mdi-printer"></i>
+                                            </a>
+                                            {{-- @endif --}}
                                         </td>
                                     </tr>
                                 @endforeach
