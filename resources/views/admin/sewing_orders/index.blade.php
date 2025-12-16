@@ -39,6 +39,12 @@
                                             <option value="customer_id"
                                                 {{ request('type') == 'customer_id' ? 'selected' : '' }}>Customer ID
                                             </option>
+                                            <option value="customer_name"
+                                                {{ request('type') == 'customer_name' ? 'selected' : '' }}>Customer Name
+                                            </option>
+                                            <option value="customer_phone"
+                                                {{ request('type') == 'customer_phone' ? 'selected' : '' }}>Customer Phone
+                                            </option>
                                             <option value="sewing_order_number"
                                                 {{ request('type') == 'sewing_order_number' ? 'selected' : '' }}>Order
                                                 Number</option>
@@ -60,7 +66,7 @@
                             </form>
                         </div>
                         <table id="datatable-buttons"
-                            class="table data-table table-striped table-hover table-bordered dt-responsive nowrap">
+                            class="table table-striped table-hover table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
                                     <th>#ID</th>
@@ -144,6 +150,9 @@
                                 @endif
                             </tbody>
                         </table>
+                    </div>
+                    <div class="px-3">
+                        {{ $orders->links('pagination::bootstrap-5') }}
                     </div>
                 </div>
             </div>

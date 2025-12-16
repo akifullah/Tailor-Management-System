@@ -29,12 +29,20 @@ class SewingOrderController extends Controller
                 $query->where('id', $value);
             } elseif ($type === 'customer_id') {
                 $query->where('customer_id', $value);
+            } elseif ($type === 'customer_name') {
+                $query->whereHas('customer', function ($q) use ($value) {
+                    $q->where('name', 'like', '%' . $value . '%');
+                });
+            } elseif ($type === 'customer_phone') {
+                $query->whereHas('customer', function ($q) use ($value) {
+                    $q->where('phone', 'like', '%' . $value . '%');
+                });
             } elseif ($type === 'sewing_order_number') {
                 $query->where('sewing_order_number', 'like', '%' . $value . '%');
             }
         }
 
-        $orders = $query->latest()->get();
+        $orders = $query->latest()->paginate(15);
 
         return view('admin.sewing_orders.index', compact('orders'));
     }
