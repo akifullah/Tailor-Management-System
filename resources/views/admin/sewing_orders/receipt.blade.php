@@ -15,7 +15,7 @@
     <style>
         body {
             font-family: monospace;
-            font-size: 12px;
+            font-size: 13px;
             margin: 0;
             padding: 0;
         }
@@ -51,7 +51,7 @@
         th,
         td {
             padding: 2px 0;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         th {

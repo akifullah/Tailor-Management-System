@@ -70,10 +70,25 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-alert-circle me-2"></i>
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="row">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
+                    @if (!in_array($sewingOrder->order_status, ['cancelled', 'delivered']))
+                        <div class="text-end">
+                            <a href="{{ route('sewing-orders.edit', $sewingOrder->id) }}" class="btn btn-primary btn-sm">
+                                <i class="mdi mdi-pencil"></i> Edit Order
+                            </a>
+                        </div>
+                    @endif
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <strong>Sewing Order Number:</strong> {{ $sewingOrder->sewing_order_number ?? 'N/A' }}

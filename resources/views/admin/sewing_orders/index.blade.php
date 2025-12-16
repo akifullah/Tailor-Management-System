@@ -115,7 +115,7 @@
                                                 </span> --}}
 
                                                 <span
-                                                    class="badge bg-{{ $order->order_status == 'completed' ? 'success' : ($order->order_status == 'in_progress' ? 'warning' : 'warning') }}">
+                                                    class="badge bg-{{ $order->order_status == 'completed' ? 'success' : ($order->order_status == 'cancelled' ? 'danger' : 'warning') }}">
                                                     {{ ucfirst(str_replace('_', ' ', $order->order_status)) }}
                                                 </span>
                                                 @if ($remaining > 0)
@@ -127,6 +127,10 @@
                                                 <a href="{{ route('sewing-orders.show', $order) }}"
                                                     class="btn btn-sm bg-info-subtle">
                                                     <i class="mdi mdi-eye fs-14 text-info"></i>
+                                                </a>
+                                                <a href="{{ route('sewing-orders.edit', $order->id) }}"
+                                                    class="btn btn-primary btn-sm">
+                                                    <i class="mdi mdi-pencil"></i> Edit
                                                 </a>
                                             </td>
                                         </tr>

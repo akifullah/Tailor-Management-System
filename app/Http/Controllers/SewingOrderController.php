@@ -279,7 +279,24 @@ class SewingOrderController extends Controller
         $customers = Customer::with('measurements')->get();
         $workers = User::all();
 
-        return view('admin.sewing_orders.edit', compact('sewingOrder', 'customers', 'workers'));
+        if (in_array($sewingOrder->order_status, ['cancelled', 'delivered'])) {
+            return redirect()->back()->with('error', 'You cannot edit an order, if that is cancelled or delivered.');
+        }
+        
+        
+        $itemsPayload = $sewingOrder->items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'product_name' => $item->product_name,
+                'sewing_price' => $item->sewing_price,
+                'qty' => $item->qty,
+                'assign_note' => $item->assign_note,
+                'measurement_id' => $item->customer_measurement['id'] ?? null,
+                'assign_to' => $item->workers->pluck('id')->toArray(),
+            ];
+        })->values();
+
+        return view('admin.sewing_orders.edit', compact('sewingOrder', 'customers', 'workers', 'itemsPayload'));
     }
 
     /**
@@ -294,16 +311,91 @@ class SewingOrderController extends Controller
             'order_status' => 'required|in:pending,in_progress,completed,on_hold,cancelled,delivered',
             'notes' => 'nullable|string',
             'cancellation_reason' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.id' => 'nullable|exists:sewing_order_items,id',
+            'items.*.product_name' => 'required|string',
+            'items.*.sewing_price' => 'required|numeric|min:0',
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.customer_measurement' => 'nullable',
+            'items.*.assign_note' => 'nullable|string',
+            'items.*.assign_to' => 'nullable|array',
+            'items.*.assign_to.*' => 'exists:users,id',
         ]);
 
         DB::beginTransaction();
         try {
-            // If order is being cancelled, handle refunds
-            if ($validated['order_status'] === 'cancelled' && $sewingOrder->order_status !== 'cancelled') {
+            $previousStatus = $sewingOrder->order_status;
+
+            $sewingOrder->customer_id = $validated['customer_id'];
+            $sewingOrder->order_date = $validated['order_date'];
+            $sewingOrder->delivery_date = $validated['delivery_date'] ?? null;
+            $sewingOrder->order_status = $validated['order_status'];
+            $sewingOrder->notes = $validated['notes'] ?? null;
+            $sewingOrder->cancellation_reason = $validated['cancellation_reason'] ?? null;
+
+            $totalAmount = 0;
+            $keptItemIds = [];
+
+            foreach ($validated['items'] as $itemData) {
+                $itemTotal = $itemData['sewing_price'] * $itemData['qty'];
+                $totalAmount += $itemTotal;
+
+                if (!empty($itemData['id'])) {
+                    $item = $sewingOrder->items()->findOrFail($itemData['id']);
+                } else {
+                    $item = new SewingOrderItem();
+                    $item->sewing_order_id = $sewingOrder->id;
+                }
+
+                $measurementPayload = $this->buildMeasurementPayload($itemData['customer_measurement'] ?? null);
+
+                $item->product_name = $itemData['product_name'];
+                $item->sewing_price = $itemData['sewing_price'];
+                $item->qty = $itemData['qty'];
+                $item->assign_note = $itemData['assign_note'] ?? null;
+                $item->total_price = $itemTotal;
+                $item->customer_measurement = $measurementPayload;
+                $item->save();
+
+                $keptItemIds[] = $item->id;
+
+                // Preserve existing pivot status/cost where possible
+                $existingPivot = $item->workers->mapWithKeys(function ($worker) {
+                    return [$worker->id => [
+                        'status' => $worker->pivot->status,
+                        'worker_cost' => $worker->pivot->worker_cost,
+                    ]];
+                });
+
+                $pivotData = [];
+                $assignTo = $itemData['assign_to'] ?? [];
+                foreach ($assignTo as $workerId) {
+                    $worker = $existingPivot[$workerId] ?? null;
+                    $workerModel = $worker ? null : User::find($workerId);
+                    $pivotData[$workerId] = [
+                        'worker_cost' => $worker['worker_cost'] ?? ($workerModel->worker_cost ?? 0),
+                        'status' => $worker['status'] ?? 'pending',
+                    ];
+                }
+
+                $item->workers()->sync($pivotData);
+            }
+
+            // Delete removed items
+            $itemsToDelete = $sewingOrder->items()->whereNotIn('id', $keptItemIds)->get();
+            foreach ($itemsToDelete as $item) {
+                $item->workers()->detach();
+                $item->delete();
+            }
+
+            $sewingOrder->total_amount = $totalAmount;
+            $sewingOrder->save();
+
+            // If order is being cancelled and wasn't cancelled before, process cancellation
+            if ($validated['order_status'] === 'cancelled' && $previousStatus !== 'cancelled') {
                 $this->cancelSewingOrder($sewingOrder, $validated['cancellation_reason'] ?? null);
             }
 
-            $sewingOrder->update($validated);
             $this->updateSewingOrderPaymentStatus($sewingOrder);
 
             DB::commit();
@@ -648,10 +740,9 @@ class SewingOrderController extends Controller
         $sewing_order->save();
 
         // If the order is delivered OR cancelled, update all items
-        if (in_array($sewing_order->order_status, ['delivered', 'cancelled'])) {
             \App\Models\SewingOrderItem::where('sewing_order_id', $sewing_order->id)
+                ->where('status', '!=', 'cancelled')
                 ->update(['status' => $sewing_order->order_status]);
-        }
 
         return redirect()->route('sewing-orders.show', $sewing_order->id)
             ->with('success', 'Order status updated successfully.');
@@ -693,5 +784,39 @@ class SewingOrderController extends Controller
         $item->save();
 
         return back()->with('success', 'Measurement assigned successfully.');
+    }
+
+    /**
+     * Build a standardized measurement payload for storing on items
+     */
+    private function buildMeasurementPayload($measurementId)
+    {
+        if (empty($measurementId)) {
+            return null;
+        }
+
+        $measurement = Measurement::find($measurementId);
+        if (!$measurement) {
+            return null;
+        }
+
+        $measurementData = $measurement->data;
+        if (is_string($measurementData)) {
+            $measurementData = json_decode($measurementData, true);
+        }
+
+        $measurementStyle = $measurement->style;
+        if (is_string($measurementStyle)) {
+            $measurementStyle = json_decode($measurementStyle, true);
+        }
+
+        return [
+            'id' => $measurement->id,
+            'type' => $measurement->type,
+            'name' => $measurement->name,
+            'data' => $measurementData,
+            'style' => $measurementStyle,
+            'notes' => $measurement->notes,
+        ];
     }
 }
