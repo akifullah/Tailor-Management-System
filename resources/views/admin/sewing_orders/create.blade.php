@@ -162,7 +162,7 @@
 
             let measurements;
             try {
-                measurements = JSON.parse(measurementData);
+                measurements = measurementData;
             } catch (err) {
                 measurements = measurementData;
             }
@@ -286,7 +286,8 @@
             let measurementOptions = '<option value="">Select a Measurement</option>';
             if (customerMeasurements && customerMeasurements.length > 0) {
                 customerMeasurements.forEach((m) => {
-                    measurementOptions += `<option value='${JSON.stringify(m)}'>${String(m?.type ?? '')}</option>`;
+                    console.log(m);
+                    measurementOptions += `<option value='${m.id}'>${String(m?.type ?? '')}</option>`;
                 });
             }
 

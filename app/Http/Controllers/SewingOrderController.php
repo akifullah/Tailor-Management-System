@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SewingOrder;
 use App\Models\SewingOrderItem;
+use App\Models\Measurement;
 use App\Models\Customer;
 use App\Models\User;
 use App\Models\Payment;
@@ -47,6 +48,18 @@ class SewingOrderController extends Controller
         $customers = Customer::with('measurements')->get();
         $workers = User::all();
 
+        foreach ($customers as $customer) {
+            foreach ($customer->measurements as $measurement) {
+                if (is_string($measurement->data)) {
+                    $measurement->data = json_decode($measurement->data, true);
+                }
+                if (is_string($measurement->style)) {
+                    $measurement->style = json_decode($measurement->style, true);
+                }
+            }
+        }
+        // return $customers;
+
         return view('admin.sewing_orders.create', compact('customers', 'selectedCustomer', 'workers'));
     }
 
@@ -75,6 +88,32 @@ class SewingOrderController extends Controller
             'items.*.assign_to.*' => 'exists:users,id',
             'items.*.assign_note' => 'nullable|string',
         ]);
+
+        // foreach ($validated['items'] as $itemData) {
+        //     $measurement = $itemData['customer_measurement'] ?? null;
+        //     if (is_string($measurement)) {
+        //         $measurement = json_decode($measurement, true);
+        //     }
+        //     return $measurement;
+
+
+        //     $sewingOrderItem = SewingOrderItem::create([
+        //         'sewing_order_id' => $sewingOrder->id,
+        //         'product_name' => $itemData['product_name'],
+        //         'sewing_price' => $itemData['sewing_price'],
+        //         'qty' => $itemData['qty'],
+        //         'customer_measurement' => $measurement,
+        //         'assign_note' => $itemData['assign_note'] ?? null,
+        //         'status' => 'pending',
+        //         'total_price' => $itemData['sewing_price'] * $itemData['qty'],
+        //     ]);
+
+        //     if (isset($itemData['assign_to']) && is_array($itemData['assign_to'])) {
+        //         $sewingOrderItem->workers()->attach($itemData['assign_to']);
+        //     }
+        // }
+        // return $validated['items'];
+
 
         DB::beginTransaction();
         try {
@@ -147,10 +186,13 @@ class SewingOrderController extends Controller
             // Create order items
             foreach ($validated['items'] as $itemData) {
                 $measurement = $itemData['customer_measurement'] ?? null;
-                if (is_string($measurement)) {
-                    $measurement = json_decode($measurement, true);
-                }
+                
+                $measurement = Measurement::find($measurement);
+                // if (is_string($measurement)) {
+                    //     $measurement = json_decode($measurement, true);
+                    // }
 
+                
                 $sewingOrderItem = SewingOrderItem::create([
                     'sewing_order_id' => $sewingOrder->id,
                     'product_name' => $itemData['product_name'],

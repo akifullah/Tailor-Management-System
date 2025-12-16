@@ -195,6 +195,17 @@
                                                 title="Print Measurement">
                                                 <i class="mdi mdi-printer"></i>
                                             </a>
+
+                                            @can('can_edit_order_measurements')
+                                                <span data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Select / Change Measurement">
+                                                    <button type="button" class="btn btn-sm bg-warning-subtle ms-2"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#changeMeasurementModal{{ $item->id }}">
+                                                        <i class="mdi mdi-swap-horizontal fs-14 text-warning"></i>
+                                                    </button>
+                                                </span>
+                                            @endcan
                                             {{-- @endif --}}
                                         </td>
                                     </tr>
