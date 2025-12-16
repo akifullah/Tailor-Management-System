@@ -491,11 +491,7 @@
                             name: 'kameez_shoulder',
                             input_type: 'input'
                         },
-                        {
-                            label: "Sleeve",
-                            name: 'kameez_sleeve',
-                            input_type: 'input'
-                        },
+                        
                         {
                             label: "Sleeve",
                             name: 'kameez_sleeve',

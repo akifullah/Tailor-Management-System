@@ -736,13 +736,60 @@ if (isset($measurement['data'])) {
                                                         </tr>
                                                     </thead>
                                                     <tbody>
+                                                        @php
+                                                            // Define pairs of main keys and their extras
+                                                            $mainExtraPairs = [
+                                                                'shoulder' => ['shoulder_extra1'],
+                                                                'sleeve' => ['sleeve_extra1'],
+                                                                'chest' => ['chest_extra1'],
+                                                                'waist' => ['waist_extra1'],
+                                                                // You may add more as per your requirements
+                                                            ];
+                                                            $usedKeys = [];
+                                                        @endphp
+
                                                         @foreach ($groupFields as $fieldKey => $fieldValue)
-                                                            <tr>
-                                                                <td class="text-capitalize">
-                                                                    <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
-                                                                </td>
-                                                                <td>{{ $fieldValue ?? 'N/A' }}</td>
-                                                            </tr>
+                                                            @php
+                                                                // If this key is an extra for a previous main field, skip it
+                                                                $alreadyHandled = false;
+                                                                foreach ($mainExtraPairs as $main => $extras) {
+                                                                    if (in_array($fieldKey, $extras)) {
+                                                                        $alreadyHandled = true;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if ($alreadyHandled || in_array($fieldKey, $usedKeys)) {
+                                                                    continue;
+                                                                }
+                                                            @endphp
+
+                                                            @if (isset($mainExtraPairs[$fieldKey]))
+                                                                <tr>
+                                                                    <td class="text-capitalize" style="width: 150px">
+                                                                        {{ Str::title(str_replace('_', ' ', $fieldKey)) }}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ $fieldValue }}
+                                                                        @foreach ($mainExtraPairs[$fieldKey] as $idx => $extraKey)
+                                                                            @if (isset($groupFields[$extraKey]) && $groupFields[$extraKey] !== '')
+                                                                                <span>
+                                                                                    | ({{ $groupFields[$extraKey] }})
+                                                                                </span>
+                                                                                @php $usedKeys[] = $extraKey; @endphp
+                                                                            @endif
+                                                                        @endforeach
+                                                                    </td>
+                                                                </tr>
+                                                            @else
+                                                                <tr>
+                                                                    <td class="text-capitalize" style="width: 150px">
+                                                                        {{ Str::title(str_replace('_', ' ', $fieldKey)) }}
+                                                                    </td>
+                                                                    <td>{{ $fieldValue }}</td>
+                                                                </tr>
+                                                            @endif
+
+                                                            @php $usedKeys[] = $fieldKey; @endphp
                                                         @endforeach
                                                     </tbody>
                                                 </table>

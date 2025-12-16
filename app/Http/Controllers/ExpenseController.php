@@ -13,7 +13,8 @@ class ExpenseController extends Controller
      */
     public function index()
     {
-        $expenses = Expense::with('user')->latest()->get();
+        $expenses = Expense::with('user')->orderBy('date', 'desc')->paginate(25);
+        // return $expenses;
         return view('admin.expenses.index', compact('expenses'));
     }
 

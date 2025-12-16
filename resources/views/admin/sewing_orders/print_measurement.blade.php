@@ -338,13 +338,57 @@
                             </h5>
                             <table class="measurement-table">
                                 <tbody>
+                                    @php
+                                        // Same logic as in customer_measurement.blade.php
+                                        $mainExtraPairs = [
+                                            'shoulder' => ['shoulder_extra1'],
+                                            'sleeve' => ['sleeve_extra1'],
+                                            'chest' => ['chest_extra1'],
+                                            'waist' => ['waist_extra1'],
+                                        ];
+                                        $usedKeys = [];
+                                    @endphp
                                     @foreach ($fields as $key => $itemVal)
-                                        <tr>
-                                            <th class="text-capitalize" style="width: 80px">
-                                                {{ Str::title(str_replace('_', ' ', $key)) }}
-                                            </th>
-                                            <td>{{ $itemVal }}</td>
-                                        </tr>
+                                        @php
+                                            // If this key is an extra for a previous main field, skip it
+                                            $alreadyHandled = false;
+                                            foreach ($mainExtraPairs as $main => $extras) {
+                                                if (in_array($key, $extras)) {
+                                                    $alreadyHandled = true;
+                                                    break;
+                                                }
+                                            }
+                                            if ($alreadyHandled || in_array($key, $usedKeys)) {
+                                                continue;
+                                            }
+                                        @endphp
+
+                                        @if (isset($mainExtraPairs[$key]))
+                                            <tr>
+                                                <th class="text-capitalize" style="width: 80px;">
+                                                    {{ Str::title(str_replace('_', ' ', $key)) }}
+                                                </th>
+                                                <td>
+                                                    {{ $itemVal }}
+                                                    @foreach ($mainExtraPairs[$key] as $idx => $extraKey)
+                                                        @if (isset($fields[$extraKey]) && $fields[$extraKey] !== '')
+                                                            <span>
+                                                                | ({{ $fields[$extraKey] }})
+                                                            </span>
+                                                            @php $usedKeys[] = $extraKey; @endphp
+                                                        @endif
+                                                    @endforeach
+                                                </td>
+                                            </tr>
+                                        @else
+                                            <tr>
+                                                <th class="text-capitalize" style="width: 80px;">
+                                                    {{ Str::title(str_replace('_', ' ', $key)) }}
+                                                </th>
+                                                <td>{{ $itemVal }}</td>
+                                            </tr>
+                                        @endif
+                                        @php $usedKeys[] = $key; @endphp
                                     @endforeach
                                 </tbody>
                             </table>
@@ -456,7 +500,7 @@
 
 
         @if (isset($measurement['notes']) && $measurement['notes'])
-            <div class="section-title" style="margin-top: 30px;">
+            <div class="section-title" style="margin-top: 20px;">
                 Notes
             </div>
             <div class="notes-box">

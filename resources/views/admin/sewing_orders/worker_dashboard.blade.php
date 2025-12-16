@@ -183,15 +183,15 @@
                                                 </a>
                                             </td>
                                             <td>{{ $item->sewingOrder->customer->name ?? '--' }}</td>
-                                        <td>{{ $item->product_name }}</td>
-                                        <td>{{ $item->color ?? '--' }}</td>
-                                        @php
-                                            $workerPivot = $item->workers->first()?->pivot;
-                                            $workerCost = $workerPivot->worker_cost ?? 0;
-                                        @endphp
-                                        <td>Rs {{ number_format($workerCost, 2) }}</td>
-                                        <td>{{ $item->qty }}</td>
-                                        <td>Rs {{ number_format($workerCost * $item->qty, 2) }}</td>
+                                            <td>{{ $item->product_name }}</td>
+                                            <td>{{ $item->color ?? '--' }}</td>
+                                            @php
+                                                $workerPivot = $item->workers->first()?->pivot;
+                                                $workerCost = $workerPivot->worker_cost ?? 0;
+                                            @endphp
+                                            <td>Rs {{ number_format($workerCost, 2) }}</td>
+                                            <td>{{ $item->qty }}</td>
+                                            <td>Rs {{ number_format($workerCost * $item->qty, 2) }}</td>
                                             <td>
                                                 @php
                                                     // Get the worker's individual status from pivot table
@@ -288,19 +288,16 @@ if (isset($measurement['data'])) {
                             @php
                                 // $measurement['data'] is now a nested keyed array like ['kameez' => [...], 'shalwar' => [...]]
                                 $dataGroups = [];
-                                // $measurement['data'] is an object of objects: ['kameez' => [...], 'shalwar' => [...]]
-                                // If it's a JSON string, decode it. If already array/object, use directly.
-if (isset($measurement['data'])) {
-    // Handle if $measurement['data'] is still JSON string (sometimes double-encoded)
-    if (is_string($measurement['data'])) {
-        $decoded = json_decode($measurement['data'], true);
-        if (is_array($decoded)) {
-            $dataGroups = $decoded;
-        }
-    } elseif (is_array($measurement['data'])) {
-        $dataGroups = $measurement['data'];
-    } elseif (is_object($measurement['data'])) {
-        $dataGroups = (array) $measurement['data'];
+                                if (isset($measurement['data'])) {
+                                    if (is_string($measurement['data'])) {
+                                        $decoded = json_decode($measurement['data'], true);
+                                        if (is_array($decoded)) {
+                                            $dataGroups = $decoded;
+                                        }
+                                    } elseif (is_array($measurement['data'])) {
+                                        $dataGroups = $measurement['data'];
+                                    } elseif (is_object($measurement['data'])) {
+                                        $dataGroups = (array) $measurement['data'];
                                     }
                                 }
                             @endphp
@@ -321,13 +318,58 @@ if (isset($measurement['data'])) {
                                                         </tr>
                                                     </thead>
                                                     <tbody>
+                                                        @php
+                                                            // Define pairs of main keys and their extras for relevant groups
+                                                            $mainExtraPairs = [
+                                                                'shoulder' => ['shoulder_extra1'],
+                                                                'sleeve' => ['sleeve_extra1'],
+                                                                'chest' => ['chest_extra1'],
+                                                                'waist' => ['waist_extra1'],
+                                                            ];
+                                                            $usedKeys = [];
+                                                        @endphp
                                                         @foreach ($groupFields as $fieldKey => $fieldValue)
-                                                            <tr>
-                                                                <td class="text-capitalize">
-                                                                    <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
-                                                                </td>
-                                                                <td>{{ $fieldValue ?? 'N/A' }}</td>
-                                                            </tr>
+                                                            @php
+                                                                // If this key is an extra for a previous main field, skip it
+                                                                $alreadyHandled = false;
+                                                                foreach ($mainExtraPairs as $main => $extras) {
+                                                                    if (in_array($fieldKey, $extras)) {
+                                                                        $alreadyHandled = true;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if ($alreadyHandled || in_array($fieldKey, $usedKeys)) {
+                                                                    continue;
+                                                                }
+                                                            @endphp
+
+                                                            @if (isset($mainExtraPairs[$fieldKey]))
+                                                                <tr>
+                                                                    <td class="text-capitalize" style="width: 150px">
+                                                                        <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ $fieldValue ?? 'N/A' }}
+                                                                        @foreach ($mainExtraPairs[$fieldKey] as $idx => $extraKey)
+                                                                            @if (isset($groupFields[$extraKey]) && $groupFields[$extraKey] !== '')
+                                                                                <span class="">
+                                                                                    | ({{ $groupFields[$extraKey] }})
+                                                                                </span>
+                                                                                @php $usedKeys[] = $extraKey; @endphp
+                                                                            @endif
+                                                                        @endforeach
+                                                                    </td>
+                                                                </tr>
+                                                            @else
+                                                                <tr>
+                                                                    <td class="text-capitalize" style="width: 150px">
+                                                                        <strong>{{ str_replace('_', ' ', ucwords($fieldKey, '_')) }}</strong>
+                                                                    </td>
+                                                                    <td>{{ $fieldValue ?? 'N/A' }}</td>
+                                                                </tr>
+                                                            @endif
+
+                                                            @php $usedKeys[] = $fieldKey; @endphp
                                                         @endforeach
                                                     </tbody>
                                                 </table>
@@ -342,43 +384,100 @@ if (isset($measurement['data'])) {
                                 </div>
 
                                 <div class="col-md-6">
-                                    @php
-                                        $styleData = [];
-                                        if (isset($measurement['style'])) {
+                                    @if (isset($measurement['style']))
+                                        @php
+                                            // Handle both JSON string and array formats
                                             if (is_string($measurement['style'])) {
-                                                $decodedStyle = json_decode($measurement['style'], true);
-                                                if (is_array($decodedStyle)) {
-                                                    $styleData = $decodedStyle;
-                                                }
-                                            } elseif (
-                                                is_array($measurement['style']) ||
-                                                is_object($measurement['style'])
-                                            ) {
+                                                $styleData = json_decode($measurement['style'], true);
+                                            } else {
                                                 $styleData = (array) $measurement['style'];
                                             }
-                                        }
-                                    @endphp
-                                    @if (!empty($styleData))
-                                        <h4 class="mt-3 mb-1 text-capitalize" style="font-weight: 700;">Style Details
-                                        </h4>
-                                        <table class="table table-bordered table-striped mb-2">
-                                            <thead>
-                                                <tr>
-                                                    <th>Attribute</th>
-                                                    <th>Value</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($styleData as $key => $value)
+                                            $rows = [];
+                                            $grouped = [];
+
+                                            // Allowed keys for extra values
+                                            $allowedExtraKeys = [
+                                                'style_patty_width',
+                                                'style_patty_length',
+                                                'style_collar_width',
+                                                'style_front_pocket_width',
+                                                'style_front_pocket_length',
+                                                'style_shalwar_jeeb',
+                                            ];
+                                            // Group keys by prefix
+                                            if ($styleData) {
+                                                foreach ($styleData as $key => $value) {
+                                                    $parts = explode('_', $key);
+                                                    $prefix = $parts[0] . '_' . $parts[1];
+
+                                                    // special case: style_front_pocket
+                                                    if ($parts[1] === 'front') {
+                                                        $prefix = $parts[0] . '_' . $parts[1] . '_' . $parts[2];
+                                                    }
+
+                                                    $grouped[$prefix][$key] = $value;
+                                                }
+
+                                                // Build rows
+                                                foreach ($grouped as $prefix => $items) {
+                                                    // If prefix main key does NOT exist, show items as normal rows
+                                                    if (!isset($items[$prefix])) {
+                                                        foreach ($items as $key => $value) {
+                                                            $rows[] = [
+                                                                'attribute' => str_replace('style_', '', $key),
+                                                                'value' => $value,
+                                                            ];
+                                                        }
+                                                        continue;
+                                                    }
+
+                                                    // Otherwise: normal processing
+                                                    $mainKey = $prefix;
+                                                    $mainValue = $items[$mainKey] ?? '';
+
+                                                    $extraValues = [];
+
+                                                    foreach ($items as $k => $v) {
+                                                        if ($k !== $mainKey && in_array($k, $allowedExtraKeys)) {
+                                                            $label = str_replace($mainKey . '_', '', $k);
+                                                            $extraValues[] = ucfirst($label) . ': ' . $v;
+                                                        }
+                                                    }
+
+                                                    $rows[] = [
+                                                        'attribute' => str_replace('style_', '', $mainKey),
+                                                        'value' =>
+                                                            $mainValue .
+                                                            (count($extraValues)
+                                                                ? '   | (' . implode(', ', $extraValues) . ')'
+                                                                : ''),
+                                                    ];
+                                                }
+                                            }
+                                        @endphp
+
+                                        @if(!empty($rows))
+                                            <h4 class="mt-3 mb-1 text-capitalize" style="font-weight:700;">Style Details
+                                            </h4>
+                                            <table class="table table-bordered table-striped mb-2">
+                                                <thead>
                                                     <tr>
-                                                        <td class="text-capitalize">
-                                                            {{ Str::title(str_replace(['style_', '_'], ['', ' '], $key)) }}
-                                                        </td>
-                                                        <td>{{ $value }}</td>
+                                                        <th>Attribute</th>
+                                                        <th>Value</th>
                                                     </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($rows as $row)
+                                                        <tr>
+                                                            <td class="text-capitalize" style="width:150px;">
+                                                                {{ Str::title(str_replace(['style_', '_'], ['', ' '], $row['attribute'])) }}
+                                                            </td>
+                                                            <td>{{ $row['value'] }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        @endif
                                     @endif
                                 </div>
 

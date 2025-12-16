@@ -495,29 +495,28 @@
                             name: 'kameez_Length',
                             input_type: 'input',
                             // extra_fields: [{
-                            //         label: "Extra 1",
-                            //         name: "kameez_Length_extra1"
-                            //     },
-                            //     {
-                            //         label: "Extra 2",
-                            //         name: "kameez_Length_extra2"
-                            //     }
-                            // ]
+                            //     label: "Length Extra",
+                            //     name: "kameez_Length_extra1"
+                            // }]
                         },
                         {
                             label: "Shoulder",
                             name: 'kameez_shoulder',
-                            input_type: 'input'
+                            input_type: 'input',
+                            // extra_fields: [{
+                            //     label: "Shoulder Extra",
+                            //     name: "kameez_shoulder_extra1"
+                            // }]
                         },
+
                         {
                             label: "Sleeve",
                             name: 'kameez_sleeve',
-                            input_type: 'input'
-                        },
-                        {
-                            label: "Sleeve",
-                            name: 'kameez_sleeve',
-                            input_type: 'input'
+                            input_type: 'input',
+                            // extra_fields: [{
+                            //     label: "Sleeve Extra",
+                            //     name: "kameez_sleeve_extra1"
+                            // }]
                         },
                         {
                             label: "Collar",
@@ -528,11 +527,19 @@
                             label: "Chest",
                             name: 'kameez_chest',
                             input_type: 'input',
+                            // extra_fields: [{
+                            //     label: "Chest Extra",
+                            //     name: "kameez_chest_extra1"
+                            // }]
                         },
                         {
                             label: "Waist",
                             name: 'kameez_waist',
                             input_type: 'input',
+                            // extra_fields: [{
+                            //     label: "Waist Extra",
+                            //     name: "kameez_waist_extra1"
+                            // }]
                         },
                         {
                             label: "Width",

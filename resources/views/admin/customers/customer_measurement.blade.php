@@ -98,13 +98,61 @@
                                                     </thead>
                                                     <tbody>
                                                         @if (is_array($fields) || is_object($fields))
+                                                            @php
+                                                                // Define pairs of main keys and their extras (e.g., shoulder => shoulder_extra1)
+                                                                $mainExtraPairs = [
+                                                                    'shoulder' => ['shoulder_extra1'],
+                                                                    'sleeve' => ['sleeve_extra1'],
+                                                                    'chest' => ['chest_extra1'],
+                                                                    'waist' => ['waist_extra1'],
+                                                                ];
+
+                                                                $usedKeys = [];
+                                                            @endphp
+
                                                             @foreach ($fields as $key => $item)
-                                                                <tr>
-                                                                    <td class="text-capitalize" style="width: 150px">
-                                                                        {{ Str::title(str_replace('_', ' ', $key)) }}
-                                                                    </td>
-                                                                    <td>{{ $item }}</td>
-                                                                </tr>
+                                                                @php
+                                                                    // If this key is an extra for a previous main field, skip it
+                                                                    $alreadyHandled = false;
+                                                                    foreach ($mainExtraPairs as $main => $extras) {
+                                                                        if (in_array($key, $extras)) {
+                                                                            $alreadyHandled = true;
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                    if ($alreadyHandled || in_array($key, $usedKeys)) {
+                                                                        continue;
+                                                                    }
+                                                                @endphp
+
+                                                                @if (isset($mainExtraPairs[$key]))
+                                                                    <tr>
+                                                                        <td class="text-capitalize" style="width: 150px">
+                                                                            {{ Str::title(str_replace('_', ' ', $key)) }}
+                                                                        </td>
+                                                                        <td>
+                                                                            {{ $item }}
+                                                                            @foreach ($mainExtraPairs[$key] as $idx => $extraKey)
+                                                                                @if (isset($fields[$extraKey]) && $fields[$extraKey] !== '')
+                                                                                    <span class=" ">
+                                                                                        {{-- | {{ Str::title(str_replace('_', ' ', $extraKey)) }}: {{ $fields[$extraKey] }} --}}
+                                                                                        | ({{ $fields[$extraKey] }})
+                                                                                    </span>
+                                                                                    @php $usedKeys[] = $extraKey; @endphp
+                                                                                @endif
+                                                                            @endforeach
+                                                                        </td>
+                                                                    </tr>
+                                                                @else
+                                                                    <tr>
+                                                                        <td class="text-capitalize" style="width: 150px">
+                                                                            {{ Str::title(str_replace('_', ' ', $key)) }}
+                                                                        </td>
+                                                                        <td>{{ $item }}</td>
+                                                                    </tr>
+                                                                @endif
+
+                                                                @php $usedKeys[] = $key; @endphp
                                                             @endforeach
                                                         @else
                                                             <tr>

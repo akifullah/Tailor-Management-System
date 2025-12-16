@@ -18,7 +18,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped dt-responsive nowrap w-100 data-table">
+                            <table class="table table-striped dt-responsive nowrap w-100 ">
                                 <thead>
                                     <tr>
                                         <th>Date</th>
@@ -32,7 +32,7 @@
                                 <tbody>
                                     @foreach ($expenses as $expense)
                                         <tr>
-                                            <td>{{ \Carbon\Carbon::parse($expense->date)->format('d M, Y') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($expense->date)->format('d M, Y h:i A') }}</td>
                                             <td>{{ $expense->title }}</td>
                                             <td>{{ $expense->category ?? '-' }}</td>
                                             <td>{{ number_format($expense->amount, 2) }}</td>
@@ -55,6 +55,9 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="mt-3">
+                            {{ $expenses->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>

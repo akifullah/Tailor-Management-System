@@ -89,6 +89,7 @@ class WorkerLedgerController extends Controller
 
     public function addPaymentForAdmin(Request $request, User $worker)
     {
+        // return $worker;
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|in:cash,online,bank_transfer,cheque',
@@ -113,11 +114,11 @@ class WorkerLedgerController extends Controller
 
         // Mirror worker payment in expenses for accounting
         Expense::create([
-            'title' => 'Worker Payment',
+            'title' => 'Payment to ' . $worker->name,
             'amount' => $validated['amount'],
-            'description' => $validated['notes'] ?? 'Worker payment',
-            'date' => $paymentDate->toDateString(),
-            'category' => 'worker_payment',
+            'description' => 'Payment to ' . $worker->name,
+            'date' => $paymentDate,
+            'category' => 'Worker Payment',
             'user_id' => Auth::id(),
         ]);
 
