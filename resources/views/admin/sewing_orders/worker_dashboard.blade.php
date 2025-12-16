@@ -183,7 +183,7 @@
                                                 </a>
                                             </td>
                                             <td>{{ $item->sewingOrder->customer->name ?? '--' }}</td>
-                                            <td>{{ $item->product_name }}</td>
+                                            <td class="text-capitalize">{{ $item->product_name }}</td>
                                             <td>{{ $item->color ?? '--' }}</td>
                                             @php
                                                 $workerPivot = $item->workers->first()?->pivot;

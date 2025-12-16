@@ -110,38 +110,151 @@
         <div class="row">
             <div class="col-lg-7">
                 <div class="card mb-3">
-                    <div class="card-body table-responsive">
-                        <h5 class="mb-3">Work Items</h5>
-                        <table class="table table-striped table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Order #</th>
-                                    <th>Customer</th>
-                                    <th>Product</th>
-                                    <th>Status</th>
-                                    <th>Qty</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($workItems as $index => $item)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $item->sewingOrder->sewing_order_number ?? '-' }}</td>
-                                        <td>{{ $item->sewingOrder->customer->name ?? '-' }}</td>
-                                        <td>{{ $item->product_name }}</td>
-                                        <td>{{ ucfirst(str_replace('_', ' ', $item->pivot->status ?? 'pending')) }}</td>
-                                        <td>{{ $item->qty }}</td>
-                                        <td>Rs {{ number_format(($item->pivot->worker_cost ?? 0) * $item->qty, 2) }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted">No work items found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    <div class="card-body">
+                        <!-- Bootstrap 5 Tabs -->
+                        <ul class="nav nav-tabs mb-3" id="workItemsTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
+                                    Pending <span class="badge bg-secondary">{{ $workStats['pending'] ?? 0 }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="in-progress-tab" data-bs-toggle="tab" data-bs-target="#in-progress" type="button" role="tab" aria-controls="in-progress" aria-selected="false">
+                                    In Progress <span class="badge bg-warning">{{ $workStats['in_progress'] ?? 0 }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">
+                                    Completed <span class="badge bg-success">{{ $workStats['completed'] ?? 0 }}</span>
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="workItemsTabContent">
+                            <!-- Pending Items Tab -->
+                            <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Order #</th>
+                                                <th>Customer</th>
+                                                <th>Product</th>
+                                                <th>Status</th>
+                                                <th>Qty</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($pendingItems as $index => $item)
+                                                <tr>
+                                                    <td>{{ $pendingItems->firstItem() + $index }}</td>
+                                                    <td>{{ $item->sewingOrder->sewing_order_number ?? '-' }}</td>
+                                                    <td>{{ $item->sewingOrder->customer->name ?? '-' }}</td>
+                                                    <td class="text-capitalize">{{ $item->product_name }}</td>
+                                                    <td>{{ ucfirst(str_replace('_', ' ', $item->pivot->status ?? 'pending')) }}</td>
+                                                    <td>{{ $item->qty }}</td>
+                                                    <td>Rs {{ number_format(($item->pivot->worker_cost ?? 0) * $item->qty, 2) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No pending items found.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @if($pendingItems->hasPages())
+                                    <div class="mt-3">
+                                        {{ $pendingItems->links('pagination::bootstrap-5') }}
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- In Progress Items Tab -->
+                            <div class="tab-pane fade" id="in-progress" role="tabpanel" aria-labelledby="in-progress-tab">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Order #</th>
+                                                <th>Customer</th>
+                                                <th>Product</th>
+                                                <th>Status</th>
+                                                <th>Qty</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($inProgressItems as $index => $item)
+                                                <tr>
+                                                    <td>{{ $inProgressItems->firstItem() + $index }}</td>
+                                                    <td>{{ $item->sewingOrder->sewing_order_number ?? '-' }}</td>
+                                                    <td>{{ $item->sewingOrder->customer->name ?? '-' }}</td>
+                                                    <td class="text-capitalize">{{ $item->product_name }}</td>
+                                                    <td>{{ ucfirst(str_replace('_', ' ', $item->pivot->status ?? 'in_progress')) }}</td>
+                                                    <td>{{ $item->qty }}</td>
+                                                    <td>Rs {{ number_format(($item->pivot->worker_cost ?? 0) * $item->qty, 2) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No in progress items found.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @if($inProgressItems->hasPages())
+                                    <div class="mt-3">
+                                        {{ $inProgressItems->links('pagination::bootstrap-5') }}
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Completed Items Tab -->
+                            <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Order #</th>
+                                                <th>Customer</th>
+                                                <th class="text-capitalize">Product</th>
+                                                <th>Status</th>
+                                                <th>Qty</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($completedItems as $index => $item)
+                                                <tr>
+                                                    <td>{{ $completedItems->firstItem() + $index }}</td>
+                                                    <td>{{ $item->sewingOrder->sewing_order_number ?? '-' }}</td>
+                                                    <td>{{ $item->sewingOrder->customer->name ?? '-' }}</td>
+                                                    <td>{{ $item->product_name }}</td>
+                                                    <td>{{ ucfirst(str_replace('_', ' ', $item->pivot->status ?? 'completed')) }}</td>
+                                                    <td>{{ $item->qty }}</td>
+                                                    <td>Rs {{ number_format(($item->pivot->worker_cost ?? 0) * $item->qty, 2) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No completed items found.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @if($completedItems->hasPages())
+                                    <div class="mt-3">
+                                        {{ $completedItems->links('pagination::bootstrap-5') }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

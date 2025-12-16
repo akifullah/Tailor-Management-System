@@ -42,30 +42,30 @@ class WorkerLedgerController extends Controller
         return view('admin.workers.ledger_index', compact('workers'));
     }
 
-    public function showForAdmin(User $worker)
+    public function showForAdmin(User $worker, Request $request)
     {
         $worker->load(['workerPayments' => function ($q) {
             $q->where('type', 'payment')->orderByDesc('payment_date');
         }]);
 
-        // Load work items with pivot data for this specific worker
-        $workItems = $worker->sewingOrderItems()
+        // Load all work items for stats calculation
+        $allWorkItems = $worker->sewingOrderItems()
             ->with(['sewingOrder.customer'])
-            ->latest()->get();
+            ->get();
 
         // Work status stats based on worker's individual pivot status
         $workStats = [
-            'total'       => $workItems->count(),
-            'pending'     => $workItems->filter(fn($item) => $item->pivot->status === 'pending')->count(),
-            'in_progress' => $workItems->filter(fn($item) => $item->pivot->status === 'in_progress')->count(),
-            'cutter'      => $workItems->filter(fn($item) => $item->pivot->status === 'cutter')->count(),
-            'sewing'      => $workItems->filter(fn($item) => $item->pivot->status === 'sewing')->count(),
-            'completed'   => $workItems->filter(fn($item) => $item->pivot->status === 'completed')->count(),
-            'on_hold'     => $workItems->filter(fn($item) => $item->pivot->status === 'on_hold')->count(),
-            'cancelled'   => $workItems->where('status', 'cancelled')->count(),
+            'total'       => $allWorkItems->count(),
+            'pending'     => $allWorkItems->filter(fn($item) => $item->pivot->status === 'pending')->count(),
+            'in_progress' => $allWorkItems->filter(fn($item) => $item->pivot->status === 'in_progress')->count(),
+            'cutter'      => $allWorkItems->filter(fn($item) => $item->pivot->status === 'cutter')->count(),
+            'sewing'      => $allWorkItems->filter(fn($item) => $item->pivot->status === 'sewing')->count(),
+            'completed'   => $allWorkItems->filter(fn($item) => $item->pivot->status === 'completed')->count(),
+            'on_hold'     => $allWorkItems->filter(fn($item) => $item->pivot->status === 'on_hold')->count(),
+            'cancelled'   => $allWorkItems->where('status', 'cancelled')->count(),
         ];
 
-        $completedAmount = $workItems
+        $completedAmount = $allWorkItems
             ->filter(fn($item) => $item->pivot->status === 'completed')
             ->sum(fn($item) => ($item->pivot->worker_cost ?? 0) * $item->qty);
 
@@ -84,7 +84,45 @@ class WorkerLedgerController extends Controller
             ->orderByDesc('payment_date')
             ->get();
 
-        return view('admin.workers.ledger_show', compact('worker', 'summary', 'workItems', 'payments', 'workStats'));
+        // Paginated work items by status
+        $pendingItems = $worker->sewingOrderItems()
+            ->wherePivot('status', 'pending')
+            ->with(['sewingOrder.customer'])
+            ->latest()
+            ->paginate(15, ['*'], 'pending_page');
+
+        $inProgressItems = $worker->sewingOrderItems()
+            ->wherePivot('status', 'in_progress')
+            ->with(['sewingOrder.customer'])
+            ->latest()
+            ->paginate(15, ['*'], 'in_progress_page');
+
+        $completedItems = $worker->sewingOrderItems()
+            ->wherePivot('status', 'completed')
+            ->with(['sewingOrder.customer'])
+            ->latest()
+            ->paginate(15, ['*'], 'completed_page');
+
+        // Determine active tab based on query parameters
+        $activeTab = 'pending'; // default
+        if ($request->has('completed_page')) {
+            $activeTab = 'completed';
+        } elseif ($request->has('in_progress_page')) {
+            $activeTab = 'in_progress';
+        } elseif ($request->has('pending_page')) {
+            $activeTab = 'pending';
+        }
+
+        return view('admin.workers.ledger_show', compact(
+            'worker', 
+            'summary', 
+            'payments', 
+            'workStats',
+            'pendingItems',
+            'inProgressItems',
+            'completedItems',
+            'activeTab'
+        ));
     }
 
     public function addPaymentForAdmin(Request $request, User $worker)
