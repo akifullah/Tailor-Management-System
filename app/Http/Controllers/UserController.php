@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\WorkerType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
@@ -40,6 +41,7 @@ class UserController extends Controller
         $data['users'] = $query->with(['roles', 'permissions'])->get();
         $data['roles'] = Role::all();
         $data['permissions'] = Permission::all();
+        $data["worker_types"] = WorkerType::all();
         return view("admin.users.index", $data);
     }
     
@@ -67,7 +69,7 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             "name" => "required",
-            "worker_type" => "required",
+            "worker_type_id" => "required",
             "email" => "required|email|unique:users,email" . ($request->id ? ',' . $request->id : ''),
             "password" => ($request->id ? "nullable" : "required") . "|min:5"
         ]);
@@ -81,7 +83,12 @@ class UserController extends Controller
         }
 
         // Only take valid fields
-        $userData = $request->only(['name', 'email', "phone", "address", "worker_type"]);
+        $userData = $request->only(['name', 'email', "phone", "address", "worker_type_id"]);
+        $worker_type = WorkerType::find($request->worker_type_id);
+        if($worker_type){
+            $userData["worker_type"] = $worker_type->type;
+            $userData["worker_cost"] = $worker_type->worker_cost;
+        }
 
         // Handle password
         if ($request->filled('password')) {

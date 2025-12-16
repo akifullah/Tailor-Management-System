@@ -19,6 +19,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SewingOrderController;
 use App\Http\Controllers\WorkerLedgerController;
+use App\Http\Controllers\WorkerTypeController;
 
 Route::get("/", function () {
     if (Auth::check()) {
@@ -124,6 +125,8 @@ Route::middleware(["auth"])->group(function () {
         Route::get('workers/ledger', [WorkerLedgerController::class, 'indexForAdmin'])->name('admin.workers.ledger.index');
         Route::get('workers/{worker}/ledger', [WorkerLedgerController::class, 'showForAdmin'])->name('admin.workers.ledger.show');
         Route::post('workers/{worker}/ledger/payments', [WorkerLedgerController::class, 'addPaymentForAdmin'])->name('admin.workers.ledger.payments.store');
+        Route::post('workers/types/{workerType}', [WorkerTypeController::class, 'destroy'])->name('workers.types.destroy');
+        Route::resource('workers/types', WorkerTypeController::class)->names('workers.types');
     });
 
     Route::middleware(['permission:worker-dashboard'])->group(function () {

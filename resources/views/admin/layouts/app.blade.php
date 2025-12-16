@@ -216,6 +216,16 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                             </li>
                         @endcan
 
+                        {{-- @can('manage-workers') --}}
+                            <li>
+                                <a href="{{ route('workers.types.index') }}"
+                                    class="{{ request()->routeIs('workers.types.*') ? 'tp-link active' : '' }}">
+                                    <i data-feather="briefcase"></i>
+                                    <span> Workers Types </span>
+                                </a>
+                            </li>
+                        {{-- @endcan --}}
+
                         @can('manage-customers')
                             <li>
                                 <a href="{{ route('customers.index') }}"

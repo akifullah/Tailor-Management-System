@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->string('role')->nullable();
-            $table->string('worker_type')->nullable();
+            $table->foreignId('worker_type_id')->nullable()->constrained('worker_types')->onDelete('restrict');
+            $table->string('worker_type')->nullable(); 
+            $table->decimal("worker_cost", 10, 2)->default(0)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

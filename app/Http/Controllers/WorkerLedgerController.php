@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Expense;
 use App\Models\SewingOrderItem;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -49,7 +51,7 @@ class WorkerLedgerController extends Controller
         // Load work items with pivot data for this specific worker
         $workItems = $worker->sewingOrderItems()
             ->with(['sewingOrder.customer'])
-            ->get();
+            ->latest()->get();
 
         // Work status stats based on worker's individual pivot status
         $workStats = [
@@ -63,12 +65,18 @@ class WorkerLedgerController extends Controller
             'cancelled'   => $workItems->where('status', 'cancelled')->count(),
         ];
 
+        $completedAmount = $workItems
+            ->filter(fn($item) => $item->pivot->status === 'completed')
+            ->sum(fn($item) => ($item->pivot->worker_cost ?? 0) * $item->qty);
+
         $paid = $worker->workerPayments()
             ->where('type', 'payment')
             ->sum('amount');
 
         $summary = [
+            'completed_amount' => $completedAmount,
             'paid' => $paid,
+            'remaining' => $completedAmount - $paid,
         ];
 
         $payments = $worker->workerPayments()
@@ -88,7 +96,9 @@ class WorkerLedgerController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $paymentDate = $validated['payment_date'] ?? now();
+        $paymentDate = $validated['payment_date']
+            ? Carbon::parse($validated['payment_date'])
+            : now();
 
         Payment::create([
             'payable_type' => User::class,
@@ -99,6 +109,16 @@ class WorkerLedgerController extends Controller
             'payment_date' => $paymentDate,
             'notes' => $validated['notes'] ?? null,
             'created_by' => Auth::id(),
+        ]);
+
+        // Mirror worker payment in expenses for accounting
+        Expense::create([
+            'title' => 'Worker Payment',
+            'amount' => $validated['amount'],
+            'description' => $validated['notes'] ?? 'Worker payment',
+            'date' => $paymentDate->toDateString(),
+            'category' => 'worker_payment',
+            'user_id' => Auth::id(),
         ]);
 
         return redirect()
@@ -136,7 +156,13 @@ class WorkerLedgerController extends Controller
             ->sum('amount');
 
         $summary = [
+            'completed_amount' => $workItems
+                ->filter(fn($item) => $item->pivot->status === 'completed')
+                ->sum(fn($item) => ($item->pivot->worker_cost ?? 0) * $item->qty),
             'paid' => $paid,
+            'remaining' => $workItems
+                ->filter(fn($item) => $item->pivot->status === 'completed')
+                ->sum(fn($item) => ($item->pivot->worker_cost ?? 0) * $item->qty) - $paid,
         ];
 
         $payments = $worker->workerPayments()

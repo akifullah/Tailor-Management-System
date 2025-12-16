@@ -16,8 +16,8 @@
         @endif
 
         <!-- Stats Cards -->
-        <div class="row align-items-stretch mb-3">
-            <div class="col-md-3">
+        <div class="row align-items-stretch">
+            <div class="col-md-3 mb-3">
                 <div class="card h-100 border-primary">
                     <div class="card-body">
                         <h5>Total Assigned</h5>
@@ -26,7 +26,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card h-100 border-secondary">
                     <div class="card-body">
                         <h5>Pending</h5>
@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card h-100 border-warning">
                     <div class="card-body">
                         <h5>In Progress</h5>
@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card h-100 border-success">
                     <div class="card-body">
                         <h5>Completed</h5>
@@ -54,9 +54,36 @@
             </div>
         </div>
 
+        <div class="row align-items-stretch mb-3">
+            <div class="col-md-4">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <h6>Amount For Completed Items</h6>
+                        <h3 class="text-success">Rs {{ number_format($stats['completed_amount'] ?? 0, 2) }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <h6>Total Paid To Me</h6>
+                        <h3 class="text-success">Rs {{ number_format($stats['paid_amount'] ?? 0, 2) }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-warning">
+                    <div class="card-body">
+                        <h6>Remaining (Completed - Paid)</h6>
+                        <h3 class="text-warning">Rs {{ number_format($stats['remaining_amount'] ?? 0, 2) }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Additional Stats Cards -->
         <div class="row align-items-stretch mb-3">
-            {{-- <div class="col-md-3">
+            {{-- <div class="col-md-3 mb-3">
                 <div class="card h-100 border-info">
                     <div class="card-body">
                         <h5>On Hold</h5>
@@ -64,7 +91,7 @@
                     </div>
                 </div>
             </div> --}}
-            {{-- <div class="col-md-3">
+            {{-- <div class="col-md-3 mb-3">
                 <div class="card h-100 border-danger">
                     <div class="card-body">
                         <h5>Cancelled</h5>
@@ -72,7 +99,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card h-100 border-success">
                     <div class="card-body">
                         <h5>Delivered</h5>
@@ -80,7 +107,7 @@
                     </div>
                 </div>
             </div> --}}
-            {{-- <div class="col-md-3">
+            {{-- <div class="col-md-3 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
                         <h5>Completion Rate</h5>
@@ -100,7 +127,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-body table-responsive">
                         <div class="mb-3">
                             <form method="GET" action="{{ route('worker.dashboard') }}">
                                 <div class="row g-2 justify-content-end align-items-end">
@@ -137,7 +164,7 @@
                                     <th>Customer</th>
                                     <th>Product Name</th>
                                     <th>Color</th>
-                                    <th>Sewing Price</th>
+                                    <th>Worker Cost</th>
                                     <th>Qty</th>
                                     <th>Total</th>
                                     <th>Status</th>
@@ -156,11 +183,15 @@
                                                 </a>
                                             </td>
                                             <td>{{ $item->sewingOrder->customer->name ?? '--' }}</td>
-                                            <td>{{ $item->product_name }}</td>
-                                            <td>{{ $item->color ?? '--' }}</td>
-                                            <td>Rs {{ number_format($item->sewing_price, 2) }}</td>
-                                            <td>{{ $item->qty }}</td>
-                                            <td>Rs {{ number_format($item->total_price, 2) }}</td>
+                                        <td>{{ $item->product_name }}</td>
+                                        <td>{{ $item->color ?? '--' }}</td>
+                                        @php
+                                            $workerPivot = $item->workers->first()?->pivot;
+                                            $workerCost = $workerPivot->worker_cost ?? 0;
+                                        @endphp
+                                        <td>Rs {{ number_format($workerCost, 2) }}</td>
+                                        <td>{{ $item->qty }}</td>
+                                        <td>Rs {{ number_format($workerCost * $item->qty, 2) }}</td>
                                             <td>
                                                 @php
                                                     // Get the worker's individual status from pivot table

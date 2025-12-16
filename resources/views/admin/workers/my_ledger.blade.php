@@ -9,7 +9,7 @@
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-primary h-100">
                     <div class="card-body">
                         <h6 class="mb-1">Total Assigned Items</h6>
@@ -17,7 +17,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-secondary h-100">
                     <div class="card-body">
                         <h6 class="mb-1">Pending</h6>
@@ -25,7 +25,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-warning h-100">
                     <div class="card-body">
                         <h6 class="mb-1">In Progress</h6>
@@ -33,7 +33,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            {{-- <div class="col-md-3 mb-3">
                 <div class="card border-info h-100">
                     <div class="card-body">
                         <h6 class="mb-1">On Hold</h6>
@@ -43,8 +43,8 @@
             </div>
         </div>
 
-        <div class="row mb-3">
-            <div class="col-md-3">
+        <div class="row mb-3"> --}}
+            <div class="col-md-3 mb-3">
                 <div class="card border-success h-100">
                     <div class="card-body">
                         <h6 class="mb-1">Completed / Delivered</h6>
@@ -52,7 +52,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-danger h-100">
                     <div class="card-body">
                         <h6 class="mb-1">Cancelled</h6>
@@ -60,11 +60,30 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-success h-100">
                     <div class="card-body">
                         <h5>Total Paid To Me</h5>
                         <h2 class="text-success">Rs {{ number_format($summary['paid'] ?? 0, 2) }}</h2>
+                    </div>
+                </div>
+            </div>
+        {{-- </div>
+
+        <div class="row mb-3"> --}}
+            <div class="col-md-3 mb-3">
+                <div class="card border-success h-100">
+                    <div class="card-body">
+                        <h6 class="mb-1">Amount For Completed Items</h6>
+                        <h3 class="mb-0 text-success">Rs {{ number_format($summary['completed_amount'] ?? 0, 2) }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-warning h-100">
+                    <div class="card-body">
+                        <h6 class="mb-1">Remaining (Completed - Paid)</h6>
+                        <h3 class="mb-0 text-warning">Rs {{ number_format(($summary['remaining'] ?? 0), 2) }}</h3>
                     </div>
                 </div>
             </div>
@@ -96,7 +115,7 @@
                                         <td>{{ $item->product_name }}</td>
                                         <td>{{ ucfirst(str_replace('_', ' ', $item->pivot->status ?? 'pending')) }}</td>
                                         <td>{{ $item->qty }}</td>
-                                        <td>Rs {{ number_format($item->total_price, 2) }}</td>
+                                        <td>Rs {{ number_format(($item->pivot->worker_cost ?? 0) * $item->qty, 2) }}</td>
                                     </tr>
                                 @empty
                                     <tr>

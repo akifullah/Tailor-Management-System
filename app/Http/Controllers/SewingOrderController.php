@@ -205,7 +205,19 @@ class SewingOrderController extends Controller
                 ]);
 
                 if (isset($itemData['assign_to']) && is_array($itemData['assign_to'])) {
-                    $sewingOrderItem->workers()->attach($itemData['assign_to']);
+                    $workers = User::whereIn('id', $itemData['assign_to'])->get();
+
+                    $pivotData = [];
+
+                    foreach ($workers as $worker) {
+                        $pivotData[$worker->id] = [
+                            'worker_cost' => $worker->worker_cost ?? 0,
+                            'status' => 'pending',
+                        ];
+                    }
+
+                    $sewingOrderItem->workers()->attach($pivotData);
+                    // $sewingOrderItem->workers()->attach($itemData['assign_to']);
                 }
             }
 
@@ -559,6 +571,26 @@ class SewingOrderController extends Controller
                 $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'in_progress');
             })->sum('total_price'),
         ];
+
+        // Compute worker-side earnings for completed items (worker_cost * qty)
+        $completedItems = SewingOrderItem::with(['workers' => function ($q) use ($userId) {
+            $q->where('users.id', $userId);
+        }])->whereHas('workers', function ($q) use ($userId) {
+            $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'completed');
+        })->get();
+
+        $completedAmount = $completedItems->sum(function ($item) {
+            $pivot = $item->workers->first()?->pivot;
+            return ($pivot->worker_cost ?? 0) * $item->qty;
+        });
+
+        $paidAmount = Auth::user()->workerPayments()
+            ->where('type', 'payment')
+            ->sum('amount');
+
+        $stats['completed_amount'] = $completedAmount;
+        $stats['paid_amount'] = $paidAmount;
+        $stats['remaining_amount'] = $completedAmount - $paidAmount;
 
         // Filtered query for table display - load workers with pivot data
         $query = SewingOrderItem::with(['sewingOrder.customer', 'workers' => function ($q) use ($userId) {

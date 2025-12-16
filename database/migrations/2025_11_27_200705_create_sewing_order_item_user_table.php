@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('sewing_order_item_id')->constrained('sewing_order_items')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('status', ['pending', "on_hold", 'in_progress', "cutter", "sewing", 'completed'])->default('pending');
+            $table->decimal("worker_cost", 10, 2)->default(0)->nullable();
             $table->timestamps();
         });
 

@@ -49,7 +49,7 @@ class User extends Authenticatable
     public function sewingOrderItems()
     {
         return $this->belongsToMany(SewingOrderItem::class, 'sewing_order_item_user')
-            ->withPivot('status')
+            ->withPivot(['worker_cost','status'])
             ->withTimestamps();
     }
 

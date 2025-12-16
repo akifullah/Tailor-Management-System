@@ -38,7 +38,7 @@ class SewingOrderItem extends Model
     public function workers()
     {
         return $this->belongsToMany(User::class, 'sewing_order_item_user')
-            ->withPivot('status')
+            ->withPivot(['worker_cost','status'])
             ->withTimestamps();
     }
 

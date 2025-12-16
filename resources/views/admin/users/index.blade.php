@@ -256,12 +256,19 @@
                                 </div><!--end col-->
                                 <div class="col-xxl-6">
                                     <label for="worker_type" class="form-label">Worker Type</label>
-                                    <select class="form-select" id="worker_type" name="worker_type" required>
+                                    <select class="form-select text-capitalize" id="worker_type_id" name="worker_type_id" required>
                                         <option disabled selected>Select Worker Type</option>
-                                        <option value="cutter">Cutter</option>
+                                        @if ($worker_types->isNotEmpty())
+                                            {
+                                            @foreach ($worker_types as $type)
+                                                <option value="{{ $type-> id }}">{{ $type->type }}</option>
+                                            @endforeach
+                                            }
+                                        @endif
+                                        {{-- <option value="cutter">Cutter</option>
                                         <option value="wiscot maker">Wiscot Maker</option>
                                         <option value="suit maker">Suit Maker</option>
-                                        <option value="coat maker">Coat Maker</option>
+                                        <option value="coat maker">Coat Maker</option> --}}
                                     </select>
                                 </div>
 
@@ -305,13 +312,13 @@
                 name,
                 phone,
                 email,
-                worker_type
+                worker_type_id
             } = user;
             setValById("id", id)
             setValById("name", name)
             setValById("email", email)
             setValById("phone", phone)
-            setValById("worker_type", worker_type)
+            setValById("worker_type_id", worker_type_id)
 
             $("#password").removeAttr("required");
         }
