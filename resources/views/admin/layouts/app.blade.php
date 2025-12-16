@@ -216,7 +216,7 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                             </li>
                         @endcan
 
-                        {{-- @can('manage-workers') --}}
+                        @can('manage-workers')
                             <li>
                                 <a href="{{ route('workers.types.index') }}"
                                     class="{{ request()->routeIs('workers.types.*') ? 'tp-link active' : '' }}">
@@ -224,7 +224,7 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                     <span> Workers Types </span>
                                 </a>
                             </li>
-                        {{-- @endcan --}}
+                        @endcan
 
                         @can('manage-customers')
                             <li>
