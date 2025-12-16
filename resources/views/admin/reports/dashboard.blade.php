@@ -111,7 +111,7 @@
                             <h5 class="mb-0">Today's Sewing Orders ({{ count($todaySewingOrdersList) }})</h5>
                         </div>
                         <div class="card-body table-responsive">
-                            <table class="table table-sm table-striped align-middle">
+                            <table class="table table-hover table-sm table-striped align-middle">
                                 <thead>
                                     <tr>
                                         <th>Order #</th>
@@ -154,7 +154,7 @@
                             <h5 class="mb-0">Today's Orders ({{ count($todayOrdersList) }})</h5>
                         </div>
                         <div class="card-body table-responsive">
-                            <table class="table table-sm table-striped align-middle">
+                            <table class="table table-hover table-sm table-striped align-middle">
                                 <thead>
                                     <tr>
                                         <th>Order #</th>
@@ -209,7 +209,7 @@
                     <h5 class="mb-0">Delivered Sewing Orders (Payment Pending)</h5>
                 </div>
                 <div class="card-body table-responsive">
-                    <table class="table table-sm table-striped align-middle">
+                    <table class="table table-hover table-sm table-striped align-middle">
                         <thead>
                             <tr>
                                 <th>Order #</th>
@@ -271,7 +271,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-sm">
+                            <table class="table table-hover table-striped table-sm">
                                 <thead>
                                     <tr>
                                         <th>Order #</th>
@@ -284,7 +284,8 @@
                                 <tbody>
                                     @forelse($nearestSewingOrders as $order)
                                         <tr>
-                                            <td>{{ $order->sewing_order_number }}</td>
+                                            <td>
+                                                <a href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number }}</a></td>
                                             <td>{{ $order->customer->name }}</td>
                                             <td>
                                                 {{ $order->delivery_date->format('Y-m-d') }}
@@ -320,7 +321,7 @@
                                 <h5 class="mb-0">Payment Methods Breakdown</h5>
                             </div>
                             <div class="card-body">
-                                <table class="table table-sm">
+                                <table class="table table-hover table-sm">
                                     <thead>
                                         <tr>
                                             <th>Payment Method</th>
@@ -375,7 +376,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-sm">
+                                    <table class="table table-hover table-sm">
                                         <thead>
                                             <tr>
                                                 <th>Product</th>
@@ -413,7 +414,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-striped table-sm">
+                                <table class="table table-hover table-striped table-sm">
                                     <thead>
                                         <tr>
                                             <th>Date</th>
@@ -459,7 +460,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-striped table-sm">
+                                <table class="table table-hover table-striped table-sm">
                                     <thead>
                                         <tr>
                                             <th>Order #</th>
@@ -477,7 +478,9 @@
                                                     $remaining = $order->total_amount - $totalPaid;
                                                 @endphp
                                                 <tr>
-                                                    <td>{{ $order->order_number }}</td>
+                                                    <td>
+                                                        <a href="{{ route('orders.show', $order->id) }}">{{ $order->order_number }}</a>
+                                                    </td>
                                                     <td>{{ $order?->customer?->name }}</td>
                                                     <td>{{ $order->order_date }}</td>
                                                     <td>Rs {{ number_format($order->total_amount, 2) }}</td>

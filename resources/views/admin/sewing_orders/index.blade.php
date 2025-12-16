@@ -60,7 +60,7 @@
                             </form>
                         </div>
                         <table id="datatable-buttons"
-                            class="table data-table table-striped table-bordered dt-responsive nowrap">
+                            class="table data-table table-striped table-hover table-bordered dt-responsive nowrap">
                             <thead>
                                 <tr>
                                     <th>#ID</th>
@@ -93,7 +93,7 @@
                                             }
                                         @endphp
                                         <tr
-                                            @if ($isDeliveryClose) style="background-color:rgba(255,87,34,0.1);" @endif>
+                                            @if ($isDeliveryClose && $order->order_status != 'delivered') style="background-color:rgba(255,87,34,0.1);" @endif>
                                             <td>{{ $order->id }}</td>
                                             <td><a
                                                     href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a>
@@ -115,7 +115,7 @@
                                                 </span> --}}
 
                                                 <span
-                                                    class="badge bg-{{ $order->order_status == 'completed' ? 'success' : ($order->order_status == 'cancelled' ? 'danger' : 'warning') }}">
+                                                    class="badge bg-{{ ($order->order_status == 'completed' || $order->order_status == 'delivered') ? 'success' : ($order->order_status == 'cancelled' ? 'danger' : 'warning') }}">
                                                     {{ ucfirst(str_replace('_', ' ', $order->order_status)) }}
                                                 </span>
                                                 @if ($remaining > 0)
