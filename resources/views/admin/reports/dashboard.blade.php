@@ -53,7 +53,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- Section -->
@@ -104,6 +103,158 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-lg-6 mb-3">
+                    <!-- Today's Sewing Orders -->
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Today's Sewing Orders ({{ count($todaySewingOrdersList) }})</h5>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-sm table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Customer</th>
+                                        <th>Delivery Date</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($todaySewingOrdersList as $order)
+                                        <tr>
+                                            <td><a
+                                                    href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number }}</a>
+                                            </td>
+                                            <td>{{ $order->customer->name ?? 'Walk-in' }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}</td>
+                                            <td>{{ ucfirst($order->order_status ?? 'pending') }}</td>
+                                            <td class="text-end">
+                                                <a href="{{ route('sewing-orders.show', $order->id) }}"
+                                                    class="btn btn-sm btn-outline-primary">View</a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">No sewing orders today.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-6 mb-3">
+                    <!-- Today's Orders -->
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Today's Orders ({{ count($todayOrdersList) }})</h5>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-sm table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Customer</th>
+                                        {{-- <th>Date</th> --}}
+                                        <th>Total</th>
+                                        <th>Paid</th>
+                                        <th>Remaining</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($todayOrdersList as $order)
+                                        @php
+                                            $paid = $order->payments->sum('amount');
+                                            $pending = max(0, $order->total_amount - $paid);
+                                        @endphp
+                                        <tr>
+                                            <td><a
+                                                    href="{{ route('orders.show', $order->id) }}">{{ $order->order_number }}</a>
+                                            </td>
+                                            <td>{{ $order->customer->name ?? 'Walk-in' }}</td>
+                                            {{-- <td>{{ \Carbon\Carbon::parse($order->order_date)->format('Y-m-d') }}</td> --}}
+                                            <td>Rs {{ number_format($order->total_amount, 2) }}</td>
+                                            <td>Rs {{ number_format($paid, 2) }}</td>
+                                            <td>Rs {{ number_format($pending, 2) }}</td>
+                                            <td class="text-end">
+                                                <a href="{{ route('orders.show', $order->id) }}"
+                                                    class="btn btn-sm btn-outline-primary">View</a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted">No orders today.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+
+            <!-- Delivered Sewing Orders With Pending Payment -->
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Delivered Sewing Orders (Payment Pending)</h5>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Delivered On</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Paid</th>
+                                <th>Remaining</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($deliveredPendingOrders as $order)
+                                @php
+                                    $paid = $order->payments->where('type', 'payment')->sum('amount');
+                                    $pending = max(0, $order->total_amount - $paid);
+                                @endphp
+                                <tr>
+                                    <td><a
+                                            href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number }}</a>
+                                    </td>
+                                    <td>{{ $order->customer->name ?? 'Walk-in' }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($order->delivery_date ?? $order->order_date)->format('Y-m-d') }}
+                                    </td>
+                                    <td class="text-capitalize">{{ $order->order_status }}</td>
+                                    <td>Rs {{ number_format($order->total_amount, 2) }}</td>
+                                    <td>Rs {{ number_format($paid, 2) }}</td>
+                                    <td>Rs {{ number_format($pending, 2) }}</td>
+                                    <td class="text-end">
+                                        <a href="{{ route('sewing-orders.show', $order->id) }}"
+                                            class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">No delivered orders with pending
+                                        payments.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="col-md-3 mb-3">
                 <div class="card ">
                     <div class="card-body">

@@ -99,10 +99,36 @@ class ReportController extends Controller
         ];
 
         $lowStockProducts = Product::where('available_meters', '<', 10)->with(['brand', 'category'])->get();
-        $recentOrders = Order::with(['customer', 'items'])->latest()->take(10)->get();
+        $recentOrders = Order::with(['customer', 'items', 'payments'])->latest()->take(10)->get();
         $nearestSewingOrders = SewingOrder::with(['customer'])->whereDate('delivery_date', '>=', today())->orderBy('delivery_date', 'asc')->take(10)->get();
 
-        return view('admin.reports.dashboard', compact('stats', 'lowStockProducts', 'recentOrders', 'paymentMethods', 'recentPayments', 'recentExpenses', 'nearestSewingOrders'));
+        // Daily orders and sewing orders
+        $todayOrdersList = Order::with(['customer', 'payments'])->whereDate('order_date', today())->latest()->get();
+        $todaySewingOrdersList = SewingOrder::with(['customer'])->whereDate('order_date', today())->latest()->get();
+        
+        // Delivered orders with pending payments
+        $deliveredPendingOrders = SewingOrder::with(['customer', 'payments' => function ($q) {
+            $q->where('type', 'payment');
+        }])
+            ->where('order_status', 'delivered')
+            ->paginate(10)
+            ->filter(function ($order) {
+                $paid = $order->payments->where('type', 'payment')->sum('amount');
+                return $paid < $order->total_amount;
+            });
+            // return $deliveredPendingOrders;
+        return view('admin.reports.dashboard', compact(
+            'stats',
+            'lowStockProducts',
+            'recentOrders',
+            'paymentMethods',
+            'recentPayments',
+            'recentExpenses',
+            'nearestSewingOrders',
+            'todayOrdersList',
+            'todaySewingOrdersList',
+            'deliveredPendingOrders'
+        ));
     }
 
     public function salesReport(Request $request)
