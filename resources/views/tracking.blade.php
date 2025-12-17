@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Tracking - Zeb Tailors & Fabrics</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- App favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/ZEB-TAILORS-Icon.png') }}">
+
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -517,8 +524,8 @@
                         <span class="zebtrack-radio-label">Track by Phone Number</span>
                     </label>
                 </div>
-                <input type="tel" id="zebtrackPhoneInput" class="zebtrack-input" placeholder="03XX XXXXXXX" maxlength="11" autocomplete="off">
-                <input type="text" id="zebtrackOrderInput" class="zebtrack-input" placeholder="Order Number (e.g. SEW-000123)" style="display: none;" autocomplete="off">
+                <input type="tel" id="zebtrackPhoneInput" class="zebtrack-input" placeholder="03XX XXXXXXX" maxlength="11" autocomplete="off" style="display: none;">
+                <input type="text" id="zebtrackOrderInput" class="zebtrack-input" placeholder="Order Number (e.g. SEW-000123)" autocomplete="off">
             </div>
             <button id="zebtrackSearchBtn" class="zebtrack-button" aria-busy="false" aria-live="polite">
                 <span class="zebtrack-button-text">Track Order</span>
@@ -602,7 +609,7 @@
             // Helper to get selected type from radios
             function getSelectedType() {
                 const checked = Array.from(zebtrackTypeRadios).find(r => r.checked);
-                return checked ? checked.value : 'order_number';
+                return checked ? checked.value : 'order';
             }
 
             // Event Listeners for radio change
@@ -621,6 +628,17 @@
                     }
                 });
             });
+
+            // Ensure inputs match selected radio on initial load (avoid flicker)
+            (function initVisibility() {
+                if (getSelectedType() === 'phone') {
+                    zebtrackPhoneInput.style.display = '';
+                    zebtrackOrderInput.style.display = 'none';
+                } else {
+                    zebtrackPhoneInput.style.display = 'none';
+                    zebtrackOrderInput.style.display = '';
+                }
+            })();
 
             function setLoading(on) {
                 if (!zebtrackSearchBtn) return;
