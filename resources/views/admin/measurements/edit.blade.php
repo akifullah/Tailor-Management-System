@@ -49,7 +49,7 @@
                                     <label>Type</label>
                                     <select id="type" name="type" class="form-select" required>
                                         <option value="">Select Type</option>
-                                        @foreach (['pant', 'shirt', 'shirt_pant', 'kameez', 'shalwar', 'kameez_shalwar', 'coat', 'waistcoat'] as $type)
+                                        @foreach (['pant', 'shirt', 'kameez', 'shalwar', 'kameez_shalwar', 'coat', 'waistcoat'] as $type)
                                             <option value="{{ $type }}"
                                                 {{ $measurement->type == $type ? 'selected' : '' }}>
                                                 {{ ucfirst(str_replace('_', ' / ', $type)) }}
@@ -79,7 +79,7 @@
                                             <label for="">: پٹی تفصیل</label>
                                             <select class="form-select" name="style_patty" id="">
                                                 <option value="">Select from list</option>
-                                                @foreach (['عام پٹی', 'چار بٹن پٹی', 'پانچ بٹن', 'چھ بٹن پٹی', 'سادہ پٹی', 'گم پٹی'] as $optionValue)
+                                                @foreach (['عام پٹی', 'عام پٹی دائیں طرف', 'عام پٹی نوکدار', 'چار بٹن پٹی', 'پانچ بٹن', 'چھ بٹن پٹی', 'سادہ پٹی', 'گم پٹی'] as $optionValue)
                                                     <option value="{{ $optionValue }}"
                                                         {{ isset($style['style_patty']) && $style['style_patty'] == $optionValue ? 'selected' : '' }}>
                                                         {{ $optionValue }}
@@ -111,7 +111,7 @@
                                             <label for="">: کالر/بین کی تفصیل</label>
                                             <select class="form-select" name="style_collar" id="">
                                                 <option value="">Select from list</option>
-                                                @foreach (['عام کالر', 'شارٹ کالر', 'نوکدار کالر', 'گلہ سادہ ہاف', 'گلہ سادہ ہاف گول', 'گلہ سادہ کٹ', 'گلہ سادہ گول', 'مغزی والا گلہ'] as $optionValue)
+                                                @foreach (['عام کالر', 'انگلش کالر', 'گلہ بند', 'شارٹ کالر', 'نوکدار کالر', 'گلہ سادہ ہاف', 'گلہ سادہ ہاف گول', 'گلہ سادہ کٹ', 'گلہ سادہ گول', 'مغزی والا گلہ'] as $optionValue)
                                                     <option value="{{ $optionValue }}"
                                                         {{ isset($style['style_collar']) && $style['style_collar'] == $optionValue ? 'selected' : '' }}>
                                                         {{ $optionValue }}
@@ -135,7 +135,7 @@
                                             <label for="">: سامنے جیب تفصیل</label>
                                             <select class="form-select" name="style_front_pocket" id="">
                                                 <option value="">Select from list</option>
-                                                @foreach (['عام جیب', 'بغیر جیب', 'سادہ جیب', 'بغیر لیبل عام جیب', "عام جیب 5'' / 5.5", 'عام جیب 5.25/5.75', 'عام جیب 5.5/6', 'عام ڈبل جیب', 'تاش والا سنگل جیب', 'تاش والا ڈبل جیب'] as $optionValue)
+                                                @foreach (['عام جیب', 'بغیر جیب', 'سادہ جیب', 'بغیر لیبل عام جیب', "عام جیب 5'' / 5.5", 'عام جیب 5.25/5.75', 'عام جیب 5.5/6', 'عام ڈبل جیب', 'تاش والا سنگل جیب', 'تاش والا ڈبل جیب', 'پاکٹ کے اندر پاکٹ', 'سامنے جیب دائیں طرف'] as $optionValue)
                                                     <option value="{{ $optionValue }}"
                                                         {{ isset($style['style_front_pocket']) && $style['style_front_pocket'] == $optionValue ? 'selected' : '' }}>
                                                         {{ $optionValue }}
@@ -213,7 +213,7 @@
                                             <label for="">: چاک پٹی تفصیل</label>
                                             <select class="form-select" name="style_chak_patti" id="">
                                                 <option value="">Select from list</option>
-                                                @foreach (['چاک پٹی کاج', 'چاک پٹی دو کاج', 'بغیر چاک پٹی', 'چاک پٹی نوکدار', 'بغیر چاک پٹی کاج'] as $optionValue)
+                                                @foreach (['چاک پٹی کاج', 'چاک پٹی دو کاج', 'بغیر چاک پٹی', 'چاک پٹی نوکدار', 'بغیر چاک پٹی کاج', 'بغیر چاک', 'سائیڈ دو چاک', 'بیک درمیان سنگل چاک'] as $optionValue)
                                                     <option value="{{ $optionValue }}"
                                                         {{ isset($style['style_chak_patti']) && $style['style_chak_patti'] == $optionValue ? 'selected' : '' }}>
                                                         {{ $optionValue }}
@@ -229,7 +229,7 @@
                                             <label for="">: دامن کی تفصیل</label>
                                             <select class="form-select" name="style_daman" id="">
                                                 <option value="">Select from list</option>
-                                                @foreach (['گھیرا سادہ', 'گھیرا گول', 'گھیرا سادہ ڈبل سلائی', 'گھیرا گول ڈبل سلائی', 'ترپائی والا گھیرا'] as $optionValue)
+                                                @foreach (['گھیرا سادہ', 'گھیرا گول', 'گول دامن', 'کراس کٹ دامن', 'سیدھا دامن', 'گھیرا سادہ ڈبل سلائی', 'گھیرا گول ڈبل سلائی', 'ترپائی والا گھیرا'] as $optionValue)
                                                     <option value="{{ $optionValue }}"
                                                         {{ isset($style['style_daman']) && $style['style_daman'] == $optionValue ? 'selected' : '' }}>
                                                         {{ $optionValue }}
@@ -310,7 +310,7 @@
                                             <label for="">: بٹن کی تفصیل</label>
                                             <select class="form-select" name="style_button_detail" id="">
                                                 <option value="">Select from list</option>
-                                                @foreach (['ہم رنگ بٹن', 'عام بٹن سادہ', 'لکڑی والا ڈیزائن', 'سٹیل والا بٹن', 'چھوٹا بٹن عام/ ڈیزائن', 'بڑا بٹن'] as $optionValue)
+                                                @foreach (['ہم رنگ بٹن', 'عام بٹن سادہ', 'لکڑی والا ڈیزائن', 'سٹیل والا بٹن', 'چھوٹا بٹن عام/ ڈیزائن', 'بڑا بٹن', 'سنگل بٹن', 'دو بٹن', 'تین بٹن', 'فولڈنگ دو بٹن'] as $optionValue)
                                                     <option value="{{ $optionValue }}"
                                                         {{ isset($style['style_button_detail']) && $style['style_button_detail'] == $optionValue ? 'selected' : '' }}>
                                                         {{ $optionValue }}
@@ -335,6 +335,20 @@
                                         </div>
                                     </div>
 
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="">: گلہ کی تفصیل</label>
+                                            <select class="form-select" name="style_gala_detail" id="">
+                                                <option value="">Select from list</option>
+                                                @foreach (['گلہ بند', 'گلہ گول', 'گلہ وی V', 'گلہ بند گول بین'] as $optionValue)
+                                                    <option value="{{ $optionValue }}"
+                                                        {{ isset($style['style_gala_detail']) && $style['style_gala_detail'] == $optionValue ? 'selected' : '' }}>
+                                                        {{ $optionValue }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
 
                                 </div>
                             </div>
@@ -477,25 +491,28 @@
                             name: 'kameez_Length',
                             input_type: 'input',
                             // extra_fields: [{
-                            //         label: "Extra 1",
-                            //         name: "kameez_Length_extra1"
-                            //     },
-                            //     {
-                            //         label: "Extra 2",
-                            //         name: "kameez_Length_extra2"
-                            //     }
-                            // ]
+                            //     label: "Length Extra",
+                            //     name: "kameez_Length_extra1"
+                            // }]
                         },
                         {
                             label: "Shoulder",
                             name: 'kameez_shoulder',
-                            input_type: 'input'
+                            input_type: 'input',
+                            // extra_fields: [{
+                            //     label: "Shoulder Extra",
+                            //     name: "kameez_shoulder_extra1"
+                            // }]
                         },
-                        
+
                         {
                             label: "Sleeve",
                             name: 'kameez_sleeve',
-                            input_type: 'input'
+                            input_type: 'input',
+                            // extra_fields: [{
+                            //     label: "Sleeve Extra",
+                            //     name: "kameez_sleeve_extra1"
+                            // }]
                         },
                         {
                             label: "Collar",
@@ -506,11 +523,19 @@
                             label: "Chest",
                             name: 'kameez_chest',
                             input_type: 'input',
+                            // extra_fields: [{
+                            //     label: "Chest Extra",
+                            //     name: "kameez_chest_extra1"
+                            // }]
                         },
                         {
                             label: "Waist",
                             name: 'kameez_waist',
                             input_type: 'input',
+                            // extra_fields: [{
+                            //     label: "Waist Extra",
+                            //     name: "kameez_waist_extra1"
+                            // }]
                         },
                         {
                             label: "Width",
@@ -546,6 +571,21 @@
             coat: {
                 coat: {
                     fields: [{
+                            label: "Length",
+                            name: 'coat_length',
+                            input_type: 'input'
+                        },
+                        {
+                            label: "Shoulder",
+                            name: 'coat_shoulder',
+                            input_type: 'input'
+                        },
+                        {
+                            label: "Sleeve",
+                            name: 'coat_sleeve',
+                            input_type: 'input'
+                        },
+                        {
                             label: "Chest",
                             name: 'coat_chest',
                             input_type: 'input'
@@ -561,38 +601,16 @@
                             input_type: 'input'
                         },
                         {
-                            label: "Shoulder",
-                            name: 'coat_shoulder',
-                            input_type: 'input'
-                        },
-                        {
-                            label: "Sleeve",
-                            name: 'coat_sleeve',
-                            input_type: 'input'
-                        },
-                        {
                             label: "Half Back",
                             name: 'coat_half_back',
                             input_type: 'input'
                         },
                         {
-                            label: "Chok",
-                            name: 'coat_chok',
-                            input_type: 'select',
-                            options: ['None', 'Single', 'Double']
+                            label: "Single Shoulder",
+                            name: 'single_shoulder',
+                            input_type: 'input',
                         },
-                        {
-                            label: "Fit",
-                            name: 'coat_fit',
-                            input_type: 'select',
-                            options: ['Slim', 'Regular']
-                        },
-                        {
-                            label: "Buttons",
-                            name: 'coat_buttons',
-                            input_type: 'select',
-                            options: ['1', '2', '3']
-                        }
+
                     ]
                 }
             },
@@ -600,6 +618,16 @@
             waistcoat: {
                 waistcoat: {
                     fields: [{
+                            label: "Length",
+                            name: 'waistcoat_length',
+                            input_type: 'input'
+                        },
+                        {
+                            label: "Shoulder",
+                            name: 'waistcoat_shoulder',
+                            input_type: 'input'
+                        },
+                        {
                             label: "Chest",
                             name: 'waistcoat_chest',
                             input_type: 'input'
@@ -609,33 +637,23 @@
                             name: 'waistcoat_waist',
                             input_type: 'input'
                         },
+
                         {
-                            label: "Shoulder",
+                            label: "Hip",
+                            name: 'waistcoat_hip',
+                            input_type: 'input'
+                        },
+                        {
+                            label: "Coller",
+                            name: 'waistcoat_coller',
+                            input_type: 'input'
+                        },
+
+                        {
+                            label: "Single Shoulder",
                             name: 'waistcoat_shoulder',
-                            input_type: 'input'
+                            input_type: 'input',
                         },
-                        {
-                            label: "Length",
-                            name: 'waistcoat_length',
-                            input_type: 'input'
-                        },
-                        {
-                            label: "Neck Depth",
-                            name: 'waistcoat_neck_depth',
-                            input_type: 'input'
-                        },
-                        {
-                            label: "Buttons",
-                            name: 'waistcoat_buttons',
-                            input_type: 'select',
-                            options: ['1', '2', '3', '4', '5']
-                        },
-                        {
-                            label: "Style",
-                            name: 'waistcoat_style',
-                            input_type: 'select',
-                            options: ['Simple', 'Design']
-                        }
                     ]
                 }
             },
@@ -650,6 +668,17 @@
             },
 
         };
+
+
+
+        options["shirt_pant"] = {
+            shirt: {
+                ...options?.shirt?.shirt
+            },
+            pant: {
+                ...options?.pant?.pant
+            },
+        }
 
         options["kameez_shalwar"] = {
             kameez: {

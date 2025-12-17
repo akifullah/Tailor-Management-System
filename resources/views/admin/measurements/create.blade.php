@@ -75,7 +75,7 @@
                                         <option value="">Select Type</option>
                                         <option value="pant">Pant</option>
                                         <option value="shirt">Shirt</option>
-                                        {{-- <option value="shirt_pant">Shirt/Shirt</option> --}}
+                                        {{-- <option value="shirt_pant">Pant/Shirt</option> --}}
                                         <option value="kameez">Kameez</option>
                                         <option value="shalwar">Shalwar</option>
                                         <option value="kameez_shalwar">Kameez/Shalwar</option>
@@ -99,6 +99,8 @@
                                             <select class="form-select" name="style_patty" id="">
                                                 <option value="">Select from list</option>
                                                 <option value="عام پٹی">عام پٹی</option>
+                                                <option value="عام پٹی دائیں طرف">عام پٹی دائیں طرف</option>
+                                                <option value="عام پٹی نوکدار">عام پٹی نوکدار</option>
                                                 <option value="چار بٹن پٹی">چار بٹن پٹی</option>
                                                 <option value="پانچ بٹن">پانچ بٹن</option>
                                                 <option value="چھ بٹن پٹی">چھ بٹن پٹی</option>
@@ -132,6 +134,8 @@
                                             <select class="form-select" name="style_collar" id="">
                                                 <option value="">Select from list</option>
                                                 <option value="عام کالر">عام کالر</option>
+                                                <option value="انگلش کالر">انگلش کالر</option>
+                                                <option value="گلہ بند">گلہ بند</option>
                                                 <option value="شارٹ کالر">شارٹ کالر</option>
                                                 <option value="نوکدار کالر">نوکدار کالر</option>
                                                 <option value="گلہ سادہ ہاف">گلہ سادہ ہاف</option>
@@ -158,6 +162,8 @@
                                                 <option value="">Select from list</option>
                                                 <option value="عام جیب">عام جیب</option>
                                                 <option value="بغیر جیب">بغیر جیب</option>
+                                                <option value="پاکٹ کے اندر پاکٹ">پاکٹ کے اندر پاکٹ</option>
+                                                <option value="سامنے جیب دائیں طرف">سامنے جیب دائیں طرف</option>
                                                 <option value="سادہ جیب">سادہ جیب</option>
                                                 <option value="بغیر لیبل عام جیب">بغیر لیبل عام جیب</option>
                                                 <option value="عام جیب 5'' / 5.5">عام جیب 5'' / 5.5</option>
@@ -243,6 +249,9 @@
                                                 <option value="بغیر چاک پٹی">بغیر چاک پٹی</option>
                                                 <option value="چاک پٹی نوکدار">چاک پٹی نوکدار</option>
                                                 <option value="بغیر چاک پٹی کاج">بغیر چاک پٹی کاج</option>
+                                                <option value="بغیر چاک">بغیر چاک</option>
+                                                <option value="سائیڈ دو چاک">سائیڈ دو چاک</option>
+                                                <option value="بیک درمیان سنگل چاک">بیک درمیان سنگل چاک</option>
                                             </select>
                                         </div>
                                     </div>
@@ -255,6 +264,9 @@
                                                 <option value="">Select from list</option>
                                                 <option value="گھیرا سادہ">گھیرا سادہ</option>
                                                 <option value="گھیرا گول">گھیرا گول</option>
+                                                <option value="گول دامن">گول دامن</option>
+                                                <option value="کراس کٹ دامن">کراس کٹ دامن</option>
+                                                <option value="سیدھا دامن">سیدھا دامن</option>
                                                 <option value="گھیرا سادہ ڈبل سلائی">گھیرا سادہ ڈبل سلائی</option>
                                                 <option value="گھیرا گول ڈبل سلائی">گھیرا گول ڈبل سلائی</option>
                                                 <option value="ترپائی والا گھیرا">ترپائی والا گھیرا</option>
@@ -334,6 +346,10 @@
                                                 <option value="سٹیل والا بٹن">سٹیل والا بٹن</option>
                                                 <option value="چھوٹا بٹن عام/ ڈیزائن">چھوٹا بٹن عام/ ڈیزائن</option>
                                                 <option value="بڑا بٹن">بڑا بٹن</option>
+                                                <option value="سنگل بٹن">سنگل بٹن</option>
+                                                <option value="دو بٹن">دو بٹن</option>
+                                                <option value="تین بٹن">تین بٹن</option>
+                                                <option value="فولڈنگ دو بٹن">فولڈنگ دو بٹن</option>
                                             </select>
                                         </div>
                                     </div>
@@ -348,6 +364,19 @@
                                                 <option value="نارمل سوٹ">نارمل سوٹ</option>
                                                 <option value="مکمل سادہ سوٹ">مکمل سادہ سوٹ</option>
                                                 <option value="کرتہ ڈیزائن">کرتہ ڈیزائن</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label for="">: گلہ کی تفصیل</label>
+                                            <select class="form-select" name="style_gala_detail" id="">
+                                                <option value="">Select from list</option>
+                                                <option value="گلہ بند">گلہ بند</option>
+                                                <option value="گلہ گول">گلہ گول</option>
+                                                <option value="گلہ وی V">گلہ وی V</option>
+                                                <option value="گلہ بند گول بین">گلہ بند گول بین</option>
                                             </select>
                                         </div>
                                     </div>
@@ -575,6 +604,21 @@
             coat: {
                 coat: {
                     fields: [{
+                            label: "Length",
+                            name: 'coat_length',
+                            input_type: 'input'
+                        },
+                        {
+                            label: "Shoulder",
+                            name: 'coat_shoulder',
+                            input_type: 'input'
+                        },
+                        {
+                            label: "Sleeve",
+                            name: 'coat_sleeve',
+                            input_type: 'input'
+                        },
+                        {
                             label: "Chest",
                             name: 'coat_chest',
                             input_type: 'input'
@@ -590,38 +634,16 @@
                             input_type: 'input'
                         },
                         {
-                            label: "Shoulder",
-                            name: 'coat_shoulder',
-                            input_type: 'input'
-                        },
-                        {
-                            label: "Sleeve",
-                            name: 'coat_sleeve',
-                            input_type: 'input'
-                        },
-                        {
                             label: "Half Back",
                             name: 'coat_half_back',
                             input_type: 'input'
                         },
                         {
-                            label: "Chok",
-                            name: 'coat_chok',
-                            input_type: 'select',
-                            options: ['None', 'Single', 'Double']
+                            label: "Single Shoulder",
+                            name: 'single_shoulder',
+                            input_type: 'input',
                         },
-                        {
-                            label: "Fit",
-                            name: 'coat_fit',
-                            input_type: 'select',
-                            options: ['Slim', 'Regular']
-                        },
-                        {
-                            label: "Buttons",
-                            name: 'coat_buttons',
-                            input_type: 'select',
-                            options: ['1', '2', '3']
-                        }
+
                     ]
                 }
             },
@@ -629,6 +651,16 @@
             waistcoat: {
                 waistcoat: {
                     fields: [{
+                            label: "Length",
+                            name: 'waistcoat_length',
+                            input_type: 'input'
+                        },
+                        {
+                            label: "Shoulder",
+                            name: 'waistcoat_shoulder',
+                            input_type: 'input'
+                        },
+                        {
                             label: "Chest",
                             name: 'waistcoat_chest',
                             input_type: 'input'
@@ -638,33 +670,23 @@
                             name: 'waistcoat_waist',
                             input_type: 'input'
                         },
+                        
                         {
-                            label: "Shoulder",
+                            label: "Hip",
+                            name: 'waistcoat_hip',
+                            input_type: 'input'
+                        },
+                        {
+                            label: "Coller",
+                            name: 'waistcoat_coller',
+                            input_type: 'input'
+                        },
+
+                        {
+                            label: "Single Shoulder",
                             name: 'waistcoat_shoulder',
-                            input_type: 'input'
+                            input_type: 'input',
                         },
-                        {
-                            label: "Length",
-                            name: 'waistcoat_length',
-                            input_type: 'input'
-                        },
-                        {
-                            label: "Neck Depth",
-                            name: 'waistcoat_neck_depth',
-                            input_type: 'input'
-                        },
-                        {
-                            label: "Buttons",
-                            name: 'waistcoat_buttons',
-                            input_type: 'select',
-                            options: ['1', '2', '3', '4', '5']
-                        },
-                        {
-                            label: "Style",
-                            name: 'waistcoat_style',
-                            input_type: 'select',
-                            options: ['Simple', 'Design']
-                        }
                     ]
                 }
             },
@@ -680,6 +702,16 @@
 
         };
 
+
+        
+        options["shirt_pant"] = {
+            shirt: {
+                ...options?.shirt?.shirt
+            },
+            pant: {
+                ...options?.pant?.pant
+            },
+        }
         options["kameez_shalwar"] = {
             kameez: {
                 ...options?.kameez?.kameez

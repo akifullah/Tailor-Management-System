@@ -109,7 +109,9 @@ class MeasurementController extends Controller
             "style_patty_length",
             "style_collar_width",
             "style_front_pocket_width",
-            "style_front_pocket_length"
+            "style_front_pocket_length",
+            "style_gala_detail",
+
         ];
         $style = array_filter($request->only($styleKeys), fn($value) => $value !== null);
         if (empty($style)) {
@@ -139,7 +141,8 @@ class MeasurementController extends Controller
             "style_patty_length",
             "style_collar_width",
             "style_front_pocket_width",
-            "style_front_pocket_length"
+            "style_front_pocket_length",
+            "style_gala_detail",
         ]))
             ->filter(fn($v) => $v !== null && $v !== '');
 
@@ -267,7 +270,9 @@ class MeasurementController extends Controller
             "style_patty_length",
             "style_collar_width",
             "style_front_pocket_width",
-            "style_front_pocket_length"
+            "style_front_pocket_length",
+            "style_gala_detail",
+
         ];
         $style = array_filter($request->only($styleKeys), fn($value) => $value !== null);
         if (empty($style)) {
@@ -302,6 +307,7 @@ class MeasurementController extends Controller
             "style_collar_width",
             "style_front_pocket_width",
             "style_front_pocket_length",
+            "style_gala_detail",
             "item_id"
         ]))
             ->filter(fn($v) => $v !== null && $v !== '');
