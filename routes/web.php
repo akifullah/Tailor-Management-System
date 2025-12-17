@@ -54,10 +54,10 @@ Route::middleware(["auth"])->group(function () {
     })->name("dashboard");
 
     // USERS - Require manage-users permission
-    Route::middleware(['permission:manage-users'])->group(function () {
+    // Route::middleware(['permission:manage-users'])->group(function () {
         Route::resource('users', UserController::class);
         Route::post('users/{user}/assign-roles-permissions', [UserController::class, 'assignRolesPermissions'])->name('users.assign-roles-permissions');
-    });
+    // });
 
     // CUSTOMERS - Require manage-customers permission
     Route::middleware(['permission:manage-customers'])->group(function () {
@@ -204,9 +204,9 @@ Route::middleware(["auth"])->group(function () {
     });
 
     // Roles & Permissions - Require manage-roles-permissions permission
+    Route::resource('roles', RoleController::class);
+    Route::resource('permissions', PermissionController::class);
     Route::middleware(['permission:manage-roles-permissions'])->group(function () {
-        Route::resource('roles', RoleController::class);
-        Route::resource('permissions', PermissionController::class);
     });
 
     // Expenses
