@@ -602,7 +602,7 @@
             // Helper to get selected type from radios
             function getSelectedType() {
                 const checked = Array.from(zebtrackTypeRadios).find(r => r.checked);
-                return checked ? checked.value : 'phone';
+                return checked ? checked.value : 'order_number';
             }
 
             // Event Listeners for radio change
