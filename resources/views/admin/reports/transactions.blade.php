@@ -18,6 +18,8 @@
                             <select name="type" class="form-control">
                                 <option value="">All</option>
                                 <option value="orders" {{ request('type') == 'orders' ? 'selected' : '' }}>Orders</option>
+                                <option value="sewing_order" {{ request('type') == 'sewing_order' ? 'selected' : '' }}>
+                                    Sewing Orders</option>
                                 <option value="purchases" {{ request('type') == 'purchases' ? 'selected' : '' }}>Purchases
                                 </option>
                             </select>
@@ -56,7 +58,7 @@
 
         <!-- Summary -->
         <div class="row align-items-stretch mb-3">
-            <div class="col-md-3">
+            <div class="col-md-3 col-lg-2 mb-2">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6>Total Transactions</h6>
@@ -64,7 +66,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-lg-2 mb-2">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6>Total Amount</h6>
@@ -72,7 +74,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-lg-2 mb-2">
                 <div class="card border-success h-100">
                     <div class="card-body">
                         <h6>Order Payments (Received)</h6>
@@ -80,11 +82,35 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-lg-2 mb-2">
+                <div class="card border-success h-100">
+                    <div class="card-body">
+                        <h6>Sewing Payments (Received)</h6>
+                        <h4 class="text-success">Rs {{ number_format($summary['sewing_orders_payments'] ?? 0, 2) }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-lg-2 mb-2">
                 <div class="card border-info h-100">
                     <div class="card-body">
                         <h6>Purchase Payments (Made)</h6>
                         <h4 class="text-info">Rs {{ number_format($summary['purchases_payments'] ?? 0, 2) }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-lg-2 mb-2">
+                <div class="card border-info h-100">
+                    <div class="card-body">
+                        <h6>Worker Payment (Expense)</h6>
+                        <h4 class="text-warning">Rs {{ number_format($summary['worker_payments'] ?? 0, 2) }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-lg-2 mb-2">
+                <div class="card border-info h-100">
+                    <div class="card-body">
+                        <h6>Total Expenses</h6>
+                        <h4 class="text-danger">Rs {{ number_format($summary['expenses'] ?? 0, 2) }}</h4>
                     </div>
                 </div>
             </div>
@@ -101,7 +127,7 @@
                         <div class="card-body">
                             <div class="row">
                                 @foreach ($summary['by_method'] as $method => $amount)
-                                    <div class="col-md-3 mb-2">
+                                    <div class="col-md-3 col-lg-2 mb-2">
                                         <div class="card bg-light h-100">
                                             <div class="card-body p-2">
                                                 <small
@@ -120,7 +146,11 @@
 
         <!-- Transactions Table -->
         <div class="card">
+            <div class="card-header ">
+                <h5 class="mb-0">Transactions</h5>
+            </div>
             <div class="card-body">
+
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
@@ -213,6 +243,55 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Expenses</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped dt-responsive nowrap w-100">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Added By</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($expenses ?? [] as $expense)
+                                        <tr>
+                                            <td>{{ \Carbon\Carbon::parse($expense->date)->format('d M, Y h:i A') }}</td>
+                                            <td>{{ $expense->title }}</td>
+                                            <td>{{ $expense->category ?? '-' }}</td>
+                                            <td><strong>Rs {{ number_format($expense->amount, 2) }}</strong></td>
+                                            <td>{{ $expense->user->name ?? 'Unknown' }}</td>
+                                            <td>{{ $expense->notes ?? '-' }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">No expenses found</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        @if (($expenses ?? null) && method_exists($expenses, 'links'))
+                            <div class="mt-3">
+                                {{ $expenses->links('pagination::bootstrap-5') }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

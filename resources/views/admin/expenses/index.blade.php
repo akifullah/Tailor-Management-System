@@ -42,14 +42,14 @@
                                                     class="btn btn-sm bg-info-subtle">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </a>
-                                                <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST"
+                                                {{-- <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST"
                                                     class="d-inline" onsubmit="return confirm('Are you sure?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm bg-danger-subtle">
                                                         <i class="mdi mdi-delete"></i>
                                                     </button>
-                                                </form>
+                                                </form> --}}
                                             </td>
                                         </tr>
                                     @endforeach

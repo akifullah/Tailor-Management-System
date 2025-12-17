@@ -65,91 +65,94 @@
                                 </div>
                             </form>
                         </div>
-                        <table id="datatable-buttons"
-                            class="table table-striped table-hover table-bordered dt-responsive nowrap">
-                            <thead>
-                                <tr>
-                                    <th>#ID</th>
-                                    <th>Sewing Order Number</th>
-                                    <th>Customer</th>
+                        <div class="table-responsive">
+                            <table id="datatable-buttons"
+                                class="table table-striped text-nowrap table-hover table-bordered dt-responsive nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>#ID</th>
+                                        <th>Sewing Order Number</th>
+                                        <th>Customer</th>
 
-                                    <th>Date</th>
-                                    <th>Delivery Date</th>
-                                    <th>Total Amount</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if ($orders->isNotEmpty())
-                                    @foreach ($orders as $order)
-                                        @php
-                                            $totalPaid = $order->payments->sum('amount');
-                                            $remaining = $order->total_amount - $totalPaid;
-                                        @endphp
-                                        @php
-                                            // Calculate if delivery date is today or tomorrow
-                                            $deliveryDate = $order->delivery_date;
-                                            $now = \Carbon\Carbon::now();
-                                            $isDeliveryClose = false;
-                                            if ($deliveryDate) {
-                                                // Check if delivery date is today or tomorrow
-                                                $daysDiff = $now->diffInDays($deliveryDate, false);
-                                                $isDeliveryClose = $daysDiff >= 0 && $daysDiff <= 1;
-                                            }
-                                        @endphp
-                                        <tr
-                                            @if ($isDeliveryClose && $order->order_status != 'delivered') style="background-color:rgba(255,87,34,0.1);" @endif>
-                                            <td>{{ $order->id }}</td>
-                                            <td><a
-                                                    href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a>
-                                            </td>
-                                            <td>{{ $order->customer->name ?? 'N/A' }}</td>
+                                        <th>Date</th>
+                                        <th>Delivery Date</th>
+                                        <th>Total Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if ($orders->isNotEmpty())
+                                        @foreach ($orders as $order)
+                                            @php
+                                                $totalPaid = $order->payments->sum('amount');
+                                                $remaining = $order->total_amount - $totalPaid;
+                                            @endphp
+                                            @php
+                                                // Calculate if delivery date is today or tomorrow
+                                                $deliveryDate = $order->delivery_date;
+                                                $now = \Carbon\Carbon::now();
+                                                $isDeliveryClose = false;
+                                                if ($deliveryDate) {
+                                                    // Check if delivery date is today or tomorrow
+                                                    $daysDiff = $now->diffInDays($deliveryDate, false);
+                                                    $isDeliveryClose = $daysDiff >= 0 && $daysDiff <= 1;
+                                                }
+                                            @endphp
+                                            <tr
+                                                @if ($isDeliveryClose && $order->order_status != 'delivered') style="background-color:rgba(255,87,34,0.1);" @endif>
+                                                <td>{{ $order->id }}</td>
+                                                <td><a
+                                                        href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a>
+                                                </td>
+                                                <td>{{ $order->customer->name ?? 'N/A' }}</td>
 
-                                            <td>{{ $order->order_date ? $order->order_date->format('Y-m-d') : 'N/A' }}</td>
-                                            <td>
-                                                {{ $order?->delivery_date?->format('Y-m-d') }}
-                                            </td>
-                                            <td>Rs {{ number_format($order->total_amount, 2) }}</td>
-                                            <td>
-                                                @php
-                                                    $totalPaid = $order->payments->sum('amount');
-                                                    $remaining = $order->total_amount - $totalPaid;
-                                                @endphp
-                                                {{-- <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
+                                                <td>{{ $order->order_date ? $order->order_date->format('Y-m-d') : 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    {{ $order?->delivery_date?->format('Y-m-d') }}
+                                                </td>
+                                                <td>Rs {{ number_format($order->total_amount, 2) }}</td>
+                                                <td>
+                                                    @php
+                                                        $totalPaid = $order->payments->sum('amount');
+                                                        $remaining = $order->total_amount - $totalPaid;
+                                                    @endphp
+                                                    {{-- <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
                                                     {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
                                                 </span> --}}
 
-                                                <span
-                                                    class="badge bg-{{ ($order->order_status == 'completed' || $order->order_status == 'delivered') ? 'success' : ($order->order_status == 'cancelled' ? 'danger' : 'warning') }}">
-                                                    {{ ucfirst(str_replace('_', ' ', $order->order_status)) }}
-                                                </span>
-                                                @if ($remaining > 0)
-                                                    <br><small class="text-muted">Remaining: Rs
-                                                        {{ number_format($remaining, 2) }}</small>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('sewing-orders.show', $order) }}"
-                                                    class="btn btn-sm bg-info-subtle">
-                                                    <i class="mdi mdi-eye fs-14 text-info"></i>
-                                                </a>
-                                                <a href="{{ route('sewing-orders.edit', $order->id) }}"
-                                                    class="btn btn-primary btn-sm">
-                                                    <i class="mdi mdi-pencil"></i> Edit
-                                                </a>
+                                                    <span
+                                                        class="badge bg-{{ $order->order_status == 'completed' || $order->order_status == 'delivered' ? 'success' : ($order->order_status == 'cancelled' ? 'danger' : 'warning') }}">
+                                                        {{ ucfirst(str_replace('_', ' ', $order->order_status)) }}
+                                                    </span>
+                                                    @if ($remaining > 0)
+                                                        <br><small class="text-muted">Remaining: Rs
+                                                            {{ number_format($remaining, 2) }}</small>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('sewing-orders.show', $order) }}"
+                                                        class="btn btn-sm bg-info-subtle">
+                                                        <i class="mdi mdi-eye fs-14 text-info"></i>
+                                                    </a>
+                                                    <a href="{{ route('sewing-orders.edit', $order->id) }}"
+                                                        class="btn btn-primary btn-sm">
+                                                        <i class="mdi mdi-pencil"></i> Edit
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="11" class="text-center text-muted">
+                                                No orders found.
                                             </td>
                                         </tr>
-                                    @endforeach
-                                @else
-                                    <tr>
-                                        <td colspan="11" class="text-center text-muted">
-                                            No orders found.
-                                        </td>
-                                    </tr>
-                                @endif
-                            </tbody>
-                        </table>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="px-3">
                         {{ $orders->links('pagination::bootstrap-5') }}

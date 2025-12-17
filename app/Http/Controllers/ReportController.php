@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Customer;
@@ -294,6 +295,32 @@ class ReportController extends Controller
 
     public function transactionsReport(Request $request)
     {
+
+
+        // Also include expense payments in the query
+        $expenseQuery = Expense::query();
+
+        // Filter expense by category (such as "Worker Payment"), if given
+        if ($request->has('category') && $request->category) {
+            $expenseQuery->where('category', $request->category);
+        }
+
+        // Filter expense by user_id, if given
+        if ($request->has('user_id') && $request->user_id) {
+            $expenseQuery->where('user_id', $request->user_id);
+        }
+
+        // Filter expense by date range (using the `date` field from the table)
+        if ($request->has('date_from') && $request->date_from) {
+            $expenseQuery->whereDate('date', '>=', $request->date_from);
+        }
+        if ($request->has('date_to') && $request->date_to) {
+            $expenseQuery->whereDate('date', '<=', $request->date_to);
+        }
+
+        // Get the latest by `date` (since there is no payment_date in this table)
+        $expenses = $expenseQuery->latest('date')->get();
+        
         $query = Payment::with(['payable']);
 
         // Filter by transaction type
@@ -302,6 +329,8 @@ class ReportController extends Controller
                 $query->where('payable_type', Order::class);
             } elseif ($request->type === 'purchases') {
                 $query->where('payable_type', InventoryTracking::class);
+            } elseif ($request->type === 'sewing_order') {
+                $query->where('payable_type', SewingOrder::class);
             }
         }
 
@@ -322,7 +351,9 @@ class ReportController extends Controller
 
         // Eager load payments for orders and purchases to calculate remaining amounts
         $orderIds = $transactions->where('payable_type', Order::class)->pluck('payable_id')->unique();
+        $sewingOrderIds = $transactions->where('payable_type', SewingOrder::class)->pluck('payable_id')->unique();
         $purchaseIds = $transactions->where('payable_type', InventoryTracking::class)->pluck('payable_id')->unique();
+        $workerIds = $transactions->where('payable_type', "App\Models\User")->pluck('payable_id')->unique();
 
         if ($orderIds->count() > 0) {
             $orders = Order::whereIn('id', $orderIds)->with('payments')->get()->keyBy('id');
@@ -333,6 +364,16 @@ class ReportController extends Controller
                 }
             }
         }
+        if ($sewingOrderIds->count() > 0) {
+            $sewingOrders = SewingOrder::whereIn('id', $sewingOrderIds)->with('payments')->get()->keyBy('id');
+            // Attach loaded orders to transactions
+            foreach ($transactions as $transaction) {
+                if ($transaction->payable_type === Order::class && isset($orders[$transaction->payable_id])) {
+                    $transaction->payable = $sewingOrders[$transaction->payable_id];
+                }
+            }
+        }
+
         if ($purchaseIds->count() > 0) {
             $purchases = InventoryTracking::whereIn('id', $purchaseIds)->with('payments')->get()->keyBy('id');
             // Attach loaded purchases to transactions
@@ -342,17 +383,32 @@ class ReportController extends Controller
                 }
             }
         }
+        // return $workerIds;
 
+        if ($workerIds->count() > 0) {
+            $workerPayments = User::whereIn('id', $workerIds)->with('workerPayments')->get()->keyBy('id');
+            
+            foreach ($transactions as $transaction) {
+                if ($transaction->payable_type === User::class && isset($workerPayments[$transaction->payable_id])) {
+                    $transaction->payable = $workerPayments[$transaction->payable_id];
+                }
+            }
+        }
+
+        
         // Calculate summary
         $summary = [
             'total_transactions' => $transactions->count(),
             'total_amount' => $transactions->sum('amount'),
             'orders_payments' => $transactions->where('payable_type', Order::class)->sum('amount'),
+            'sewing_orders_payments' => $transactions->where('payable_type', SewingOrder::class)->sum('amount'),
             'purchases_payments' => $transactions->where('payable_type', InventoryTracking::class)->sum('amount'),
+            'worker_payments' => $transactions->where('payable_type', User::class)->sum('amount'),
+            'expenses' => $expenses->sum('amount'),
             'by_method' => $transactions->groupBy('payment_method')->map->sum('amount'),
         ];
-
-        return view('admin.reports.transactions', compact('transactions', 'summary'));
+        // return $summary;
+        return view('admin.reports.transactions', compact('transactions', "expenses", 'summary'));
     }
 
     public function pendingTransactionsReport(Request $request)
@@ -386,10 +442,29 @@ class ReportController extends Controller
             return $purchase->payments->sum('amount') < $total;
         });
 
+
+        // Pending SewingOrder Payments
+        $sewingOrderQuery = SewingOrder::with(['payments']);
+
+        if ($request->has('date_from') && $request->date_from) {
+            $sewingOrderQuery->whereDate('order_date', '>=', $request->date_from);
+        }
+        if ($request->has('date_to') && $request->date_to) {
+            $sewingOrderQuery->whereDate('order_date', '<=', $request->date_to);
+        }
+
+        $sewingOrders = $sewingOrderQuery->get()->filter(function ($order) {
+            return $order->remaining_amount > 0;
+        });
+
         $summary = [
             'pending_orders_count' => $orders->count(),
             'pending_orders_amount' => $orders->sum(function ($order) {
                 return $order->total_amount - $order->payments->sum('amount');
+            }),
+            'pending_sewing_orders_count'=> $sewingOrders->count(),
+            'pending_sewing_orders_amount' => $sewingOrders->sum(function ($sewingOrder) {
+                return $sewingOrder->total_amount - $sewingOrder->payments->sum('amount');
             }),
             'pending_purchases_count' => $purchases->count(),
             'pending_purchases_amount' => $purchases->sum(function ($purchase) {
@@ -398,7 +473,7 @@ class ReportController extends Controller
             }),
         ];
 
-        return view('admin.reports.pending-transactions', compact('orders', 'purchases', 'summary'));
+        return view('admin.reports.pending-transactions', compact('orders', 'sewingOrders', 'purchases', 'summary'));
     }
 
     public function completedTransactionsReport(Request $request)
