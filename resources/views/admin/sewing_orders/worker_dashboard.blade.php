@@ -137,15 +137,15 @@
                                             <option value="">All Statuses</option>
                                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
                                                 Pending</option>
-                                            <option value="on_hold" {{ request('status') == 'on_hold' ? 'selected' : '' }}>
-                                                On Hold</option>
+                                            {{-- <option value="on_hold" {{ request('status') == 'on_hold' ? 'selected' : '' }}>
+                                                On Hold</option> --}}
                                             <option value="in_progress"
                                                 {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress
                                             </option>
-                                            <option value="cutter" {{ request('status') == 'cutter' ? 'selected' : '' }}>
+                                            {{-- <option value="cutter" {{ request('status') == 'cutter' ? 'selected' : '' }}>
                                                 Cutter</option>
                                             <option value="sewing" {{ request('status') == 'sewing' ? 'selected' : '' }}>
-                                                Sewing</option>
+                                                Sewing</option> --}}
                                             <option value="completed"
                                                 {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                                         </select>
@@ -218,12 +218,12 @@ $workerStatus = $item->workers->first()->pivot->status ?? 'pending';
                                                     <option value="in_progress"
                                                         {{ $workerStatus == 'in_progress' ? 'selected' : '' }}>In
                                                         Progress</option>
-                                                    <option value="cutter"
+                                                    {{-- <option value="cutter"
                                                         {{ $workerStatus == 'cutter' ? 'selected' : '' }}>Cutter
                                                     </option>
                                                     <option value="sewing"
                                                         {{ $workerStatus == 'sewing' ? 'selected' : '' }}>Sewing
-                                                    </option>
+                                                    </option> --}}
                                                     <option value="completed"
                                                         {{ $workerStatus == 'completed' ? 'selected' : '' }}>
                                                         Completed</option>

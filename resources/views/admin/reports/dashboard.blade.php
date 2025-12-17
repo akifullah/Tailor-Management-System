@@ -429,7 +429,9 @@
                                                 <td>{{ $payment->payment_date->format('Y-m-d H:i') }}</td>
                                                 <td>
                                                     @if ($payment->payable_type === 'App\Models\Order')
-                                                        <span class="badge bg-success">Order</span>
+                                                    <span class="badge bg-success">Order</span>
+                                                    @elseif($payment->payable_type === 'App\Models\SewingOrder')
+                                                        <span class="badge bg-primary">Sewing Payment</span>
                                                     @elseif($payment->payable_type === 'App\Models\User')
                                                         <span class="badge bg-warning">Worker Payment</span>
                                                     @else

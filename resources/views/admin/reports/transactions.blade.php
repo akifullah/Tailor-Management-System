@@ -26,10 +26,13 @@
                             <label>Payment Method</label>
                             <select name="payment_method" class="form-control">
                                 <option value="">All Methods</option>
-                                <option value="cash" {{ request('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                <option value="cash" {{ request('payment_method') == 'cash' ? 'selected' : '' }}>Cash
+                                </option>
                                 <option value="online" {{ request('payment_method') == 'online' ? 'selected' : '' }}>Online
                                 </option>
-                                <option value="bank_transfer" {{ request('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                <option value="bank_transfer"
+                                    {{ request('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer
+                                </option>
                                 <option value="cheque" {{ request('payment_method') == 'cheque' ? 'selected' : '' }}>Cheque
                                 </option>
                             </select>
@@ -88,7 +91,7 @@
         </div>
 
         <!-- Payment Method Breakdown -->
-        @if(isset($summary['by_method']) && $summary['by_method']->count() > 0)
+        @if (isset($summary['by_method']) && $summary['by_method']->count() > 0)
             <div class="row align-items-stretch mb-3">
                 <div class="col-md-12">
                     <div class="card h-100">
@@ -97,11 +100,12 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                @foreach($summary['by_method'] as $method => $amount)
+                                @foreach ($summary['by_method'] as $method => $amount)
                                     <div class="col-md-3 mb-2">
                                         <div class="card bg-light h-100">
                                             <div class="card-body p-2">
-                                                <small class="text-muted">{{ ucfirst(str_replace('_', ' ', $method)) }}</small>
+                                                <small
+                                                    class="text-muted">{{ ucfirst(str_replace('_', ' ', $method)) }}</small>
                                                 <h6 class="mb-0">Rs {{ number_format($amount, 2) }}</h6>
                                             </div>
                                         </div>
@@ -135,51 +139,62 @@
                                 <tr>
                                     <td>{{ $transaction->payment_date->format('Y-m-d h:i A') }}</td>
                                     <td style="text-transform: capitalize">
-                                        @if($transaction->payable_type === 'App\Models\Order')
-                                            @if($transaction->type === 'refund')
+                                        @if ($transaction->payable_type === 'App\Models\Order')
+                                            @if ($transaction->type === 'refund')
                                                 <span class="badge bg-secondary">Order refund</span>
                                             @else
                                                 <span class="badge bg-success">Order payment</span>
                                             @endif
-                                            @if($transaction->payable)
+                                            @if ($transaction->payable)
                                                 <br><small><a
                                                         href="{{ route('orders.show', $transaction->payable->id) }}">{{ $transaction->payable->order_number }}</a></small>
                                             @endif
                                         @elseif($transaction->payable_type === 'App\Models\User')
                                             <span class="badge bg-warning">Worker Payment</span>
-                                            @if($transaction->payable)
+                                            @if ($transaction->payable)
                                                 <br><small>{{ $transaction->payable->name }}</small>
                                             @endif
+                                        @elseif($transaction->payable_type === 'App\Models\SewingOrder')
+                                            <span class="badge bg-primary">Sewing Payment</span>
                                         @else
                                             <span class="badge bg-info">Purchase Payment</span>
-                                            @if($transaction->payable)
+                                            @if ($transaction->payable)
                                                 <br><small>Purchase #{{ $transaction->payable->id }}</small>
                                             @endif
                                         @endif
                                     </td>
                                     <td>
-                                        @if($transaction->payable_type === 'App\Models\Order')
+                                        @if ($transaction->payable_type === 'App\Models\Order')
                                             <a
                                                 href="{{ route('orders.show', $transaction->payable->id) }}">{{ $transaction->payable->order_number }}</a>
                                             @php
                                                 $order = $transaction->payable;
-                                                $orderTotalPaid = $order->payments ? $order->payments->sum('amount') : 0;
+                                                $orderTotalPaid = $order->payments
+                                                    ? $order->payments->sum('amount')
+                                                    : 0;
                                                 $orderRemaining = max(0, $order->total_amount - $orderTotalPaid);
                                             @endphp
-                                            <br><small class="text-muted">Total: Rs {{ number_format($order->total_amount, 2) }} |
+                                            <br><small class="text-muted">Total: Rs
+                                                {{ number_format($order->total_amount, 2) }} |
                                                 Remaining: Rs {{ number_format($orderRemaining, 2) }}</small>
                                         @elseif($transaction->payable_type === 'App\Models\User')
                                             <span class="badge bg-warning">Worker Payment</span>
                                             <br><small>{{ $transaction->payable->name }}</small>
+                                        @elseif($transaction->payable_type === 'App\Models\SewingOrder')
+                                            <span class="badge bg-primary">Sewing Payment</span>
                                         @else
                                             Purchase #{{ $transaction->payable->id }}
                                             @php
                                                 $purchase = $transaction->payable;
-                                                $purchaseTotal = $purchase->quantity_meters * $purchase->price_per_meter;
-                                                $purchasePaid = $purchase->payments ? $purchase->payments->sum('amount') : 0;
+                                                $purchaseTotal =
+                                                    $purchase->quantity_meters * $purchase->price_per_meter;
+                                                $purchasePaid = $purchase->payments
+                                                    ? $purchase->payments->sum('amount')
+                                                    : 0;
                                                 $purchaseRemaining = max(0, $purchaseTotal - $purchasePaid);
                                             @endphp
-                                            <br><small class="text-muted">Total: Rs {{ number_format($purchaseTotal, 2) }} |
+                                            <br><small class="text-muted">Total: Rs {{ number_format($purchaseTotal, 2) }}
+                                                |
                                                 Remaining: Rs {{ number_format($purchaseRemaining, 2) }}</small>
                                         @endif
                                     </td>
