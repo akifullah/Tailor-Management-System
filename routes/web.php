@@ -20,6 +20,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SewingOrderController;
 use App\Http\Controllers\WorkerLedgerController;
 use App\Http\Controllers\WorkerTypeController;
+use App\Http\Controllers\OrderTrackingApiController;
 
 Route::get("/", function () {
     if (Auth::check()) {
@@ -34,6 +35,18 @@ Route::get("/", function () {
 Route::post("/login", [AuthController::class, "login"])->name("login-post");
 Route::get("/logout", [AuthController::class, "logout"])->name("logout");
 
+// =============================
+//          API ROUTES
+// =============================
+Route::prefix('api')->group(function() {
+    // Order tracking endpoint: GET /api/track-order?order_number= or ?phone=
+    Route::get('/track-order', [OrderTrackingApiController::class, 'track']);
+    // Sewing order tracking endpoint: GET /api/track-sewing-order?sewing_order_number= or ?phone=
+    Route::get('/track-sewing-order', [\App\Http\Controllers\SewingOrderTrackingApiController::class, 'track']);
+});
+Route::get("/tracking", function () {
+    return view('tracking');
+});
 
 Route::middleware(["auth"])->group(function () {
     Route::get('/dashboard', function () {
