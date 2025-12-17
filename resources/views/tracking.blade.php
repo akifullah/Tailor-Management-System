@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Tracking - Zeb Tailors & Fabrics</title>
+    <title>Order Tracking - {{ config('app.name', 'Zeb Tailors & Fabrics') }}</title>
 
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 

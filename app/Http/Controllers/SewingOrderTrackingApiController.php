@@ -25,6 +25,7 @@ class SewingOrderTrackingApiController extends Controller
                 ->first();
         } elseif ($phone) {
             $customer = Customer::where('phone', $phone)->first();
+            return $customer;
             $order = $customer
                 ? SewingOrder::with(['items'])
                     ->where('customer_id', $customer->id)
