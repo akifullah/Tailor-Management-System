@@ -651,7 +651,7 @@
 
                         {
                             label: "Single Shoulder",
-                            name: 'waistcoat_shoulder',
+                            name: 'waistcoat_single_shoulder',
                             input_type: 'input',
                         },
                     ]
