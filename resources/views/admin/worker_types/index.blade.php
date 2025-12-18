@@ -55,7 +55,7 @@
                                             <td>{{ $workerType->description }}</td>
                                             <td>
                                                 <a href="{{ route('workers.types.edit', $workerType->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                                                <a href="javascript:void(0)" onclick="handleDelete({{ $workerType->id }})" class="btn btn-sm btn-danger">Delete</a>
+                                                {{-- <a href="javascript:void(0)" onclick="handleDelete({{ $workerType->id }})" class="btn btn-sm btn-danger">Delete</a> --}}
                                             </td>
                                         </tr>
                                     @endforeach
