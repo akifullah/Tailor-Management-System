@@ -585,7 +585,31 @@
                 </div>
             </div>
         </div>
+
+
+        <footer class="zebtrack-footer" style=" margin-top: 32px; padding: 28px 0 8px 0; text-align: center; color: var(--zebtrack-text-secondary, #a0a0a0); font-size: 14px;">
+            <div style="margin-bottom: 4px;">
+                &copy; {{ date('Y') }}
+                <span style="color: var(--zebtrack-gold, #C28A23); font-weight: 600; font-family: 'Playfair Display', serif;">
+                    Zeb Tailors &amp; Fabrics
+                </span>
+            </div>
+            <div style="font-size: 12px;">
+                Made with
+                <svg width="16" height="14" viewBox="0 0 16 14" fill="none" style="vertical-align: middle; margin: 0 2px -2px 2px;" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 13s5.3-4.006 7.326-6.254A4.08 4.08 0 0 0 8 2.07 4.08 4.08 0 0 0 .674 6.746C2.7 8.994 8 13 8 13z" fill="#EF4444"/>
+                </svg>
+                by
+                <a href="https://webspires.com.pk/?utm_source=zeb"
+                   style="color: var(--zebtrack-gold, #C28A23); text-decoration: none; font-weight: 600;"
+                   target="_blank" rel="noopener">
+                   Webspires.com.pk
+                </a>
+            </div>
+        </footer>
     </div>
+
+    
 
     <script>
         /**

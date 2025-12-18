@@ -14,7 +14,8 @@
             font-family: 'Inter', sans-serif;
             color: #1f2937;
             -webkit-print-color-adjust: exact;
-            font-size: 10px;
+            font-size: 12px;
+            font-weight: 600;
             /* Reduced base font size */
         }
 
@@ -118,7 +119,7 @@
         .measurement-table td {
             padding: 4px 8px;
             border-bottom: 1px solid #e5e7eb;
-            font-size: 11px;
+            font-size: 13px;
         }
 
         .measurement-table th {
@@ -234,7 +235,7 @@
             .measurement-table th,
             .measurement-table td {
                 padding: 3px 4px;
-                font-size: 7pt;
+                font-size: 8pt;
             }
 
             .header-section {

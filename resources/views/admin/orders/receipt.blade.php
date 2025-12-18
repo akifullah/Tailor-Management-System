@@ -2,7 +2,8 @@
     $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');
     $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
     $netPaid = $totalPaid - $totalRefunded;
-    $remaining = $order->total_amount - $netPaid;
+    $discount = $order->discount_amount ?? 0;
+    $remaining = $order->total_amount - $netPaid - $discount ;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -14,9 +15,10 @@
     <style>
         body {
             font-family: monospace;
-            font-size: 12px;
+            font-size: 13px;
             margin: 0;
             padding: 0;
+            font-weight: 600;
         }
 
         .receipt {
@@ -50,7 +52,7 @@
         th,
         td {
             padding: 2px 0;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         th {
@@ -114,6 +116,10 @@
             <tr>
                 <td>Refunded</td>
                 <td class="right">Rs -{{ number_format($totalRefunded, 2) }}</td>
+            </tr>
+            <tr>
+                <td>Discount</td>
+                <td class="right bold">Rs {{ number_format($discount, 2) }}</td>
             </tr>
             <tr>
                 <td>Total Paid</td>

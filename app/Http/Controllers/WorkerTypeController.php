@@ -72,12 +72,18 @@ class WorkerTypeController extends Controller
             'worker_cost' => 'required|numeric',
         ]);
 
+        
         if ($validate->fails()) {
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
         $workerType = WorkerType::find($id);
         $workerType->update($request->all());
+
+        // Update all users' worker_cost where worker_type_id matches the updated WorkerType's id
+        \App\Models\User::where('worker_type_id', $workerType->id)
+            ->update(['worker_cost' => $workerType->worker_cost]);
+        
         return redirect()->route('workers.types.index')->with('success', 'Worker type updated successfully');
     }
 
