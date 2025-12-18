@@ -146,6 +146,10 @@
                                                 <a href="{{ route('orders.show', $order) }}" class="btn btn-sm bg-info-subtle">
                                                     <i class="mdi mdi-eye fs-14 text-info"></i>
                                                 </a>
+                                                
+                                                <a href="{{ route('orders.edit', $order) }}" class="btn btn-sm bg-warning-subtle">
+                                                    <i class="mdi mdi-pencil fs-14 text-warning"></i>
+                                                </a>
 
 
                                                 <a href="#" title="return" data-bs-toggle="modal"

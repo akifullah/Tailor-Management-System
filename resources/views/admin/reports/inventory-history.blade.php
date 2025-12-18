@@ -83,7 +83,8 @@
                                     </td>
                                     <td>{{ number_format($txn->quantity_meters, 2) }}</td>
                                     <td>{{ number_format($txn->balance_meters, 2) }}</td>
-                                    <td>{{ $txn->reference_number ?? 'N/A' }}</td>
+                                    <td><a href="{{ route('orders.show', $txn->order_id) }}">{{ $txn->reference_number ?? 'N/A' }}</a></td>
+                                    
                                     <td>{{ $txn->notes }}</td>
                                 </tr>
                                 @endforeach

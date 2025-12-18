@@ -294,6 +294,16 @@ class OrderController extends Controller
         return view('admin.orders.show', compact('order'));
     }
 
+    /**
+     * Show the form for editing the specified order.
+     */
+    public function edit(Order $order)
+    {
+        $order->load(['customer', 'items.product', 'payments']);
+        $products = Product::all();
+        return view('admin.orders.edit', compact('order', 'products'));
+    }
+
     public function print(Order $order)
     {
         $order->load([
@@ -309,26 +319,201 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        // Basic validation for top-level fields
         $validated = $request->validate([
-            'order_status' => 'nullable|in:pending,in_progress,completed,on_hold,cancelled,delivered',
+            'order_date' => 'nullable|date',
             'delivery_date' => 'nullable|date',
-            'delivery_status' => 'nullable|in:pending,delivered',
+            'delivery_status' => 'nullable|string|max:50',
+            // items is optional - we handle structural validation below
         ]);
+
+        $itemsPayload = $request->input('items', []); // associative array keyed by item id
+        $newItems = $request->input('new_items', []); // array of new items
+        $removeItems = $request->input('remove_items', []); // array of item ids to remove
 
         DB::beginTransaction();
         try {
-            $order->update($validated);
-            
-            // If order is being cancelled, handle refunds
-            if ($validated['order_status'] === 'cancelled' && $order->order_status !== 'cancelled') {
-                $this->cancelOrder($order, $request->input('cancellation_reason'));
+            // Step 1: compute product inventory changes (change > 0 means consume more stock)
+            $productChanges = []; // product_id => change (positive means decrease available)
+
+            // Existing items updates
+            foreach ($itemsPayload as $itemId => $data) {
+                $item = OrderItem::find($itemId);
+                if (!$item || $item->order_id !== $order->id) {
+                    continue; // ignore invalid
+                }
+
+                $oldQty = (float) $item->quantity_meters;
+                $oldFromInventory = (bool) $item->is_from_inventory;
+
+                $newQty = isset($data['quantity_meters']) ? (float) $data['quantity_meters'] : $oldQty;
+                $newFromInventory = isset($data['is_from_inventory']) ? (bool) $data['is_from_inventory'] : $oldFromInventory;
+                $productId = $item->product_id;
+
+                $oldReserved = $oldFromInventory ? $oldQty : 0;
+                $newReserved = $newFromInventory ? $newQty : 0;
+                $change = $newReserved - $oldReserved;
+                if ($change != 0 && $productId) {
+                    $productChanges[$productId] = ($productChanges[$productId] ?? 0) + $change;
+                }
             }
+
+            // Removals: restore stock for items removed
+            foreach ($removeItems as $rid) {
+                $item = OrderItem::find($rid);
+                if (!$item || $item->order_id !== $order->id) continue;
+                if ($item->is_from_inventory && $item->product_id) {
+                    $productChanges[$item->product_id] = ($productChanges[$item->product_id] ?? 0) - $item->quantity_meters;
+                }
+            }
+
+            // New items: consume stock if marked from inventory
+            foreach ($newItems as $nitem) {
+                if (empty($nitem['product_id'])) continue;
+                $pid = $nitem['product_id'];
+                $qty = isset($nitem['quantity_meters']) ? (float) $nitem['quantity_meters'] : 0;
+                $fromInv = isset($nitem['is_from_inventory']) ? (bool) $nitem['is_from_inventory'] : false;
+                if ($fromInv && $pid) {
+                    $productChanges[$pid] = ($productChanges[$pid] ?? 0) + $qty;
+                }
+            }
+
+            // Validate inventory availability
+            foreach ($productChanges as $pid => $change) {
+                if ($change > 0) {
+                    $product = Product::find($pid);
+                    if (!$product) throw new \Exception("Product not found: {$pid}");
+                    if ($product->available_meters < $change) {
+                        throw new \Exception("Insufficient stock for '{$product->title}'. Available: {$product->available_meters}, required: {$change}");
+                    }
+                }
+            }
+
+            // Apply item removals
+            foreach ($removeItems as $rid) {
+                $item = OrderItem::find($rid);
+                if (!$item || $item->order_id !== $order->id) continue;
+                // restore stock if needed (we will also perform aggregated product changes below, but do explicit tracking now for clarity)
+                if ($item->is_from_inventory && $item->product_id) {
+                    $product = Product::find($item->product_id);
+                    if ($product) {
+                        $product->available_meters += $item->quantity_meters;
+                        $product->save();
+                        InventoryTracking::create([
+                            'product_id' => $product->id,
+                            'order_id' => $order->id,
+                            'type' => 'return',
+                            'quantity_meters' => $item->quantity_meters,
+                            'balance_meters' => $product->available_meters,
+                            'notes' => "Item removed in order edit - Order #{$order->order_number}",
+                            'reference_number' => $order->order_number,
+                        ]);
+                    }
+                }
+                $item->delete();
+            }
+
+            // Apply updates to existing items
+            foreach ($itemsPayload as $itemId => $data) {
+                $item = OrderItem::find($itemId);
+                if (!$item || $item->order_id !== $order->id) continue;
+
+                $oldQty = (float) $item->quantity_meters;
+                $oldFromInventory = (bool) $item->is_from_inventory;
+
+                $newQty = isset($data['quantity_meters']) ? (float) $data['quantity_meters'] : $oldQty;
+                $newPrice = isset($data['sell_price']) ? (float) $data['sell_price'] : $item->sell_price;
+                $newFromInventory = isset($data['is_from_inventory']) ? (bool) $data['is_from_inventory'] : $oldFromInventory;
+
+                $item->quantity_meters = $newQty;
+                $item->sell_price = $newPrice;
+                $item->is_from_inventory = $newFromInventory ? 1 : 0;
+                $item->total_price = $newPrice * $newQty;
+                $item->save();
+            }
+
+            // Create new items
+            foreach ($newItems as $nitem) {
+                if (empty($nitem['product_id'])) continue;
+                $productId = $nitem['product_id'];
+                $qty = isset($nitem['quantity_meters']) ? (float) $nitem['quantity_meters'] : 0;
+                $price = isset($nitem['sell_price']) ? (float) $nitem['sell_price'] : 0;
+                $fromInv = isset($nitem['is_from_inventory']) ? (bool) $nitem['is_from_inventory'] : false;
+
+                $orderItem = OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $productId,
+                    'product_name' => $nitem['product_name'] ?? null,
+                    'is_from_inventory' => $fromInv ? 1 : 0,
+                    'sell_price' => $price,
+                    'quantity_meters' => $qty,
+                    'status' => $nitem['status'] ?? 'pending',
+                    'total_price' => $price * $qty,
+                ]);
+            }
+
+            // Apply aggregated productChanges to inventory and create InventoryTracking records
+            foreach ($productChanges as $pid => $change) {
+                if ($change == 0) continue;
+                $product = Product::find($pid);
+                if (!$product) continue;
+                // Positive change => consume more stock (decrease available_meters)
+                if ($change > 0) {
+                    $product->available_meters = max(0, $product->available_meters - $change);
+                    $product->save();
+                    InventoryTracking::create([
+                        'product_id' => $product->id,
+                        'order_id' => $order->id,
+                        'type' => 'sale',
+                        'quantity_meters' => -abs($change),
+                        'balance_meters' => $product->available_meters,
+                        'notes' => "Order edit - consumed stock - Order #{$order->order_number}",
+                        'reference_number' => $order->order_number,
+                    ]);
+                } else {
+                    // Negative change => stock restored
+                    $restored = abs($change);
+                    $product->available_meters += $restored;
+                    $product->save();
+                    InventoryTracking::create([
+                        'product_id' => $product->id,
+                        'order_id' => $order->id,
+                        'type' => 'return',
+                        'quantity_meters' => $restored,
+                        'balance_meters' => $product->available_meters,
+                        'notes' => "Order edit - restored stock - Order #{$order->order_number}",
+                        'reference_number' => $order->order_number,
+                    ]);
+                }
+            }
+
+            // Recalculate order totals
+            $orderItems = $order->items()->get();
+            $total = $orderItems->sum(function ($it) { return $it->total_price; });
+            $order->total_amount = $total;
+            if ($request->filled('order_date')) $order->order_date = $request->input('order_date');
+            // if ($request->filled('delivery_status')) $order->delivery_status = $request->input('delivery_status');
+            $order->save();
+            return $order;
             
+            // Update payment status based on payments/refunds
+            $this->updateOrderPaymentStatus($order);
+
             DB::commit();
-            return response()->json(['success' => true, 'message' => 'Order updated successfully']);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Order updated successfully.']);
+            }
+
+            session()->flash('success', 'Order updated successfully.');
+            return redirect()->route('orders.show', $order->id);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Failed to update order: ' . $e->getMessage()], 500);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to update order: ' . $e->getMessage()], 500);
+            }
+            return back()->with('error', 'Failed to update order: ' . $e->getMessage());
         }
     }
 

@@ -24,7 +24,11 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
-
+                        <div class="text-end">
+                            <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-primary btn-sm">
+                                <i class="mdi mdi-pencil"></i> Edit Order
+                            </a>
+                        </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <strong>Order Number:</strong> {{ $order->order_number }}

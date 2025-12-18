@@ -110,7 +110,7 @@
                                 <th>Total Amount</th>
                                 <th>Paid</th>
                                 <th>Remaining</th>
-                                <th>Status</th>
+                                <!-- <th>Status</th> -->
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -127,13 +127,13 @@
                                         </a>
                                     </td>
                                     <td>{{ $sewingOrder->customer->name ?? 'N/A' }}</td>
-                                    <td>{{ $sewingOrder->order_date ?? ($sewingOrder->created_at ? $sewingOrder->created_at->format('Y-m-d') : '') }}
+                                    <td>{{ $sewingOrder->order_date->format('d-m-Y') }}
                                     </td>
                                     <td>Rs {{ number_format($sewingOrder->total_amount, 2) }}</td>
                                     <td class="text-success">Rs {{ number_format($sewingTotalPaid, 2) }}</td>
                                     <td class="text-warning"><strong>Rs {{ number_format($sewingRemaining, 2) }}</strong>
                                     </td>
-                                    <td>
+                                    <!-- <td>
                                         @if (isset($sewingOrder->status))
                                             @switch($sewingOrder->status)
                                                 @case('pending')
@@ -155,7 +155,7 @@
                                         @else
                                             <span class="badge bg-light text-dark">N/A</span>
                                         @endif
-                                    </td>
+                                    </td> -->
                                     <td>
                                         <a href="{{ route('sewing-orders.show', $sewingOrder->id) }}"
                                             class="btn btn-sm btn-primary">View</a>
@@ -188,8 +188,8 @@
                                     <th>Total Amount</th>
                                     <th>Paid</th>
                                     <th>Remaining</th>
-                                    <th>Order Status</th>
-                                    <th>Items Status</th>
+                                    <!-- <th>Order Status</th> -->
+                                    <!-- <th>Items Status</th> -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -210,11 +210,11 @@
                                             </a>
                                         </td>
                                         <td>{{ $order->customer->name ?? 'N/A' }}</td>
-                                        <td>{{ $order->order_date }}</td>
+                                        <td>{{ $order->order_date->format("d-m-Y") }}</td>
                                         <td>Rs {{ number_format($order->total_amount, 2) }}</td>
                                         <td class="text-success">Rs {{ number_format($totalPaid, 2) }}</td>
                                         <td class="text-warning"><strong>Rs {{ number_format($remaining, 2) }}</strong></td>
-                                        <td>
+                                        <!-- <td>
                                             @if (isset($order->order_status))
                                                 @switch($order->order_status)
                                                     @case('pending')
@@ -239,8 +239,8 @@
                                             @else
                                                 <span class="badge bg-light text-dark">N/A</span>
                                             @endif
-                                        </td>
-                                        <td>
+                                        </td> -->
+                                        <!-- <td>
                                             @if ($totalItems > 0)
                                                 @if ($itemsCompleted == $totalItems)
                                                     <span class="badge bg-success">All Items Done</span>
@@ -249,7 +249,7 @@
                                                         Done</span>
                                                 @endif
                                             @endif
-                                        </td>
+                                        </td> -->
                                         <td>
                                             <a href="{{ route('orders.show', $order->id) }}"
                                                 class="btn btn-sm btn-primary">View</a>
