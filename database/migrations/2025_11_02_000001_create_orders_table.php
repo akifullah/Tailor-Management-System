@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('payment_method', ['online', 'cash', "bank_transfer", "cheque"])->default('cash')->nullable();
             $table->enum('payment_status', ['partial', 'full', "no_payment"])->default('full');
             $table->decimal('partial_amount', 10, 2)->nullable();
+            $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('remaining_amount', 10, 2)->default(0);
             $table->text('notes')->nullable();
             $table->boolean("is_return")->default(false);

@@ -612,8 +612,10 @@ class SewingOrderController extends Controller
     {
         $totalPaid = $sewingOrder->payments()->where('type', 'payment')->sum('amount');
         $totalRefunded = $sewingOrder->payments()->where('type', 'refund')->sum('amount');
+        $totalDiscount = $sewingOrder->discount_amount ?? 0;
         $netPaid = $totalPaid - $totalRefunded;
-        $remaining = $sewingOrder->total_amount - $netPaid;
+        // Remaining should subtract discounts (waived amounts) as well
+        $remaining = max(0, $sewingOrder->total_amount - ($totalDiscount ?? 0) - $netPaid);
 
         if ($remaining <= 0) {
             $sewingOrder->payment_status = 'full';

@@ -106,7 +106,7 @@
                                             // Net paid = total paid - total refunded
                                             $netPaid = $totalPaid - $totalRefunded;
                                             // Remaining = order total - net paid
-                                            $remaining = $order->total_amount - $netPaid;
+                                            $remaining = $order->total_amount - $netPaid - ($order->discount_amount ?? 0);
                                         @endphp
                                         <tr style="background-color: {{ $order->is_return ? 'rgba(255, 0, 0, 0.1)' : '' }} ;">
                                             <td>{{ $order->id }}</td>

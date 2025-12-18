@@ -3,7 +3,8 @@
     $totalPaid = $payments ? $payments->where('type', 'payment')->sum('amount') : 0;
     $totalRefunded = $payments ? $payments->where('type', 'refund')->sum('amount') : 0;
     $netPaid = $totalPaid - $totalRefunded;
-    $remaining = $sewingOrder->total_amount - $netPaid;
+    $discount = $sewingOrder->discount_amount ?? 0;
+    $remaining = $sewingOrder->total_amount - $netPaid - ($sewingOrder->discount_amount ?? 0);
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -115,6 +116,10 @@
             <tr>
                 <td>Refunded</td>
                 <td class="right">Rs -{{ number_format($totalRefunded, 2) }}</td>
+            </tr>
+            <tr>
+                <td>Discount</td>
+                <td class="right bold">Rs {{ number_format($discount, 2) }}</td>
             </tr>
             <tr>
                 <td>Total Paid</td>

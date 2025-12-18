@@ -242,7 +242,11 @@
                         $refunds = $sewingOrder->refunds ?? collect([]);
                         $totalPaid = $payments ? $payments->where('type', 'payment')->sum('amount') : 0;
                         $totalRefunded = $payments ? $payments->where('type', 'refund')->sum('amount') : 0;
-                        $remaining = $sewingOrder->total_amount - $totalPaid + $totalRefunded;
+                        // Discount stored on sewing order record
+                        $totalDiscount = $sewingOrder->discount_amount ?? 0;
+                        // Net paid considers refunds; remaining also subtracts discounts
+                        $netPaid = ($totalPaid ?? 0) - ($totalRefunded ?? 0);
+                        $remaining = max(0, $sewingOrder->total_amount - ($totalDiscount ?? 0) - $netPaid);
                     @endphp
                     <div class="row mt-3">
                         <div class="col-md-12 d-flex justify-content-between align-items-center">
@@ -264,31 +268,34 @@
 
 
                     <div class="row mt-3">
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-lg-2 mb-2">
                             <strong>Total Amount:</strong><br>
                             <span class="fs-16 fw-semibold">Rs
                                 {{ number_format($sewingOrder->total_amount, 2) }}</span>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-lg-2 mb-2">
                             <strong>Total Paid:</strong><br>
-                            {{-- <span class="fs-16 fw-semibold text-success">Rs {{ number_format($totalPaid, 2) }}</span> --}}
-                            <span class="fs-16 fw-semibold text-success">Rs
-                                {{ number_format(($totalPaid ?? 0) - ($totalRefunded ?? 0), 2) }}</span>
+                            <span class="fs-16 fw-semibold text-success">Rs {{ number_format($netPaid, 2) }}</span>
                         </div>
-                        <div class="col-md-3">
-                            <strong>Total Refunded:</strong><br>
-                            <span class="fs-16 fw-semibold text-danger">Rs
-                                {{ number_format($totalRefunded, 2) }}</span>
+                        <div class="col-md-3 col-lg-2 mb-2">
+                            <strong>Total Discount:</strong><br>
+                            <span class="fs-16 fw-semibold text-info">Rs {{ number_format($totalDiscount ?? 0, 2) }}</span>
                         </div>
-                        <div class="col-md-3">
+                         <div class="col-md-3 col-lg-2 mb-2">
                             <strong>Remaining:</strong><br>
                             <span class="fs-16 fw-semibold text-{{ $remaining > 0 ? 'warning' : 'success' }}">
                                 Rs {{ number_format($remaining, 2) }}
                             </span>
                         </div>
+                        <div class="col-md-3 col-lg-2 mb-2">
+                            <strong>Total Refunded:</strong><br>
+                            <span class="fs-16 fw-semibold text-danger">Rs
+                                {{ number_format($totalRefunded, 2) }}</span>
+                        </div>
+                       
                     </div>
                     <div class="row mt-2">
-                        <div class="col-md-3 offset-md-9">
+                        <div class="col-md-3 mb-2 offset-md-9">
                             <strong>Payment Status:</strong><br>
                             <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
                                 {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
@@ -381,34 +388,30 @@
                                             @endforeach
 
                                             <tr>
-                                                <th colspan="1" class="text-end">
-                                                    Total Paid:
-                                                </th>
+                                                <th colspan="1" class="text-end">Total Paid:</th>
                                                 <th colspan="5">
-                                                    <h5 class="text-success fw-bold mb-0">
-                                                        Rs {{ number_format($totalPaid ?? 0, 2) }}
-                                                    </h5>
+                                                    <h5 class="text-success fw-bold mb-0">Rs {{ number_format($totalPaid ?? 0, 2) }}</h5>
                                                 </th>
                                             </tr>
 
                                             <tr>
-                                                <th colspan="1" class="text-end">
-                                                    Total Refunded:
-                                                </th>
+                                                <th colspan="1" class="text-end">Total Discount:</th>
                                                 <th colspan="5">
-                                                    <h5 class="text-danger fw-bold mb-0">
-                                                        -{{ number_format($totalRefunded ?? 0, 2) }}
-                                                    </h5>
+                                                    <h5 class="text-info fw-bold mb-0">Rs {{ number_format($totalDiscount ?? 0, 2) }}</h5>
                                                 </th>
                                             </tr>
+
                                             <tr>
-                                                <th colspan="1" class="text-end">
-                                                    Total Net Paid:
-                                                </th>
+                                                <th colspan="1" class="text-end">Total Refunded:</th>
                                                 <th colspan="5">
-                                                    <h5 class="text-success fw-bold mb-0">
-                                                        {{ number_format(($totalPaid ?? 0) - ($totalRefunded ?? 0), 2) }}
-                                                    </h5>
+                                                    <h5 class="text-danger fw-bold mb-0">-{{ number_format($totalRefunded ?? 0, 2) }}</h5>
+                                                </th>
+                                            </tr>
+
+                                            <tr>
+                                                <th colspan="1" class="text-end">Total Net Paid:</th>
+                                                <th colspan="5">
+                                                    <h5 class="text-success fw-bold mb-0">{{ number_format($netPaid, 2) }}</h5>
                                                 </th>
                                             </tr>
 
@@ -453,19 +456,30 @@
                             $payments = $sewingOrder->payments ?? collect([]);
                             $totalPaid = $payments ? $payments->where('type', 'payment')->sum('amount') : 0;
                             $totalRefunded = $payments ? $payments->where('type', 'refund')->sum('amount') : 0;
-                            $remaining = max(0, $sewingOrder->total_amount - $totalPaid + $totalRefunded);
+                            $totalDiscount = $sewingOrder->discount_amount ?? 0;
+                            $netPaid = ($totalPaid ?? 0) - ($totalRefunded ?? 0);
+                            $remaining = max(0, $sewingOrder->total_amount - ($totalDiscount ?? 0) - $netPaid);
                         @endphp
                         <div class="mb-3">
                             <label class="form-label">Amount (Rs) <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="number" class="form-control" name="amount" id="paymentAmount"
-                                    step="0.01" min="0.01" max="{{ $remaining }}"
+                                    step="0.01" min="0.00" max="{{ $remaining }}"
                                     value="{{ number_format($remaining, 2, '.', '') }}" required>
                                 <button type="button" class="btn btn-outline-secondary"
                                     onclick="setMaxAmount()">Max</button>
                             </div>
-                            <small class="text-muted">Remaining: Rs <span
-                                    id="remainingAmount">{{ number_format($remaining, 2) }}</span></small>
+                            <small class="text-muted">Remaining: Rs <span id="remainingAmount">{{ number_format($remaining, 2) }}</span></small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Discount (Rs)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" name="discount_amount" id="paymentDiscount"
+                                    step="0.01" min="0.00" max="{{ $remaining }}" value="0.00">
+                                <button type="button" class="btn btn-outline-secondary" onclick="setMaxAmount()">Max</button>
+                            </div>
+                            <small class="text-muted">Apply discount/written-off amount (optional)</small>
                         </div>
 
                         <div class="mb-3">
@@ -1064,8 +1078,12 @@ if (isset($measurement['data'])) {
         }
 
         function setMaxAmount() {
-            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, ''));
-            document.getElementById('paymentAmount').value = remaining.toFixed(2);
+            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, '')) || 0;
+            const discountEl = document.getElementById('paymentDiscount');
+            const discount = discountEl ? (parseFloat(discountEl.value) || 0) : 0;
+            const amountEl = document.getElementById('paymentAmount');
+            const value = Math.max(0, remaining - discount);
+            if (amountEl) amountEl.value = value.toFixed(2);
         }
 
         function setMaxRefund() {
@@ -1111,16 +1129,32 @@ if (isset($measurement['data'])) {
         });
 
         document.getElementById('paymentAmount').addEventListener('input', function() {
-            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(
-                /[^0-9.-]+/g, ''));
+            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, '')) || 0;
+            const discount = parseFloat(document.getElementById('paymentDiscount')?.value || 0) || 0;
             const entered = parseFloat(this.value) || 0;
 
-            if (entered > remaining) {
-                this.setCustomValidity('Amount cannot exceed remaining amount');
+            if ((entered + discount) > remaining) {
+                this.setCustomValidity('Amount + discount cannot exceed remaining amount');
             } else {
                 this.setCustomValidity('');
             }
         });
+
+        // validate discount input as well
+        const discountEl = document.getElementById('paymentDiscount');
+        if (discountEl) {
+            discountEl.addEventListener('input', function() {
+                const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, '')) || 0;
+                const enteredDiscount = parseFloat(this.value) || 0;
+                const amountEntered = parseFloat(document.getElementById('paymentAmount')?.value || 0) || 0;
+
+                if ((amountEntered + enteredDiscount) > remaining) {
+                    this.setCustomValidity('Amount + discount cannot exceed remaining amount');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
 
         document.getElementById('refundForm').addEventListener('submit', function(e) {
             e.preventDefault();

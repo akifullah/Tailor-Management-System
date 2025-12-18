@@ -170,6 +170,16 @@ class OrderController extends Controller
                 $orderNumber = 'ORD-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
             } while (Order::where('order_number', $orderNumber)->exists());
 
+            // Determine order discount (from request) and ensure it's non-negative
+            $orderDiscount = floatval($request->input('discount_amount', 0));
+            if ($orderDiscount < 0) $orderDiscount = 0;
+
+            // Ensure payment + discount does not exceed total amount
+            if (($paymentAmount + $orderDiscount) > $totalAmount) {
+                DB::rollBack();
+                return back()->withInput()->with('error', 'Payment amount plus discount cannot exceed order total.');
+            }
+
             $orderData = [
                 'order_number' => $orderNumber,
                 'customer_id' => $validated['customer_id'],
@@ -177,6 +187,7 @@ class OrderController extends Controller
                 // 'delivery_date' => $validated['delivery_date'] ?? null,
                 // 'delivery_status' => $validated['delivery_status'] ?? 'pending',
                 'total_amount' => $totalAmount,
+                'discount_amount' => $orderDiscount,
                 'payment_method' => $validated['payment_status'] !== 'no_payment' ? ($validated['payment_method'] ?? null) : null,
                 'payment_status' => $validated['payment_status'],
                 'partial_amount' => $paymentAmount > 0 ? $paymentAmount : null,
@@ -562,7 +573,8 @@ class OrderController extends Controller
         $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');
         $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
         $netPaid = $totalPaid - $totalRefunded;
-        $remaining = $order->total_amount - $netPaid;
+        $discount = $order->discount_amount ?? 0;
+        $remaining = ($order->total_amount - $discount) - $netPaid;
 
         // Update payment status
         if ($remaining <= 0) {

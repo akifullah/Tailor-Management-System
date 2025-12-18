@@ -86,7 +86,7 @@
                                         @foreach ($orders as $order)
                                             @php
                                                 $totalPaid = $order->payments->sum('amount');
-                                                $remaining = $order->total_amount - $totalPaid;
+                                                $remaining = $order->total_amount - $totalPaid - ($order->discount_amount ?? 0);
                                             @endphp
                                             @php
                                                 // Calculate if delivery date is today or tomorrow
@@ -116,7 +116,7 @@
                                                 <td>
                                                     @php
                                                         $totalPaid = $order->payments->sum('amount');
-                                                        $remaining = $order->total_amount - $totalPaid;
+                                                        $remaining = $order->total_amount - $totalPaid - ($order->discount_amount ?? 0);
                                                     @endphp
                                                     {{-- <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
                                                     {{ $remaining <= 0 ? 'Paid' : 'Pending' }}

@@ -94,6 +94,14 @@
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
+                    <div class="card border-secondary h-100">
+                        <div class="card-body">
+                            <h6>Total Discount</h6>
+                            <h4 class="text-secondary">Rs {{ number_format(($customerSummary['total_order_discount'] ?? 0) + ($customerSummary['total_sewing_discount'] ?? 0), 2) }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
                     <div class="card border-success h-100">
                         <div class="card-body">
                             <h6>Total Paid</h6>
@@ -125,7 +133,8 @@
                                     $ordersTotalPaid = $customerOrders->sum(fn($order) => $order->payments()->where('type', 'payment')->sum('amount'));
                                     $ordersTotalRefunded = $customerOrders->sum(fn($order) => $order->payments()->where('type', 'refund')->sum('amount'));
                                     $ordersNetPaid = $ordersTotalPaid - $ordersTotalRefunded;
-                                    $ordersRemaining = $customerOrders->sum('total_amount') - $ordersNetPaid;
+                                    $ordersTotalDiscount = $customerOrders->sum(fn($o) => $o->discount_amount ?? 0);
+                                    $ordersRemaining = $customerOrders->sum('total_amount') - $ordersTotalDiscount - $ordersNetPaid;
                                 @endphp
                                 <li><strong>Total Paid:</strong> <span class="text-success">Rs
                                         {{ number_format($ordersTotalPaid, 2) }}</span>
@@ -137,6 +146,9 @@
                                     <li><strong>Net Paid:</strong> <span class="text-info">Rs
                                             {{ number_format($ordersNetPaid, 2) }}</span>
                                     </li>
+                                @endif
+                                @if ($ordersTotalDiscount > 0)
+                                    <li><strong>Discounts:</strong> <span class="text-muted">Rs {{ number_format($ordersTotalDiscount, 2) }}</span></li>
                                 @endif
                                 <li><strong>Remaining:</strong> <span class="text-{{ $ordersRemaining > 0 ? 'warning' : 'success' }}">Rs
                                         {{ number_format($ordersRemaining, 2) }}</span>
@@ -159,10 +171,11 @@
                                     $sewingTotalPaid = $customerSewingOrders->sum(fn($order) => $order->payments()->where('type', 'payment')->sum('amount'));
                                     $sewingTotalRefunded = $customerSewingOrders->sum(fn($order) => $order->payments()->where('type', 'refund')->sum('amount'));
                                     $sewingNetPaid = $sewingTotalPaid - $sewingTotalRefunded;
-                                    $sewingRemaining = $customerSewingOrders->sum('total_amount') - $sewingNetPaid;
+                                    $sewingTotalDiscount = $customerSewingOrders->sum(fn($o) => $o->discount_amount ?? 0);
+                                    $sewingRemaining = $customerSewingOrders->sum('total_amount') - $sewingTotalDiscount - $sewingNetPaid;
                                 @endphp
                                 <li><strong>Total Paid:</strong> <span class="text-success">Rs
-                                        {{ number_format($sewingTotalPaid, 2) }}</span>
+                                    {{ number_format($sewingTotalPaid, 2) }}</span>
                                 </li>
                                 @if ($sewingTotalRefunded > 0)
                                     <li><strong>Refunded:</strong> <span class="text-danger fw-bold bg-light rounded px-1 py-0">Rs
@@ -171,6 +184,9 @@
                                     <li><strong>Net Paid:</strong> <span class="text-info">Rs
                                             {{ number_format($sewingNetPaid, 2) }}</span>
                                     </li>
+                                @endif
+                                @if ($sewingTotalDiscount > 0)
+                                    <li><strong>Discounts:</strong> <span class="text-muted">Rs {{ number_format($sewingTotalDiscount, 2) }}</span></li>
                                 @endif
                                 <li><strong>Remaining:</strong> <span class="text-{{ $sewingRemaining > 0 ? 'warning' : 'success' }}">Rs
                                         {{ number_format($sewingRemaining, 2) }}</span>
@@ -208,15 +224,16 @@
                         <tbody>
                                 @foreach ($customerOrders as $order)
                                     @php
-                                        $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');
-                                        $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
-                                        $netPaid = $totalPaid - $totalRefunded;
-                                        $remaining = $order->total_amount - $netPaid;
-                                        $itemsPending = $order->items->where('status', 'pending')->count();
-                                        $itemsProgress = $order->items->where('status', 'progress')->count();
-                                        $itemsCompleted = $order->items->where('status', 'completed')->count();
-                                        $totalItems = $order->items->count();
-                                    @endphp
+                                            $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');
+                                            $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
+                                            $netPaid = $totalPaid - $totalRefunded;
+                                            $discount = $order->discount_amount ?? 0;
+                                            $remaining = $order->total_amount - $discount - $netPaid;
+                                            $itemsPending = $order->items->where('status', 'pending')->count();
+                                            $itemsProgress = $order->items->where('status', 'progress')->count();
+                                            $itemsCompleted = $order->items->where('status', 'completed')->count();
+                                            $totalItems = $order->items->count();
+                                        @endphp
                                     <tr
                                         @if ($order->is_return) class="return-row" @endif
                                     >
@@ -227,10 +244,16 @@
                                             </a>
                                         </td>
                                         <td>{{ $order->order_date }}</td>
-                                        <td><strong>Rs {{ number_format($order->total_amount, 2) }}</strong></td>
+                                        <td>
+                                            <strong>Rs {{ number_format($order->total_amount, 2) }}</strong>
+                                            
+                                        </td>
                                         <td>
                                             {{-- <span class="text-success">Rs {{ number_format($totalPaid, 2) }}</span> --}}
                                             <span class="text-success">Rs {{ number_format($netPaid, 2) }}</span>
+                                            @if($discount > 0)
+                                                <br><small class="text-muted">Discount: Rs {{ number_format($discount,2) }}</small>
+                                            @endif
                                             @if ($totalRefunded > 0)
                                                 <br><small class="text-danger fw-bold bg-light rounded px-1 py-0">Refunded: Rs {{ number_format($totalRefunded, 2) }}</small>
                                                 {{-- <br><small class="text-info">Net: Rs {{ number_format($netPaid, 2) }}</small> --}}
@@ -295,7 +318,8 @@
                                         $totalPaid = $sewingOrder->payments()->where('type', 'payment')->sum('amount');
                                         $totalRefunded = $sewingOrder->payments()->where('type', 'refund')->sum('amount');
                                         $netPaid = $totalPaid - $totalRefunded;
-                                        $remaining = $sewingOrder->total_amount - $netPaid;
+                                        $discount = $sewingOrder->discount_amount ?? 0;
+                                        $remaining = $sewingOrder->total_amount - $discount - $netPaid;
                                         $itemsPending = $sewingOrder->items->where('status', 'pending')->count();
                                         $itemsInProgress = $sewingOrder->items->whereIn('status', ['in_progress', "on_hold", "cutter", "sewing"])->count();
                                         $itemsCompleted = $sewingOrder->items->whereIn('status', ['completed', 'delivered'])->count();
@@ -311,10 +335,16 @@
                                         </td>
                                         <td>{{ $sewingOrder->order_date ? $sewingOrder->order_date->format('Y-m-d') : 'N/A' }}
                                         </td>
-                                        <td><strong>Rs {{ number_format($sewingOrder->total_amount, 2) }}</strong></td>
+                                        <td>
+                                            <strong>Rs {{ number_format($sewingOrder->total_amount, 2) }}</strong>
+                                            
+                                        </td>
                                         <td>
                                             {{-- <span class="text-success">Rs {{ number_format($totalPaid, 2) }}</span> --}}
                                             <span class="text-success">Rs {{ number_format($netPaid, 2) }}</span>
+                                            @if($discount > 0)
+                                                <br><small class="text-muted">Discount: Rs {{ number_format($discount,2) }}</small>
+                                            @endif
                                             @if ($totalRefunded > 0)
                                                 <br><small class="text-danger fw-bold bg-light rounded px-1 py-0">Refunded: Rs {{ number_format($totalRefunded, 2) }}</small>
                                                 {{-- <br><small class="text-info">Net: Rs {{ number_format($netPaid, 2) }}</small> --}}
@@ -547,6 +577,14 @@
                                     </div>
 
                                     <div class="mb-3">
+                                        <label class="form-label">Discount (Rs)</label>
+                                        <input type="number" class="form-control" name="discount_amount" id="paymentDiscount{{ $order->id }}" step="0.01" min="0" value="0">
+                                        @if($order->discount_amount)
+                                            <small class="text-muted">Existing discount on order: Rs {{ number_format($order->discount_amount,2) }}</small>
+                                        @endif
+                                    </div>
+
+                                    <div class="mb-3">
                                         <label class="form-label">Payment Method <span
                                                 class="text-danger">*</span></label>
                                         <select class="form-select" name="payment_method" required>
@@ -590,7 +628,8 @@
         @foreach ($customerSewingOrders as $sewingOrder)
             @php
                 $totalPaid = $sewingOrder->payments->sum('amount');
-                $remaining = $sewingOrder->total_amount - $totalPaid;
+                $discount = $sewingOrder->discount_amount ?? 0;
+                $remaining = $sewingOrder->total_amount - $discount - $totalPaid;
             @endphp
             @if ($remaining > 0)
                 <div class="modal fade" id="addSewingPaymentModal{{ $sewingOrder->id }}" tabindex="-1"
@@ -623,6 +662,14 @@
                                         </div>
                                         <small class="text-muted">Remaining: Rs <span
                                                 id="sewingRemainingAmount{{ $sewingOrder->id }}">{{ number_format($remaining, 2) }}</span></small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Discount (Rs)</label>
+                                        <input type="number" class="form-control" name="discount_amount" id="sewingPaymentDiscount{{ $sewingOrder->id }}" step="0.01" min="0" value="0">
+                                        @if($discount > 0)
+                                            <small class="text-muted">Existing discount on order: Rs {{ number_format($discount,2) }}</small>
+                                        @endif
                                     </div>
 
                                     <div class="mb-3">
@@ -774,11 +821,20 @@
                     $totalPaid = $order->payments->sum('amount');
                     $remaining = $order->total_amount - $totalPaid;
                 @endphp
-                @if ($remaining > 0)
+                    @if ($remaining > 0)
                     $('#paymentForm{{ $order->id }}').on('submit', function(e) {
                         e.preventDefault();
                         const form = $(this);
                         const orderId = form.data('order-id');
+                        const amount = parseFloat(form.find('input[name="amount"]').val()) || 0;
+                        const discount = parseFloat(form.find('input[name="discount_amount"]').val()) || 0;
+                        const remaining = parseFloat('{{ number_format($remaining, 2, '.', '') }}');
+
+                        if ((amount + discount) > remaining) {
+                            alert('Amount + discount cannot exceed remaining amount (Rs ' + remaining.toFixed(2) + ').');
+                            return;
+                        }
+
                         const formData = form.serialize();
 
                         $.ajax({
@@ -818,11 +874,20 @@
                     $totalPaid = $sewingOrder->payments->sum('amount');
                     $remaining = $sewingOrder->total_amount - $totalPaid;
                 @endphp
-                @if ($remaining > 0)
+                    @if ($remaining > 0)
                     $('#sewingPaymentForm{{ $sewingOrder->id }}').on('submit', function(e) {
                         e.preventDefault();
                         const form = $(this);
                         const sewingOrderId = form.data('sewing-order-id');
+                        const amount = parseFloat(form.find('input[name="amount"]').val()) || 0;
+                        const discount = parseFloat(form.find('input[name="discount_amount"]').val()) || 0;
+                        const remaining = parseFloat('{{ number_format($remaining, 2, '.', '') }}');
+
+                        if ((amount + discount) > remaining) {
+                            alert('Amount + discount cannot exceed remaining amount (Rs ' + remaining.toFixed(2) + ').');
+                            return;
+                        }
+
                         const formData = form.serialize();
 
                         $.ajax({

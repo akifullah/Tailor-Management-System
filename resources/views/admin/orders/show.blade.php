@@ -182,13 +182,16 @@
                             $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
                             // Net paid = total paid - total refunded
                             $netPaid = $totalPaid - $totalRefunded;
-                            // Remaining = order total - net paid
-                            $remaining = $order->total_amount - $netPaid;
+                            // Order-level discount
+                            $discount = $order->discount_amount ?? 0;
+                            // Remaining = order total - discount - net paid
+                            $remaining = ($order->total_amount - $discount) - $netPaid;
                         @endphp
                         <div class="row mt-3">
                             <div class="col-md-3 col-lg-2">
                                 <strong>Total Amount:</strong><br>
                                 <span class="fs-16 fw-semibold">Rs {{ number_format($order->total_amount, 2) }}</span>
+                                
                             </div>
                             <div class="col-md-3 col-lg-2">
                                 <strong>Total Paid:</strong><br>
@@ -199,10 +202,14 @@
                                     <br><small class="text-info">Net Paid: Rs {{ number_format($netPaid, 2) }}</small>
                                 @endif --}}
                             </div>
+                             <div class="col-md-3 mb-2">
+                            <strong>Total Discount:</strong><br>
+                            <span class="fs-16 fw-semibold text-info">Rs {{ number_format($discount ?? 0, 2) }}</span>
+                        </div>
                             <div class="col-md-3 col-lg-2">
                                 <strong>Remaining:</strong><br>
                                 <span class="fs-16 fw-semibold text-{{ $remaining > 0 ? 'warning' : 'success' }}">
-                                    Rs {{ number_format($remaining, 2) }}
+                                    Rs {{ number_format(max(0,$remaining), 2) }}
                                 </span>
                             </div>
 
@@ -212,7 +219,10 @@
                                     Rs {{ number_format($totalRefunded, 2) }}
                                 </span>
                             </div>
-                            <div class="col-md-3">
+                            
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 offset-md-9">
                                 <strong>Payment Status:</strong><br>
                                 <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
                                     {{ $remaining <= 0 ? 'Paid' : 'Pending' }}
@@ -306,7 +316,12 @@
                                                         </h5>
                                                     </th>
                                                 </tr>
-
+<tr>
+                                                <th colspan="2" class="text-end">Total Discount:</th>
+                                                <th colspan="5">
+                                                    <h5 class="text-info fw-bold mb-0">Rs {{ number_format($discount ?? 0, 2) }}</h5>
+                                                </th>
+                                            </tr>
                                                 <tr>
                                                     <th colspan="2" class="text-end">
                                                         Total Refunded:
@@ -375,7 +390,9 @@
                             // Net paid = total paid - total refunded
                             $netPaid = $totalPaid - $totalRefunded;
                             // Remaining = order total - net paid
-                            $remaining = max(0, $order->total_amount - $netPaid);
+                            // For the modal, include existing order discount
+                            $discount = $order->discount_amount ?? 0;
+                            $remaining = max(0, ($order->total_amount - $discount) - $netPaid);
                         @endphp
                         <div class="mb-3">
                             <label class="form-label">Amount (Rs) <span class="text-danger">*</span></label>
@@ -388,6 +405,14 @@
                             </div>
                             <small class="text-muted">Remaining: Rs <span
                                     id="remainingAmount">{{ number_format($remaining, 2) }}</span></small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Discount (Rs)</label>
+                            <input type="number" class="form-control" name="discount_amount" id="paymentDiscount" step="0.01" min="0" value="0">
+                            @if($discount > 0)
+                                <small class="text-muted">Existing discount on order: Rs {{ number_format($discount,2) }}</small>
+                            @endif
                         </div>
 
                         <div class="mb-3">
@@ -795,6 +820,16 @@ if (isset($measurement['data'])) {
         document.getElementById('paymentForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            const form = this;
+            const amount = parseFloat(form.querySelector('input[name="amount"]').value) || 0;
+            const discount = parseFloat(form.querySelector('input[name="discount_amount"]').value) || 0;
+            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, '')) || 0;
+
+            if ((amount + discount) > remaining) {
+                alert('Amount + discount cannot exceed remaining amount (Rs ' + remaining.toFixed(2) + ').');
+                return;
+            }
+
             const formData = new FormData(this);
             const submitButton = this.querySelector('button[type="submit"]');
             submitButton.disabled = true;
@@ -831,18 +866,23 @@ if (isset($measurement['data'])) {
                 });
         });
 
-        // Update remaining amount when payment amount changes
-        document.getElementById('paymentAmount').addEventListener('input', function() {
-            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(
-                /[^0-9.-]+/g, ''));
-            const entered = parseFloat(this.value) || 0;
+        // Update remaining amount when payment amount or discount changes
+        const paymentAmountInput = document.getElementById('paymentAmount');
+        const paymentDiscountInput = document.getElementById('paymentDiscount');
+        function validatePaymentInputs() {
+            const remaining = parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^0-9.-]+/g, '')) || 0;
+            const entered = parseFloat(paymentAmountInput.value) || 0;
+            const discountVal = parseFloat(paymentDiscountInput.value) || 0;
 
-            if (entered > remaining) {
-                this.setCustomValidity('Amount cannot exceed remaining amount');
+            if ((entered + discountVal) > remaining) {
+                paymentAmountInput.setCustomValidity('Amount + discount cannot exceed remaining amount');
             } else {
-                this.setCustomValidity('');
+                paymentAmountInput.setCustomValidity('');
             }
-        });
+        }
+
+        paymentAmountInput.addEventListener('input', validatePaymentInputs);
+        paymentDiscountInput.addEventListener('input', validatePaymentInputs);
 
         // Handle return item form submission with AJAX
         $(document).on('submit', '.return-item-form', function(e) {

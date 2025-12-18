@@ -16,7 +16,9 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'payable_type' => 'required|in:order,purchase,sewing_order',
             'payable_id' => 'required|integer',
-            'amount' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.00',
+            // discount_amount will be stored on sewing_orders.discount_amount, not on payments
+            'discount_amount' => 'nullable|numeric|min:0',
             'payment_method' => 'required|in:cash,online,bank_transfer,cheque',
             'person_reference' => 'nullable|string|max:255',
             'payment_date' => 'required|date',
@@ -49,6 +51,23 @@ class PaymentController extends Controller
             }
 
             // Create payment
+                // Server-side validation: ensure amount + discount does not exceed remaining for orders and sewing orders
+                if ($payable instanceof SewingOrder || $payable instanceof Order) {
+                    $paidSoFar = $payable->payments()->where('type', 'payment')->sum('amount');
+                    $refundedSoFar = $payable->payments()->where('type', 'refund')->sum('amount');
+                    $netPaidSoFar = $paidSoFar - $refundedSoFar;
+                    $existingDiscount = $payable->discount_amount ?? 0;
+                    $remainingBefore = max(0, $payable->total_amount - $existingDiscount - $netPaidSoFar);
+                    $requestedDiscount = floatval($validated['discount_amount'] ?? 0);
+                    $requestedAmount = floatval($validated['amount'] ?? 0);
+                    if (($requestedAmount + $requestedDiscount) > $remainingBefore) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Amount + discount cannot exceed remaining amount. Remaining: Rs ' . number_format($remainingBefore, 2),
+                        ], 400);
+                    }
+                }
+
             $payment = Payment::create([
                 'payable_type' => $payableType,
                 'payable_id' => $validated['payable_id'],
@@ -63,8 +82,20 @@ class PaymentController extends Controller
 
             // Update order or purchase status
             if ($payable instanceof Order) {
+                // If discount provided, add it to Order.discount_amount (store on order)
+                $discount = floatval($validated['discount_amount'] ?? 0);
+                if ($discount > 0) {
+                    $payable->discount_amount = ($payable->discount_amount ?? 0) + $discount;
+                    $payable->save();
+                }
                 $this->updateOrderPaymentStatus($payable);
             } elseif ($payable instanceof SewingOrder) {
+                // If discount provided, add it to SewingOrder.discount_amount (store on order)
+                $discount = floatval($validated['discount_amount'] ?? 0);
+                if ($discount > 0) {
+                    $payable->discount_amount = ($payable->discount_amount ?? 0) + $discount;
+                    $payable->save();
+                }
                 $this->updateSewingOrderPaymentStatus($payable);
             } elseif ($payable instanceof InventoryTracking && $payable->type === 'purchase') {
                 // For purchases, we might want to update a status field if we add one
@@ -91,7 +122,8 @@ class PaymentController extends Controller
         $totalPaid = $order->payments()->where('type', 'payment')->sum('amount');
         $totalRefunded = $order->payments()->where('type', 'refund')->sum('amount');
         $netPaid = $totalPaid - $totalRefunded;
-        $remaining = $order->total_amount - $netPaid;
+        $discount = $order->discount_amount ?? 0;
+        $remaining = ($order->total_amount - $discount) - $netPaid;
 
         // Update payment status
         if ($remaining <= 0) {
@@ -111,8 +143,10 @@ class PaymentController extends Controller
     {
         $totalPaid = $sewingOrder->payments()->where('type', 'payment')->sum('amount');
         $totalRefunded = $sewingOrder->payments()->where('type', 'refund')->sum('amount');
+            $totalDiscount = $sewingOrder->discount_amount ?? 0;
         $netPaid = $totalPaid - $totalRefunded;
-        $remaining = $sewingOrder->total_amount - $netPaid;
+        // Remaining subtracts discounts as well
+        $remaining = max(0, $sewingOrder->total_amount - ($totalDiscount ?? 0) - $netPaid);
 
         if ($remaining <= 0) {
             $sewingOrder->payment_status = 'full';
@@ -124,6 +158,7 @@ class PaymentController extends Controller
 
         $sewingOrder->paid_amount = $netPaid;
         $sewingOrder->partial_amount = $netPaid;
+        $sewingOrder->discount_amount = $totalDiscount;
         $sewingOrder->save();
     }
 
@@ -147,13 +182,12 @@ class PaymentController extends Controller
             : ($payable instanceof SewingOrder 
                 ? $payable->total_amount 
                 : ($payable->price_per_meter * $payable->quantity_meters));
-        
-        $remaining = $totalAmount - $payable->payments->sum('amount');
 
         $totalPaid = $payable->payments()->where('type', 'payment')->sum('amount');
         $totalRefunded = $payable->payments()->where('type', 'refund')->sum('amount');
+        $totalDiscount = ($payable->discount_amount ?? 0);
         $netPaid = $totalPaid - $totalRefunded;
-        $remaining = $totalAmount - $netPaid;
+        $remaining = max(0, $totalAmount - ($totalDiscount ?? 0) - $netPaid);
 
         return response()->json([
             'success' => true,

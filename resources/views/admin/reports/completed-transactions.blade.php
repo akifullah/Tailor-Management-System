@@ -75,7 +75,7 @@
                             <th>Order Date</th>
                             <th>Total Amount</th>
                             <th>Paid</th>
-                            <th>Items Status</th>
+                            <!-- <th>Items Status</th> -->
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -83,7 +83,11 @@
                     <tbody>
                         @forelse($orders as $order)
                         @php
-                            $totalPaid = $order->payments->sum('amount');
+                            $totalPaid = $order->payments->where('type', 'payment')->sum('amount');
+                            $totalRefunded = $order->payments->where('type', 'refund')->sum('amount');
+                            $netPaid = $totalPaid - $totalRefunded;
+                            $totalDiscount = $order->discount_amount ?? 0;
+                            $effectiveTotal = $order->total_amount;
                             $itemsPending = $order->items->where('status', 'pending')->count();
                             $itemsProgress = $order->items->where('status', 'progress')->count();
                             $itemsCompleted = $order->items->where('status', 'completed')->count();
@@ -93,9 +97,17 @@
                             <td>{{ $order->order_number }}</td>
                             <td>{{ $order->customer->name ?? 'N/A' }}</td>
                             <td>{{ $order->order_date }}</td>
-                            <td>Rs {{ number_format($order->total_amount, 2) }}</td>
-                            <td class="text-success">Rs {{ number_format($totalPaid, 2) }}</td>
                             <td>
+                                Rs {{ number_format($effectiveTotal, 2) }}
+                                
+                            </td>
+                            <td class="text-success">
+                                Rs {{ number_format($netPaid, 2) }}
+                                @if($totalDiscount > 0)
+                                    <br/><small class="text-muted">Discount: Rs {{ number_format($totalDiscount,2) }}</small>
+                                @endif
+                            </td>
+                            <!-- <td>
                                 @if($totalItems > 0)
                                     @if($itemsCompleted == $totalItems)
                                         <span class="badge bg-success">All Done</span>
@@ -103,7 +115,7 @@
                                         <span class="badge bg-info">{{ $itemsCompleted }}/{{ $totalItems }} Done</span>
                                     @endif
                                 @endif
-                            </td>
+                            </td> -->
                             <td><span class="badge bg-success">Paid</span></td>
                             <td>
                                 <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-primary">View</a>

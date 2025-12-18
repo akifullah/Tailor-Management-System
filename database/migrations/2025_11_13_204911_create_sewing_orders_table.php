@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('delivery_date')->nullable();
             $table->decimal('total_amount', 10, 2)->default(0);
             $table->decimal('paid_amount', 10, 2)->default(0);
+            $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('remaining_amount', 10, 2)->default(0);
             $table->enum('payment_method', ['cash', 'online', 'bank_transfer', 'cheque'])->default('cash');
             $table->decimal('partial_amount', 10, 2)->nullable();
