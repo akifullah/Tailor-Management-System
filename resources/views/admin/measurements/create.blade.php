@@ -34,7 +34,9 @@
 
                             @if ($selectedCustomer)
                                 <div class="text-end">
-
+                                    <a class="btn btn-primary"
+                                    href="{{ route('sewing-orders.create.withCustomer', ['customer' => $selectedCustomer->id]) }}">Create Sewing
+                                    Order</a>
                                     <a class="btn btn-success"
                                         href="{{ route('orders.create.withCustomer', ['customer' => $selectedCustomer->id]) }}">Create
                                         Order</a>
