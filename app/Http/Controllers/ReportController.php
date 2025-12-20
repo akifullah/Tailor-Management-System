@@ -369,7 +369,11 @@ class ReportController extends Controller
             // Attach loaded orders to transactions
             foreach ($transactions as $transaction) {
                 if ($transaction->payable_type === Order::class && isset($orders[$transaction->payable_id])) {
-                    $transaction->payable = $sewingOrders[$transaction->payable_id];
+                    if (isset($sewingOrders[$transaction->payable_id])) {
+                        $transaction->payable = $sewingOrders[$transaction->payable_id];
+                    } else {
+                        $transaction->payable = null;
+                    }
                 }
             }
         }

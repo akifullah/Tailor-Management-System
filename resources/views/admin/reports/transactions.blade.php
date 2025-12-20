@@ -195,17 +195,24 @@
                                     </td>
                                     <td>
                                         @if ($transaction->payable_type === 'App\Models\Order')
-                                            <a
-                                                href="{{ route('orders.show', $transaction->payable->id) }}">{{ $transaction->payable->order_number }}</a>
+                                            @if ($transaction?->payable && $transaction?->payable?->id)
+                                                <a href="{{ route('orders.show', $transaction->payable->id) }}">
+                                                    {{ $transaction->payable->order_number }}
+                                                </a>
+                                            @else
+                                                <span class="text-muted">N/A</span>
+                                            @endif
+
+                                                
                                             @php
-                                                $order = $transaction->payable;
-                                                $orderTotalPaid = $order->payments
-                                                    ? $order->payments->sum('amount')
+                                                $order = $transaction?->payable;
+                                                $orderTotalPaid = $order?->payments
+                                                    ? $order?->payments?->sum('amount')
                                                     : 0;
-                                                $orderRemaining = max(0, $order->total_amount - $orderTotalPaid);
+                                                $orderRemaining = max(0, $order?->total_amount - $orderTotalPaid);
                                             @endphp
                                             <br><small class="text-muted">Total: Rs
-                                                {{ number_format($order->total_amount, 2) }} |
+                                                {{ number_format($order?->total_amount, 2) }} |
                                                 Remaining: Rs {{ number_format($orderRemaining, 2) }}</small>
                                         @elseif($transaction->payable_type === 'App\Models\User')
                                             <span class="badge bg-warning">Worker Payment</span>
