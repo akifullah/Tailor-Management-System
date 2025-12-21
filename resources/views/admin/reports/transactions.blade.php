@@ -91,6 +91,14 @@
                 </div>
             </div>
             <div class="col-md-3 col-lg-2 mb-2">
+                <div class="card border-warning h-100">
+                    <div class="card-body">
+                        <h6>Total Refunds</h6>
+                        <h4 class="text-warning">Rs {{ number_format($summary['total_refunds'] ?? 0, 2) }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-lg-2 mb-2">
                 <div class="card border-info h-100">
                     <div class="card-body">
                         <h6>Purchase Payments (Made)</h6>
@@ -159,6 +167,7 @@
                                 <th>Type</th>
                                 <th>Reference</th>
                                 <th>Amount</th>
+                                <th>Type</th>
                                 <th>Payment Method</th>
                                 <th>Person/Reference</th>
                                 <th>Notes</th>
@@ -186,6 +195,10 @@
                                             @endif
                                         @elseif($transaction->payable_type === 'App\Models\SewingOrder')
                                             <span class="badge bg-primary">Sewing Payment</span>
+                                            @if ($transaction->payable)
+                                                <br><small><a
+                                                        href="{{ route('sewing-orders.show', $transaction->payable->id) }}">{{ $transaction->payable->sewing_order_number }}</a></small>
+                                            @endif
                                         @else
                                             <span class="badge bg-info">Purchase Payment</span>
                                             @if ($transaction->payable)
@@ -203,22 +216,27 @@
                                                 <span class="text-muted">N/A</span>
                                             @endif
 
-                                                
-                                            @php
+
+                                            {{-- @php
                                                 $order = $transaction?->payable;
                                                 $orderTotalPaid = $order?->payments
                                                     ? $order?->payments?->sum('amount')
                                                     : 0;
                                                 $orderRemaining = max(0, $order?->total_amount - $orderTotalPaid);
-                                            @endphp
-                                            <br><small class="text-muted">Total: Rs
+                                            @endphp --}}
+                                            {{-- <br><small class="text-muted">Total: Rs
                                                 {{ number_format($order?->total_amount, 2) }} |
                                                 Remaining: Rs {{ number_format($orderRemaining, 2) }}</small>
+                                                 --}}
                                         @elseif($transaction->payable_type === 'App\Models\User')
                                             <span class="badge bg-warning">Worker Payment</span>
                                             <br><small>{{ $transaction->payable->name }}</small>
                                         @elseif($transaction->payable_type === 'App\Models\SewingOrder')
                                             <span class="badge bg-primary">Sewing Payment</span>
+                                            @if ($transaction->payable)
+                                                <br><small><a
+                                                        href="{{ route('sewing-orders.show', $transaction->payable->id) }}">{{ $transaction->payable->sewing_order_number }}</a></small>
+                                            @endif
                                         @else
                                             Purchase #{{ $transaction->payable->id }}
                                             @php
@@ -236,6 +254,7 @@
                                         @endif
                                     </td>
                                     <td><strong>Rs {{ number_format($transaction->amount, 2) }}</strong></td>
+                                    <td>{{ $transaction->type }}</td>
                                     <td>
                                         <span
                                             class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $transaction->payment_method)) }}</span>

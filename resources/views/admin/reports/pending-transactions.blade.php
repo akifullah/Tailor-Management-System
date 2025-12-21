@@ -117,8 +117,10 @@
                         <tbody>
                             @forelse($sewingOrders as $sewingOrder)
                                 @php
-                                    $sewingTotalPaid = $sewingOrder->payments->sum('amount');
-                                    $sewingRemaining = $sewingOrder->total_amount - $sewingTotalPaid;
+                                    $sewingTotalRefund = $sewingOrder->payments->where("type", "refund")->sum('amount');
+                                    // $sewingTotalPaid = $sewingOrder->payments->where("type", "!=", "refund")->sum('amount') - $sewingTotalRefund ;
+                                    $sewingTotalPaid = $sewingOrder->paid_amount;
+                                    $sewingRemaining = $sewingOrder->remaining_amount;
                                 @endphp
                                 <tr>
                                     <td>
@@ -196,7 +198,8 @@
                             <tbody>
                                 @forelse($orders as $order)
                                     @php
-                                        $totalPaid = $order->payments->sum('amount');
+                                        $refundTotal = $order->payments->where("type", "refund")->sum('amount');
+                                        $totalPaid = $order->payments->where("type", "!=", "refund")->sum('amount') - $refundTotal;
                                         $remaining = $order->total_amount - $totalPaid;
                                         $itemsPending = $order->items->where('status', 'pending')->count();
                                         $itemsProgress = $order->items->where('status', 'progress')->count();

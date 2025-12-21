@@ -484,7 +484,7 @@
                                                         <a href="{{ route('orders.show', $order->id) }}">{{ $order->order_number }}</a>
                                                     </td>
                                                     <td>{{ $order?->customer?->name }}</td>
-                                                    <td>{{ $order->order_date }}</td>
+                                                    <td>{{ $order->order_date->format("Y-m-d") }}</td>
                                                     <td>Rs {{ number_format($order->total_amount, 2) }}</td>
                                                     <td>
                                                         @if ($remaining <= 0)

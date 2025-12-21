@@ -41,18 +41,33 @@ class Order extends Model
         'return_reason' => 'string',
         'cancelled_at' => 'datetime',
     ];
-    
+
     protected $appends = ['total_paid'];
 
-    public function customer() { return $this->belongsTo(Customer::class); }
-    public function items() { return $this->hasMany(OrderItem::class); }
-    public function payments() { return $this->morphMany(Payment::class, 'payable'); }
-    public function cancelledBy() { return $this->belongsTo(User::class, 'cancelled_by'); }
-    
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function payments()
+    {
+        return $this->morphMany(Payment::class, 'payable');
+    }
+
+    public function cancelledBy()
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
     // Calculate total paid amount from payments (only payments, not refunds)
     public function getTotalPaidAttribute()
     {
-        return $this->payments()->where('type', 'payment')->sum('amount') - 
+        return $this->payments()->where('type', 'payment')->sum('amount') -
                $this->payments()->where('type', 'refund')->sum('amount');
     }
 
@@ -63,9 +78,9 @@ class Order extends Model
         if ($items->isEmpty()) {
             return false;
         }
+
         return $items->every(function ($item) {
             return $item->status === 'cancelled';
         });
     }
 }
-
