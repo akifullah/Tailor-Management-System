@@ -113,10 +113,10 @@
                 <td class="right bold">Rs {{ number_format($order->total_amount, 2) }}</td>
             </tr>
 
-            <tr>
+            {{-- <tr>
                 <td>Refunded</td>
                 <td class="right">Rs -{{ number_format($totalRefunded, 2) }}</td>
-            </tr>
+            </tr> --}}
             <tr>
                 <td>Discount</td>
                 <td class="right bold">Rs {{ number_format($discount, 2) }}</td>
