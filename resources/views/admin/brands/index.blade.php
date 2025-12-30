@@ -85,11 +85,11 @@
                                                     data-bs-original-title="Edit">
                                                     <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
                                                 </button>
-                                                <button onclick="handleDelete({{ $brand->id }})"
+                                                {{-- <button onclick="handleDelete({{ $brand->id }})"
                                                     class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
                                                     data-bs-original-title="Delete">
                                                     <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                                </button>
+                                                </button> --}}
                                             </td>
                                         </tr>
                                     @endforeach
