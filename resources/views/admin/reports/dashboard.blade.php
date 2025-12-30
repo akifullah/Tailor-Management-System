@@ -127,7 +127,7 @@
                                             <td><a
                                                     href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number }}</a>
                                             </td>
-                                            <td>{{ $order->customer->name ?? 'Walk-in' }}</td>
+                                            <td>{{ $order?->customer?->name ?? 'Walk-in' }}</td>
                                             <td>{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}</td>
                                             <td>{{ ucfirst($order->order_status ?? 'pending') }}</td>
                                             <td class="text-end">
@@ -534,7 +534,7 @@
                                                 <td>{{ $expense->title }}</td>
                                                 <td>{{ $expense->category ?? '-' }}</td>
                                                 <td><strong>Rs {{ number_format($expense->amount, 2) }}</strong></td>
-                                                <td>{{ $expense->user->name ?? 'Unknown' }}</td>
+                                                <td>{{ $expense?->user?->name ?? 'Unknown' }}</td>
                                             </tr>
                                         @empty
                                             <tr>
