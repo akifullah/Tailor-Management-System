@@ -136,11 +136,11 @@
                                                     </button>
                                                 @endcan
 
-                                                <button onclick="handleDelete({{ $user->id }})"
+                                                {{-- <button onclick="handleDelete({{ $user->id }})"
                                                     class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
                                                     data-bs-original-title="Delete">
                                                     <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                                </button>
+                                                </button> --}}
                                             </td>
                                         </tr>
                                     @endforeach

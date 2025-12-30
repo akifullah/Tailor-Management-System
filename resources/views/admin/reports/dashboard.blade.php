@@ -286,7 +286,7 @@
                                         <tr>
                                             <td>
                                                 <a href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number }}</a></td>
-                                            <td>{{ $order->customer->name }}</td>
+                                            <td>{{ $order?->customer?->name }}</td>
                                             <td>
                                                 {{ $order->delivery_date->format('Y-m-d') }}
                                                 @if ($order->delivery_date->isToday())

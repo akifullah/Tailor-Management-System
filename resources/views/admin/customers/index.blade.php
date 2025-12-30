@@ -134,11 +134,11 @@
                                                         data-bs-original-title="Edit">
                                                         <i class="mdi mdi-pencil-outline fs-14 text-primary"></i>
                                                     </button>
-                                                    <button onclick="handleDelete({{ $customer->id }})"
+                                                    {{-- <button onclick="handleDelete({{ $customer->id }})"
                                                         class="btn btn-sm bg-danger-subtle" data-bs-toggle="tooltip"
                                                         data-bs-original-title="Delete">
                                                         <i class="mdi mdi-delete fs-14 text-danger"></i>
-                                                    </button>
+                                                    </button> --}}
                                                 </div>
 
 

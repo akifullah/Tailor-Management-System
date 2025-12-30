@@ -75,13 +75,13 @@
                                         <td>
                                             <a href="{{ route('products.edit', $product) }}"
                                                 class="btn btn-sm btn-warning">Edit</a>
-                                            <form action="{{ route('products.destroy', $product) }}" method="POST"
+                                            {{-- <form action="{{ route('products.destroy', $product) }}" method="POST"
                                                 style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger"
                                                     onclick="return confirm('Are you sure?')">Delete</button>
-                                            </form>
+                                            </form> --}}
                                         </td>
                                     </tr>
                                 @endforeach
