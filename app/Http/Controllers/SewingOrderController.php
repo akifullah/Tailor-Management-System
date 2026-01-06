@@ -20,15 +20,23 @@ class SewingOrderController extends Controller
     public function index(Request $request)
     {
         $query = SewingOrder::with(['customer', 'items', 'payments']);
+        // return $query;
 
         $type = $request->input('type');
         $value = $request->input('value');
 
         if ($type && $value !== null && $value !== '') {
+            // if ($type === 'id') {
+            //     $query->where('id', $value);
             if ($type === 'id') {
-                $query->where('id', $value);
-            } elseif ($type === 'customer_id') {
-                $query->where('customer_id', $value);
+                $query->whereHas('customer', function ($q) use ($value) {
+                    $q->where('id', $value);
+                });
+            } elseif ($type == 'customer_id') {
+                // $query->where('customer_id', $value);
+                $query->whereHas('customer', function ($q) use ($value) {
+                    $q->where('customer_id', $value);
+                });
             } elseif ($type === 'customer_name') {
                 $query->whereHas('customer', function ($q) use ($value) {
                     $q->where('name', 'like', '%' . $value . '%');
@@ -43,7 +51,6 @@ class SewingOrderController extends Controller
         }
 
         $orders = $query->latest()->paginate(15);
-
         return view('admin.sewing_orders.index', compact('orders'));
     }
 
@@ -194,13 +201,13 @@ class SewingOrderController extends Controller
             // Create order items
             foreach ($validated['items'] as $itemData) {
                 $measurement = $itemData['customer_measurement'] ?? null;
-                
+
                 $measurement = Measurement::find($measurement);
                 // if (is_string($measurement)) {
-                    //     $measurement = json_decode($measurement, true);
-                    // }
+                //     $measurement = json_decode($measurement, true);
+                // }
 
-                
+
                 $sewingOrderItem = SewingOrderItem::create([
                     'sewing_order_id' => $sewingOrder->id,
                     'product_name' => $itemData['product_name'],
@@ -290,8 +297,8 @@ class SewingOrderController extends Controller
         if (in_array($sewingOrder->order_status, ['cancelled', 'delivered'])) {
             return redirect()->back()->with('error', 'You cannot edit an order, if that is cancelled or delivered.');
         }
-        
-        
+
+
         $itemsPayload = $sewingOrder->items->map(function ($item) {
             return [
                 'id' => $item->id,
@@ -369,10 +376,12 @@ class SewingOrderController extends Controller
 
                 // Preserve existing pivot status/cost where possible
                 $existingPivot = $item->workers->mapWithKeys(function ($worker) {
-                    return [$worker->id => [
-                        'status' => $worker->pivot->status,
-                        'worker_cost' => $worker->pivot->worker_cost,
-                    ]];
+                    return [
+                        $worker->id => [
+                            'status' => $worker->pivot->status,
+                            'worker_cost' => $worker->pivot->worker_cost,
+                        ]
+                    ];
                 });
 
                 $pivotData = [];
@@ -675,9 +684,11 @@ class SewingOrderController extends Controller
         ];
 
         // Compute worker-side earnings for completed items (worker_cost * qty)
-        $completedItems = SewingOrderItem::with(['workers' => function ($q) use ($userId) {
-            $q->where('users.id', $userId);
-        }])->whereHas('workers', function ($q) use ($userId) {
+        $completedItems = SewingOrderItem::with([
+            'workers' => function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            }
+        ])->whereHas('workers', function ($q) use ($userId) {
             $q->where('users.id', $userId)->where('sewing_order_item_user.status', 'completed');
         })->get();
 
@@ -695,9 +706,12 @@ class SewingOrderController extends Controller
         $stats['remaining_amount'] = $completedAmount - $paidAmount;
 
         // Filtered query for table display - load workers with pivot data
-        $query = SewingOrderItem::with(['sewingOrder.customer', 'workers' => function ($q) use ($userId) {
-            $q->where('users.id', $userId);
-        }])
+        $query = SewingOrderItem::with([
+            'sewingOrder.customer',
+            'workers' => function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            }
+        ])
             ->whereHas('workers', function ($q) use ($userId) {
                 $q->where('users.id', $userId);
             });
@@ -750,9 +764,9 @@ class SewingOrderController extends Controller
         $sewing_order->save();
 
         // If the order is delivered OR cancelled, update all items
-            \App\Models\SewingOrderItem::where('sewing_order_id', $sewing_order->id)
-                ->where('status', '!=', 'cancelled')
-                ->update(['status' => $sewing_order->order_status]);
+        \App\Models\SewingOrderItem::where('sewing_order_id', $sewing_order->id)
+            ->where('status', '!=', 'cancelled')
+            ->update(['status' => $sewing_order->order_status]);
 
         return redirect()->route('sewing-orders.show', $sewing_order->id)
             ->with('success', 'Order status updated successfully.');

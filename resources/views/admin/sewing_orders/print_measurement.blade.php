@@ -302,16 +302,19 @@
         <div class="info-grid">
             <div class="info-card">
                 <div class="info-label">Customer Details </div>
-                @if ($item->sewingOrder->customer->customer_id)
-                    <div class="info-value">Customer ID: #{{ $item->sewingOrder->customer->customer_id }}</div>
-                @endif
+
+                <div class="info-value">Customer ID: #{{ $item->sewingOrder->customer->id }}
+                    @if ($item->sewingOrder->customer->customer_id)
+                        / #{{ $item->sewingOrder->customer->customer_id }}
+                    @endif
+                </div>
                 <div class="info-value">Name: {{ $item->sewingOrder->customer->name }}</div>
                 <div style="detail-list-item">Phone: {{ $item->sewingOrder->customer->phone }}</div>
                 <div style="detail-list-item">Address: {{ $item->sewingOrder->customer->address }}</div>
             </div>
             <div class="info-card">
                 <div class="info-label">Order Details</div>
-                <div class="info-value">Order #: {{ $item->sewingOrder->sewing_order_number }}</div>
+                {{-- <div class="info-value">Order #: {{ $item->sewingOrder->sewing_order_number }}</div> --}}
                 <div style="detail-list-item font-weight: 600;">Item:
                     {{ ucfirst($item?->product_name) }} |
                     @if ($item?->color)

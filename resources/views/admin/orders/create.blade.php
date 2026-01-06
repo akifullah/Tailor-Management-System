@@ -5,8 +5,8 @@
         <div class="py-3">
             <div class="d-flex align-items-center justify-content-between">
                 <h4 class="fs-18 fw-semibold mb-0">Create New Order</h4>
-                <button data-bs-toggle="modal" data-bs-target='#userModal' class="btn btn-primary btn-sm"
-                    onclick="handleCreateCustomer()">Add Customer</button>
+                {{-- <button data-bs-toggle="modal" data-bs-target='#userModal' class="btn btn-primary btn-sm"
+                    onclick="handleCreateCustomer()">Add Customer</button> --}}
             </div>
         </div>
 
@@ -144,7 +144,7 @@
     </div>
 
 
-    <div class="modal fade" id="userModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    {{-- <div class="modal fade" id="userModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -197,7 +197,7 @@
                 </div> <!-- end modal body -->
             </div> <!-- end modal content -->
         </div>
-    </div>
+    </div> --}}
 
 
 @endsection

@@ -70,7 +70,7 @@
                                 class="table table-striped text-nowrap table-hover table-bordered dt-responsive nowrap">
                                 <thead>
                                     <tr>
-                                        <th>#ID</th>
+                                        <th>#ID/O_ID</th>
                                         <th>Sewing Order Number</th>
                                         <th>Customer</th>
 
@@ -86,7 +86,8 @@
                                         @foreach ($orders as $order)
                                             @php
                                                 $totalPaid = $order->payments->sum('amount');
-                                                $remaining = $order->total_amount - $totalPaid - ($order->discount_amount ?? 0);
+                                                $remaining =
+                                                    $order->total_amount - $totalPaid - ($order->discount_amount ?? 0);
                                             @endphp
                                             @php
                                                 // Calculate if delivery date is today or tomorrow
@@ -101,11 +102,21 @@
                                             @endphp
                                             <tr
                                                 @if ($isDeliveryClose && $order->order_status != 'delivered') style="background-color:rgba(255,87,34,0.1);" @endif>
-                                                <td>{{ $order->id }}</td>
+                                                <td>
+                                                    <a target="_blank"
+                                                        href="{{ route('customers.measurements', ['id' => $order->customer->id]) }}">
+                                                        #{{ $order->customer->id }}
+                                                        @if ($order->customer->customer_id)
+                                                            / #{{ $order->customer->customer_id }}
+                                                        @endif
+                                                    </a>
+                                                </td>
                                                 <td><a
                                                         href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number ?? 'N/A' }}</a>
                                                 </td>
-                                                <td>{{ $order->customer->name ?? 'N/A' }}</td>
+                                                <td><a target="_blank"
+                                                        href="{{ route('customers.measurements', ['id' => $order->customer->id]) }}">{{ $order->customer->name ?? 'N/A' }}</a>
+                                                </td>
 
                                                 <td>{{ $order->order_date ? $order->order_date->format('Y-m-d') : 'N/A' }}
                                                 </td>
@@ -116,7 +127,10 @@
                                                 <td>
                                                     @php
                                                         $totalPaid = $order->payments->sum('amount');
-                                                        $remaining = $order->total_amount - $totalPaid - ($order->discount_amount ?? 0);
+                                                        $remaining =
+                                                            $order->total_amount -
+                                                            $totalPaid -
+                                                            ($order->discount_amount ?? 0);
                                                     @endphp
                                                     {{-- <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
                                                     {{ $remaining <= 0 ? 'Paid' : 'Pending' }}

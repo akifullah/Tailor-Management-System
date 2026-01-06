@@ -63,7 +63,7 @@ class OrderController extends Controller
             }
         }
 
-        $orders = $query->latest()->get();
+        $orders = $query->latest()->paginate(15);
 
         // New filter: item status (filter in PHP since it depends on loaded relations)
         if ($itemStatus !== null && $itemStatus !== '') {

@@ -34,7 +34,8 @@
                                         <label for="search_type" class="form-label">Search By</label>
                                         <select name="type" id="search_type" class="form-select" required>
                                             <option value="">-- Select Type --</option>
-                                            <option value="order_number" {{ request('type') == 'order_number' ? 'selected' : '' }}>Order Number
+                                            <option value="order_number"
+                                                {{ request('type') == 'order_number' ? 'selected' : '' }}>Order Number
                                             </option>
                                             <option value="customer" {{ request('type') == 'customer' ? 'selected' : '' }}>
                                                 Customer</option>
@@ -49,21 +50,32 @@
                                         <label for="status_filter" class="form-label">Order Status</label>
                                         <select name="order_status" id="status_filter" class="form-select">
                                             <option value="">All Statuses</option>
-                                            <option value="pending" {{ request('order_status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                            <option value="completed" {{ request('order_status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                            <option value="cancelled" {{ request('order_status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                            <option value="returned" {{ request('order_status') == 'returned' ? 'selected' : '' }}>Returned</option>
+                                            <option value="pending"
+                                                {{ request('order_status') == 'pending' ? 'selected' : '' }}>Pending
+                                            </option>
+                                            <option value="completed"
+                                                {{ request('order_status') == 'completed' ? 'selected' : '' }}>Completed
+                                            </option>
+                                            <option value="cancelled"
+                                                {{ request('order_status') == 'cancelled' ? 'selected' : '' }}>Cancelled
+                                            </option>
+                                            <option value="returned"
+                                                {{ request('order_status') == 'returned' ? 'selected' : '' }}>Returned
+                                            </option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
                                         <label for="payment_status_filter" class="form-label">Payment Status</label>
                                         <select name="payment_status" id="payment_status_filter" class="form-select">
                                             <option value="">All</option>
-                                            <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                                            <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="paid"
+                                                {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                            <option value="pending"
+                                                {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending
+                                            </option>
                                         </select>
                                     </div>
-                                    <div class="col-md-2">
+                                    {{-- <div class="col-md-2">
                                         <label for="item_status_filter" class="form-label">Item Status</label>
                                         <select name="item_status" id="item_status_filter" class="form-select">
                                             <option value="">All</option>
@@ -72,7 +84,7 @@
                                             <option value="returned" {{ request('item_status') == 'returned' ? 'selected' : '' }}>All Returned</option>
                                             <option value="not_returned" {{ request('item_status') == 'not_returned' ? 'selected' : '' }}>Any Not Returned</option>
                                         </select>
-                                    </div>
+                                    </div> --}}
                                     <div class="col-md-1 align-self-end">
                                         <div class="d-flex gap-1">
                                             <button type="submit" class="btn px-2 btn-primary">Search</button>
@@ -83,10 +95,10 @@
                                 </div>
                             </form>
                         </div>
-                        <table id="datatable-buttons" class="table data-table table-striped table-bordered dt-responsive nowrap">
+                        <table id="datatable-buttons" class="table table-striped table-bordered  nowrap">
                             <thead>
                                 <tr>
-                                    <th>#ID</th>
+                                    <th>#ID / #O_ID</th>
                                     <th>Order Number</th>
                                     <th>Date</th>
                                     <th>Customer</th>
@@ -106,22 +118,40 @@
                                             // Net paid = total paid - total refunded
                                             $netPaid = $totalPaid - $totalRefunded;
                                             // Remaining = order total - net paid
-                                            $remaining = $order->total_amount - $netPaid - ($order->discount_amount ?? 0);
+                                            $remaining =
+                                                $order->total_amount - $netPaid - ($order->discount_amount ?? 0);
                                         @endphp
-                                        <tr style="background-color: {{ $order->is_return ? 'rgba(255, 0, 0, 0.1)' : '' }} ;">
-                                            <td>{{ $order->id }}</td>
-                                            <td><a href="{{ route('orders.show', $order->id) }}">{{ $order->order_number }}</a></td>
+                                        <tr
+                                            style="background-color: {{ $order->is_return ? 'rgba(255, 0, 0, 0.1)' : '' }} ;">
+                                            <td>
+                                                {{-- {{ $order->id }} --}}
+
+                                                <a target="_blank"
+                                                    href="{{ route('customers.measurements', ['id' => $order->customer->id]) }}">
+                                                    #{{ $order->customer->id }}
+                                                    @if ($order->customer->customer_id)
+                                                        / #{{ $order->customer->customer_id }}
+                                                    @endif
+                                                </a>
+                                            </td>
+                                            <td><a
+                                                    href="{{ route('orders.show', $order->id) }}">{{ $order->order_number }}</a>
+                                            </td>
                                             <td>
                                                 {{ $order->order_date->format('Y-m-d') }}
 
-                                            @if ($order->is_return && $order->return_date)
-                                                <br/><small class="text-muted">Return Date: {{ $order->return_date instanceof \Carbon\Carbon ? $order->return_date->format('Y-m-d') : $order->return_date }}</small>
-                                            @endif
+                                                @if ($order->is_return && $order->return_date)
+                                                    <br /><small class="text-muted">Return Date:
+                                                        {{ $order->return_date instanceof \Carbon\Carbon ? $order->return_date->format('Y-m-d') : $order->return_date }}</small>
+                                                @endif
                                             </td>
-                                            <td>{{ $order->customer->name ?? 'N/A' }}</td>
+                                            <td>
+                                                <a target="_blank"
+                                                    href="{{ route('customers.measurements', ['id' => $order->customer->id]) }}">{{ $order->customer->name ?? 'N/A' }}</a>
+                                            </td>
                                             <td>{{ number_format($order->total_amount, 2) }}</td>
                                             <td>
-                                                @if($order->order_status === 'cancelled' || $order->is_return)
+                                                @if ($order->order_status === 'cancelled' || $order->is_return)
                                                     <span class="badge bg-secondary">--</span>
                                                 @else
                                                     <span class="badge bg-{{ $remaining <= 0 ? 'success' : 'warning' }}">
@@ -143,11 +173,13 @@
 
 
                                             <td>
-                                                <a href="{{ route('orders.show', $order) }}" class="btn btn-sm bg-info-subtle">
+                                                <a href="{{ route('orders.show', $order) }}"
+                                                    class="btn btn-sm bg-info-subtle">
                                                     <i class="mdi mdi-eye fs-14 text-info"></i>
                                                 </a>
-                                                
-                                                <a href="{{ route('orders.edit', $order) }}" class="btn btn-sm bg-warning-subtle">
+
+                                                <a href="{{ route('orders.edit', $order) }}"
+                                                    class="btn btn-sm bg-warning-subtle">
                                                     <i class="mdi mdi-pencil fs-14 text-warning"></i>
                                                 </a>
 
@@ -165,29 +197,33 @@
                                                     <div class="modal-dialog">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title" id="returnModalLabel">Return Order</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                    aria-label="Close"></button>
+                                                                <h5 class="modal-title" id="returnModalLabel">Return Order
+                                                                </h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <form id="returnForm{{ $order->id }}" action="{{ route('orders.return', $order->id) }}" method="POST" enctype="multipart/form-data">
+                                                                <form id="returnForm{{ $order->id }}"
+                                                                    action="{{ route('orders.return', $order->id) }}"
+                                                                    method="POST" enctype="multipart/form-data">
 
                                                                     @csrf
                                                                     <div class="mb-3">
                                                                         <label for="return_date" class="form-label">Return
                                                                             Date</label>
-                                                                        <input type="date" class="form-control" id="return_date"
-                                                                            name="return_date" required>
+                                                                        <input type="date" class="form-control"
+                                                                            id="return_date" name="return_date" required>
                                                                     </div>
                                                                     <div class="mb-3">
-                                                                        <label for="reason" class="form-label">Reason</label>
-                                                                        <textarea class="form-control" id="reason" name="reason"
-                                                                            rows="3" required></textarea>
+                                                                        <label for="reason"
+                                                                            class="form-label">Reason</label>
+                                                                        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
                                                                     </div>
                                                                     <div class="modal-footer">
                                                                         <button type="button" class="btn btn-secondary"
                                                                             data-bs-dismiss="modal">Close</button>
-                                                                        <button type="submit" class="btn btn-danger">Return</button>
+                                                                        <button type="submit"
+                                                                            class="btn btn-danger">Return</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -208,6 +244,9 @@
                                 @endif
                             </tbody>
                         </table>
+                    </div>
+                    <div class="px-3">
+                        {{ $orders->links('pagination::bootstrap-5') }}
                     </div>
                 </div>
             </div>
@@ -240,7 +279,8 @@
                     success: function(response) {
                         if (response.success) {
                             // Find the modal associated with this form and hide it
-                            let modalSelector = '#returnModal' + $(form).attr('id').replace('returnForm', '');
+                            let modalSelector = '#returnModal' + $(form).attr('id').replace(
+                                'returnForm', '');
                             $(modalSelector).modal('hide');
                             window.location.reload();
                         } else {

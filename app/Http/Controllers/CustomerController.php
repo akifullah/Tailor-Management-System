@@ -73,7 +73,6 @@ class CustomerController extends Controller
             ['id' => $request->id],
             $customerData
         );
-        Cache::forget("customers");
         session()->flash('success', $request->id ? 'Customer updated successfully.' : 'Customer created successfully.');
 
         return response()->json([
