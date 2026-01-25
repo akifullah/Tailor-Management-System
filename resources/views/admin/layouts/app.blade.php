@@ -7,7 +7,7 @@
     <title>Dashboard | {{ config('app.name') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="" />
+    <meta name="description" content="A Full Tailor Management System" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <!-- App favicon -->
@@ -124,11 +124,10 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                     </a> --}}
                                 @endcan
 
-                                <a class="dropdown-item notify-item"
-                                 href="{{ route('worker.ledger') }}">
-                                <i data-feather="file-text" class="align-middle" style="width: 16px;"></i>
-                                <span> My Ledger </span>
-                            </a>
+                                <a class="dropdown-item notify-item" href="{{ route('worker.ledger') }}">
+                                    <i data-feather="file-text" class="align-middle" style="width: 16px;"></i>
+                                    <span> My Ledger </span>
+                                </a>
 
                                 <div class="dropdown-divider"></div>
 
@@ -162,12 +161,13 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                 <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="24">
                             </span> --}}
                         </a>
-                        <a class='logo ' >
+                        <a class='logo '>
                             {{-- <span class="logo-sm">
                                 <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
                             </span> --}}
                             <span class="logo-lg">
-                                <img src="{{ asset('assets/images/ZEB-TAILORS-FABRICS-logo.png') }}" alt="" height="40">
+                                <img src="{{ asset('assets/images/ZEB-TAILORS-FABRICS-logo.png') }}" alt=""
+                                    height="40">
                             </span>
                         </a>
                     </div>
@@ -282,11 +282,11 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
                                 </a>
                             </li>
                         @endcan
-                        @can("manage-workers")
+                        @can('manage-workers')
                             <li>
                                 <a href="{{ route('admin.workers.ledger.index') }}"
                                     class="{{ request()->routeIs('admin.workers.ledger.*') ? 'tp-link active' : '' }}">
-                                     <i data-feather="file-text"></i>
+                                    <i data-feather="file-text"></i>
                                     <span> Workers Ledger </span>
                                 </a>
                             </li>
