@@ -232,7 +232,7 @@
                                     <td><a
                                             href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number }}</a>
                                     </td>
-                                    <td>{{ $order->customer->name ?? 'Walk-in' }}</td>
+                                    <td>{{ $order->customer->name ?? 'Walk-in' }}<br><small class="text-muted">{{ $order->customer->customer_id ?? '-' }}/{{ $order->customer->id ?? '-' }}</small></td>
                                     <td>{{ \Carbon\Carbon::parse($order->delivery_date ?? $order->order_date)->format('Y-m-d') }}
                                     </td>
                                     <td class="text-capitalize">{{ $order->order_status }}</td>
@@ -286,7 +286,7 @@
                                         <tr>
                                             <td>
                                                 <a href="{{ route('sewing-orders.show', $order->id) }}">{{ $order->sewing_order_number }}</a></td>
-                                            <td>{{ $order?->customer?->name }}</td>
+                                            <td>{{ $order?->customer?->name }}<br><small class="text-muted">{{ $order?->customer?->customer_id ?? '-' }}/{{ $order?->customer?->id ?? '-' }}</small></td>
                                             <td>
                                                 {{ $order->delivery_date->format('Y-m-d') }}
                                                 @if ($order->delivery_date->isToday())
