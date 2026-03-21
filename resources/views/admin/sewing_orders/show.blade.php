@@ -100,11 +100,17 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <strong>Customer:</strong> {{ $sewingOrder->customer->name ?? 'N/A' }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <strong>Phone:</strong> {{ $sewingOrder->customer->phone ?? 'N/A' }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Old ID:</strong> {{ $sewingOrder->customer->customer_id ?? 'N/A' }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>New ID:</strong> {{ $sewingOrder->customer->id ?? 'N/A' }}
                         </div>
                     </div>
 
@@ -278,8 +284,12 @@
                             <span class="fs-16 fw-semibold text-success">Rs {{ number_format($netPaid, 2) }}</span>
                         </div>
                         <div class="col-md-3 col-lg-2 mb-2">
-                            <strong>Total Discount:</strong><br>
-                            <span class="fs-16 fw-semibold text-info">Rs {{ number_format($totalDiscount ?? 0, 2) }}</span>
+                            <strong>Total Discount:</strong>
+                            <button type="button" class="btn btn-sm btn-link p-0 ms-1" data-bs-toggle="modal" data-bs-target="#editDiscountModal" title="Edit Discount">
+                                <i class="mdi mdi-pencil-outline fs-14"></i>
+                            </button>
+                            <br>
+                            <span class="fs-16 fw-semibold text-info" id="discountDisplay">Rs {{ number_format($totalDiscount ?? 0, 2) }}</span>
                         </div>
                          <div class="col-md-3 col-lg-2 mb-2">
                             <strong>Remaining:</strong><br>
@@ -371,18 +381,23 @@
                                                                     $payment->amount - $alreadyRefunded;
                                                             @endphp
                                                             @if ($availableToRefund > 0)
-                                                                <button type="button" class="btn btn-sm"
+                                                                <button type="button" class="btn btn-sm me-1"
                                                                     style="background-color:#16A34A; color:#fff;"
                                                                     data-bs-toggle="modal"
                                                                     data-bs-target="#refundModal{{ $payment->id }}">
                                                                     <i class="mdi mdi-cash-refund me-1"></i> Refund
                                                                 </button>
                                                             @else
-                                                                <span class="badge bg-secondary">Refunded</span>
+                                                                <span class="badge bg-secondary me-1">Refunded</span>
                                                             @endif
                                                         @else
-                                                            <span class="badge bg-danger">Refunded</span>
+                                                            <span class="badge bg-danger me-1">Refunded</span>
                                                         @endif
+                                                        <button type="button" class="btn btn-sm btn-danger delete-payment-btn"
+                                                            data-payment-id="{{ $payment->id }}"
+                                                            title="Delete this payment">
+                                                            <i class="mdi mdi-delete"></i>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -666,6 +681,44 @@
             @endif
         @endif
     @endforeach
+
+    <!-- Edit Discount Modal -->
+    <div class="modal fade" id="editDiscountModal" tabindex="-1" aria-labelledby="editDiscountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editDiscountModalLabel">
+                        <i class="mdi mdi-tag-text-outline me-2"></i>Edit Discount
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editDiscountForm">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Total Amount</label>
+                            <input type="text" class="form-control" value="Rs {{ number_format($sewingOrder->total_amount, 2) }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Discount Amount (Rs) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="discount_amount" id="editDiscountAmount"
+                                step="0.01" min="0" max="{{ $sewingOrder->total_amount }}"
+                                value="{{ number_format($totalDiscount ?? 0, 2, '.', '') }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Net Paid So Far</label>
+                            <input type="text" class="form-control" value="Rs {{ number_format($netPaid, 2) }}" readonly>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Discount</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Measurement Modals -->
     @foreach ($sewingOrder->items as $itemIndex => $item)
@@ -1198,6 +1251,43 @@ if (isset($measurement['data'])) {
                     alert('An error occurred. Please try again.');
                     submitButton.disabled = false;
                     submitButton.textContent = 'Submit Refund';
+                });
+        });
+
+        // Edit Discount form handler
+        document.getElementById('editDiscountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Updating...';
+
+            fetch('{{ route('sewing-orders.update-discount', $sewingOrder->id) }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editDiscountModal'));
+                        modal.hide();
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Update Discount';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Update Discount';
                 });
         });
 

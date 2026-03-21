@@ -843,4 +843,58 @@ class SewingOrderController extends Controller
             'notes' => $measurement->notes,
         ];
     }
+
+    /**
+     * Update the discount amount for a sewing order (AJAX)
+     */
+    public function updateDiscount(Request $request, SewingOrder $sewing_order)
+    {
+        $validated = $request->validate([
+            'discount_amount' => 'required|numeric|min:0',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $newDiscount = floatval($validated['discount_amount']);
+
+            // Ensure discount doesn't exceed total amount
+            if ($newDiscount > $sewing_order->total_amount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Discount cannot exceed total amount (Rs ' . number_format($sewing_order->total_amount, 2) . ')',
+                ], 400);
+            }
+
+            // Ensure discount doesn't cause negative remaining (i.e. discount + paid > total)
+            $totalPaid = $sewing_order->payments()->where('type', 'payment')->sum('amount');
+            $totalRefunded = $sewing_order->payments()->where('type', 'refund')->sum('amount');
+            $netPaid = $totalPaid - $totalRefunded;
+
+            if (($newDiscount + $netPaid) > $sewing_order->total_amount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Discount + paid amount cannot exceed total. Paid so far: Rs ' . number_format($netPaid, 2),
+                ], 400);
+            }
+
+            $sewing_order->discount_amount = $newDiscount;
+            $sewing_order->save();
+
+            // Recalculate payment status
+            $this->updateSewingOrderPaymentStatus($sewing_order);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Discount updated successfully.',
+                'discount_amount' => $newDiscount,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update discount: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

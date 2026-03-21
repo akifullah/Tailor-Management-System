@@ -281,4 +281,65 @@ class PaymentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Delete a payment record (for mistaken entries)
+     */
+    public function destroy(Payment $payment)
+    {
+        DB::beginTransaction();
+        try {
+            // Check if this payment has any refunds linked to it
+            $linkedRefunds = Payment::where('refund_for_payment_id', $payment->id)
+                ->where('type', 'refund')
+                ->count();
+
+            if ($linkedRefunds > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete this payment because it has linked refunds. Delete the refunds first.',
+                ], 400);
+            }
+
+            $payable = $payment->payable;
+            $payment->delete();
+
+            // Recalculate payment status for the parent order
+            if ($payable instanceof SewingOrder) {
+                $totalPaid = $payable->payments()->where('type', 'payment')->sum('amount');
+                $totalRefunded = $payable->payments()->where('type', 'refund')->sum('amount');
+                $totalDiscount = $payable->discount_amount ?? 0;
+                $netPaid = $totalPaid - $totalRefunded;
+                $remaining = max(0, $payable->total_amount - $totalDiscount - $netPaid);
+
+                $payable->paid_amount = $netPaid;
+                $payable->partial_amount = $netPaid;
+                $payable->remaining_amount = $remaining;
+                $payable->payment_status = $remaining <= 0 ? 'full' : 'partial';
+                $payable->save();
+            } elseif ($payable instanceof Order) {
+                $totalPaid = $payable->payments()->where('type', 'payment')->sum('amount');
+                $totalRefunded = $payable->payments()->where('type', 'refund')->sum('amount');
+                $netPaid = $totalPaid - $totalRefunded;
+                $remaining = max(0, $payable->total_amount - $netPaid);
+
+                $payable->paid_amount = $netPaid;
+                $payable->remaining_amount = $remaining;
+                $payable->payment_status = $remaining <= 0 ? 'full' : ($netPaid > 0 ? 'partial' : 'no_payment');
+                $payable->save();
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment deleted successfully.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete payment: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

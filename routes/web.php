@@ -132,6 +132,7 @@ Route::middleware(["auth"])->group(function () {
         Route::patch('sewing-orders/{sewing_order}/update-status', [SewingOrderController::class, 'updateStatus'])->name('sewing-orders.update-status');
         Route::get('sewing-order-items/{item}/print-measurement', [SewingOrderController::class, 'printMeasurement'])->name('sewing-order-items.print-measurement');
         Route::put('sewing-order-items/{item}/assign-measurement', [SewingOrderController::class, 'assignMeasurement'])->name('sewing-order-items.assign-measurement');
+        Route::patch('sewing-orders/{sewing_order}/update-discount', [SewingOrderController::class, 'updateDiscount'])->name('sewing-orders.update-discount');
     });
 
     Route::middleware(['permission:manage-workers'])->group(function () {
@@ -201,6 +202,7 @@ Route::middleware(["auth"])->group(function () {
         Route::post('payments', [\App\Http\Controllers\PaymentController::class, 'store'])->name('payments.store');
         Route::get('payments', [\App\Http\Controllers\PaymentController::class, 'getPayments'])->name('payments.get');
         Route::post('payments/{payment}/refund', [\App\Http\Controllers\PaymentController::class, 'createRefund'])->name('payments.refund');
+        Route::delete('payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'destroy'])->name('payments.destroy');
     });
 
     // Roles & Permissions - Require manage-roles-permissions permission
