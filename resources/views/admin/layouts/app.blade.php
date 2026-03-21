@@ -20,8 +20,16 @@
     <link href="{{ asset('assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet"
         type="text/css" />
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
     <!-- App css -->
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" id="app-style" />
+
+    <!-- Dark Gold Theme -->
+    <link href="{{ asset('assets/css/theme-dark-gold.css') }}" rel="stylesheet" type="text/css" />
 
     <!-- Icons -->
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
@@ -46,7 +54,7 @@ https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.min.css
 
 <!-- body start -->
 
-<body data-menu-color="light" data-sidebar="default">
+<body data-menu-color="dark" data-sidebar="default">
 
     <!-- Begin page -->
     <div id="app-layout">

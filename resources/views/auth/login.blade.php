@@ -15,6 +15,14 @@
     <!-- App css -->
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" id="app-style" />
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Dark Gold Theme -->
+    <link href="{{ asset('assets/css/theme-dark-gold.css') }}" rel="stylesheet" type="text/css" />
+
     <script src="{{ asset('assets/js/head.js') }}"></script>
 
 
