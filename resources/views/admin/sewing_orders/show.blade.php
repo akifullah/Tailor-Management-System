@@ -1133,14 +1133,13 @@ if (isset($measurement['data'])) {
             const discount = parseFloat(document.getElementById('paymentDiscount')?.value || 0) || 0;
             const entered = parseFloat(this.value) || 0;
 
-            if ((entered + discount) > remaining) {
-                this.setCustomValidity('Amount + discount cannot exceed remaining amount');
+            if (entered > (remaining - discount)) {
+                this.setCustomValidity('Amount cannot exceed remaining amount minus discount');
             } else {
                 this.setCustomValidity('');
             }
         });
 
-        // validate discount input as well
         const discountEl = document.getElementById('paymentDiscount');
         if (discountEl) {
             discountEl.addEventListener('input', function() {
@@ -1148,10 +1147,18 @@ if (isset($measurement['data'])) {
                 const enteredDiscount = parseFloat(this.value) || 0;
                 const amountEntered = parseFloat(document.getElementById('paymentAmount')?.value || 0) || 0;
 
-                if ((amountEntered + enteredDiscount) > remaining) {
-                    this.setCustomValidity('Amount + discount cannot exceed remaining amount');
+                if (amountEntered > (remaining - enteredDiscount)) {
+                    document.getElementById('paymentAmount').setCustomValidity('Amount cannot exceed remaining amount minus discount');
                 } else {
-                    this.setCustomValidity('');
+                    document.getElementById('paymentAmount').setCustomValidity('');
+                }
+                this.setCustomValidity('');
+
+                // Auto-adjust amount if it now exceeds the available
+                const maxAmount = Math.max(0, remaining - enteredDiscount);
+                if (amountEntered > maxAmount) {
+                    document.getElementById('paymentAmount').value = maxAmount.toFixed(2);
+                    document.getElementById('paymentAmount').setCustomValidity('');
                 }
             });
         }

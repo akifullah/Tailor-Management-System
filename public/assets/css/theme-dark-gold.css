@@ -53,14 +53,14 @@
 body {
     background: linear-gradient(135deg, var(--zeb-bg-body) 0%, #1a1410 100%) !important;
     color: var(--zeb-text-primary) !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-family: 'Poppins', sans-serif !important;
 }
 
 /* ── TYPOGRAPHY ── */
 h1, h2, h3, h4, h5, h6,
 .card-title,
 .page-title {
-    font-family: 'Playfair Display', serif !important;
+    font-family: 'Poppins', sans-serif !important;
     color: var(--zeb-gold) !important;
 }
 
@@ -142,7 +142,7 @@ h1, h2, h3, h4, h5, h6,
 
 #side-menu .menu-title {
     color: var(--zeb-gold) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: 'Poppins', sans-serif !important;
     font-weight: 700 !important;
     font-size: 0.7rem !important;
     letter-spacing: 1.5px !important;
@@ -394,7 +394,7 @@ label {
     letter-spacing: 0.8px !important;
     border-bottom: 2px solid var(--zeb-gold-hover) !important;
     padding: 14px 16px !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: 'Poppins', sans-serif !important;
 }
 
 .table tbody td {
@@ -502,8 +502,15 @@ label {
 }
 
 .badge.bg-secondary {
-    background: var(--zeb-border) !important;
-    color: var(--zeb-text-secondary) !important;
+    background: var(--zeb-success) !important;
+    color: #ffffff !important;
+}
+
+/* Method column badges */
+.badge.bg-light,
+.badge.text-dark {
+    background: var(--zeb-success) !important;
+    color: #ffffff !important;
 }
 
 .badge {
@@ -767,4 +774,19 @@ hr {
     .topbar-custom {
         background: var(--zeb-bg-topbar) !important;
     }
+}
+
+/* ── STAT CARD OVERRIDES ── */
+/* Make all h2/h4 stat numbers inside cards white instead of colored */
+.card-body h2.text-primary,
+.card-body h2.text-info,
+.card-body h2.text-success,
+.card-body h2.text-warning,
+.card-body h2.text-danger,
+.card-body h4.text-primary,
+.card-body h4.text-info,
+.card-body h4.text-success,
+.card-body h4.text-warning,
+.card-body h4.text-danger {
+    color: #ffffff !important;
 }

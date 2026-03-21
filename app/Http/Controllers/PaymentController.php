@@ -60,10 +60,10 @@ class PaymentController extends Controller
                     $remainingBefore = max(0, $payable->total_amount - $existingDiscount - $netPaidSoFar);
                     $requestedDiscount = floatval($validated['discount_amount'] ?? 0);
                     $requestedAmount = floatval($validated['amount'] ?? 0);
-                    if (($requestedAmount + $requestedDiscount) > $remainingBefore) {
+                    if ($requestedAmount > ($remainingBefore - $requestedDiscount)) {
                         return response()->json([
                             'success' => false,
-                            'message' => 'Amount + discount cannot exceed remaining amount. Remaining: Rs ' . number_format($remainingBefore, 2),
+                            'message' => 'Amount cannot exceed remaining amount minus discount. Remaining: Rs ' . number_format($remainingBefore, 2) . ', Discount: Rs ' . number_format($requestedDiscount, 2),
                         ], 400);
                     }
                 }
